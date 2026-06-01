@@ -20,6 +20,13 @@ This document fills that gap. The goal — chosen during brainstorming — is a
 in the Backstage system model, even where v1 only implements part of it. It is meant to
 be exemplary, because the plugin suite is a publishable OSS reference.
 
+**Note (regis v0.34.0).** As of v0.34.0 (issue #640), regis playbooks adopt a
+Kubernetes/Backstage-style `apiVersion`/`kind`/`metadata`/`spec` envelope; the
+`report.json` contract (integer `schemaVersion`) is **unchanged**. This makes the
+Playbook → `Resource` translation near-direct (see §Playbook) but does **not** change the
+catalog model — the decision to model the playbook as a standard `Resource` (not a custom
+kind) stands (see "Locked decisions").
+
 ## Two layers — and why `Report` is not a catalog entity
 
 The single most important framing: there are **two distinct models**, and Regis concepts
@@ -106,19 +113,39 @@ spec:
 The quality standard an image is assessed against. A durable, ownable, discoverable
 concept — hence an entity (the brainstorming chose to model it explicitly).
 
+**Source format (regis v0.34.0).** Since v0.34.0 (issue #640) a regis playbook is itself a
+Kubernetes/Backstage-shaped envelope — `apiVersion: regis.trivoallan.dev/v1alpha1`,
+`kind: Playbook`, with `metadata` + `spec`. This is *not* a Backstage entity (different
+`apiVersion` domain), but it makes the translation to a Backstage `Resource` near-direct:
+
+| regis Playbook (v0.34.0) | Backstage `Resource` |
+| --- | --- |
+| `metadata.name` (machine id) | `metadata.name` (validated/sanitised to the name regex; original kept in `regis.io/playbook-id` if changed) |
+| `metadata.title` (display name) | `metadata.title` |
+| `metadata.labels["app.kubernetes.io/version"]` | label `app.kubernetes.io/version` (carried through unchanged) |
+| `spec` (rules / tiers / badges / integrations / links) | **not copied** — stays plugin data, like the report |
+| _(regis has no owner concept)_ | `spec.owner` ← index entry → config fallback |
+| `apiVersion` / `kind` | drive nothing in Backstage; identify the source format |
+
+The Backstage side stays a **standard `Resource`** (not a custom `kind: Playbook`): v0.34.0
+improves the *translation* but does not change the Backstage-side trade-off (portability,
+zero kind registration, symmetry with the image, alignment with Backstage's "reuse standard
+kinds" guidance) — see "Locked decisions".
+
 ```yaml
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: regis-playbook-default
-  title: "Regis Default Playbook"
+  name: regis-playbook-default              # ← regis metadata.name (machine id)
+  title: "Regis Default Playbook"           # ← regis metadata.title
   description: "Quality standard images are assessed against"
+  labels:
+    app.kubernetes.io/version: "1.0.0"      # ← carried from the regis envelope
   annotations:
-    regis.io/playbook-id: default
-    regis.io/playbook-version: "1.0.0"
+    regis.io/playbook-id: default           # original regis id (kept if the name was sanitised)
 spec:
   type: regis-playbook
-  owner: group:default/team-platform
+  owner: group:default/team-platform        # index entry / config fallback
 ```
 
 ### Identity & naming
@@ -221,15 +248,15 @@ These constants live in `plugins/regis-common/src/annotations.ts` (extending the
 | `regis.io/snapshot-date` | image | ISO date of the report snapshot |
 | `regis.io/regis-version` | image | version of regis that produced the report |
 | `regis.io/playbook` | image | entityRef of the playbook the image was assessed against |
-| `regis.io/playbook-id` | playbook | playbook identifier |
-| `regis.io/playbook-version` | playbook | playbook semver |
+| `regis.io/playbook-id` | playbook | original regis playbook id (kept when the Backstage name was sanitised) |
 
 **Labels** (queryable; value format `[a-z0-9A-Z]` sep `[-_.]`, ≤63):
 
-| Key | Values |
-| --- | --- |
-| `regis.io/tier` | `gold` \| `silver` \| `bronze` \| `none` |
-| `regis.io/score-band` | `0-49` \| `50-79` \| `80-99` \| `100` |
+| Key | On | Values |
+| --- | --- | --- |
+| `regis.io/tier` | image | `gold` \| `silver` \| `bronze` \| `none` |
+| `regis.io/score-band` | image | `0-49` \| `50-79` \| `80-89` \| `90-100` |
+| `app.kubernetes.io/version` | playbook | bundle version, carried from the regis v0.34.0 envelope (well-known label, not a `regis.io/*` key) |
 
 ## The published report index (source) & provider
 
@@ -260,12 +287,17 @@ Carries *summaries* + *pointers*; the full report is fetched on demand.
 Required per image entry: `imageRef`, `reportUrl`, `digest` (required for alias grouping).
 Optional: `tier`, `score`, `playbook`, `owner`, `system`.
 
+Playbook entries mirror the v0.34.0 envelope: `id` ← `metadata.name`, `title` ←
+`metadata.title`, `version` ← the `app.kubernetes.io/version` label; `owner` is index /
+config (regis has no owner concept).
+
 ### `CatalogEntityProvider` behaviour
 
 1. Fetch + **validate** the index (`schemaVersion` + schema) — same trust boundary as the
    report.
 2. **Group `images` by `digest`** → compute alias sets.
-3. Mint a `Resource` (`regis-playbook`) per `playbooks[]` entry.
+3. Mint a `Resource` (`regis-playbook`) per `playbooks[]` entry (mapping the v0.34.0
+   envelope metadata — see §Playbook).
 4. Mint a `Resource` (`container-image`) per `images[]` entry: name from ref; labels
    `tier`/`score-band`; annotations (ref, digest, aliases, report-url, score,
    snapshot-date, regis-version, playbook); `spec.owner` (entry → config fallback),
@@ -359,6 +391,7 @@ From the descriptor format, well-known relations, and system model docs:
 
 - Plugin design (companion): `docs/superpowers/specs/2026-06-01-regis-backstage-plugin-design.md`
 - Contract types & annotations: `plugins/regis-common/src/types.ts`, `plugins/regis-common/src/annotations.ts`
+- regis v0.34.0 — playbook envelope (issue #640): https://github.com/trivoallan/regis/releases/tag/v0.34.0
 - [Backstage — System Model](https://backstage.io/docs/features/software-catalog/system-model/)
 - [Backstage — Descriptor Format](https://backstage.io/docs/features/software-catalog/descriptor-format/)
 - [Backstage — Well-known Relations](https://backstage.io/docs/features/software-catalog/well-known-relations/)
