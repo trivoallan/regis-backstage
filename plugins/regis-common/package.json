@@ -1,0 +1,40 @@
+{
+  "name": "@regis/backstage-plugin-regis-common",
+  "version": "0.1.0",
+  "description": "Shared contract (types, validator, annotations) for the Regis Backstage plugin.",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "common-library"
+  },
+  "scripts": {
+    "build": "backstage-cli package build",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack",
+    "generate:contract": "tsx scripts/sync-contract.ts"
+  },
+  "dependencies": {
+    "@backstage/catalog-model": "^1.7.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.7.0",
+    "json-schema-to-typescript": "^15.0.3",
+    "tsx": "^4.19.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

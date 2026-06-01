@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "version": "0.40.0",
+  "snapshot_date": "2026-09-01",
+  "tier": "Gold",
+  "request": {
+    "url": "registry-1.docker.io/library/nginx:1.27",
+    "registry": "registry-1.docker.io",
+    "repository": "library/nginx",
+    "tag": "1.27",
+    "digest": null,
+    "analyzers": ["cve"],
+    "timestamp": "2026-09-01T12:00:00+00:00"
+  },
+  "results": {}
+}

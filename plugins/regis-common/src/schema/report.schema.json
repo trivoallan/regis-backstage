@@ -1,0 +1,785 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trivoallan.github.io/regis/schemas/report/report.schema.json",
+  "title": "report",
+  "description": "Final report envelope produced by regis, containing request metadata and analyzer results.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "request",
+    "results",
+    "version"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Report-structure contract version. Consumers (e.g. the standalone dashboard) gate rendering on this. Distinct from `version` (package/snapshot)."
+    },
+    "version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Version of regis that generated this report."
+    },
+    "snapshot_date": {
+      "type": "string",
+      "description": "ISO 8601 date when this version was snapshotted in the doc site."
+    },
+    "tier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The earned tier (e.g. Gold, Silver, Bronze) based on playbook conditions."
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "scope",
+          "class"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Unique identifier for the badge."
+          },
+          "scope": {
+            "type": "string",
+            "description": "Domain of the badge (e.g., 'security', 'hygiene')."
+          },
+          "value": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Display value or grade (e.g., 'A', '95%')."
+          },
+          "class": {
+            "type": "string",
+            "enum": [
+              "success",
+              "warning",
+              "error",
+              "information"
+            ],
+            "description": "Visual style indicator."
+          },
+          "label": {
+            "type": "string",
+            "description": "The full label string (scope or scope: value)."
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary user-provided metadata.",
+      "additionalProperties": true
+    },
+    "links": {
+      "type": "array",
+      "description": "Custom templated links.",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "url"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Display label for the link."
+          },
+          "url": {
+            "type": "string",
+            "description": "Target URL."
+          }
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "description": "Metadata describing the analysis request.",
+      "required": [
+        "url",
+        "registry",
+        "repository",
+        "tag",
+        "analyzers",
+        "timestamp"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Original URL or image reference provided by the user."
+        },
+        "registry": {
+          "type": "string",
+          "description": "Resolved registry hostname (e.g. registry-1.docker.io)."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Full repository path (e.g. library/nginx)."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Image tag that was analyzed."
+        },
+        "digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Resolved image manifest digest (e.g. sha256-xxx), if available."
+        },
+        "analyzers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of analyzer names that were executed."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp of the analysis."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Arbitrary user-provided metadata.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "results": {
+      "type": "object",
+      "description": "Analyzer results keyed by analyzer name.",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "playbooks": {
+      "type": "array",
+      "description": "List of evaluated playbook results.",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://trivoallan.github.io/regis/schemas/playbook/result.schema.json",
+        "title": "playbook.result",
+        "type": "object",
+        "description": "Final playbook result produced by regis, containing metadata and analyzer results.",
+        "required": [
+          "playbook_name",
+          "score",
+          "total_scorecards",
+          "passed_scorecards",
+          "pages"
+        ],
+        "properties": {
+          "playbook_name": {
+            "type": "string",
+            "description": "Identifier of the playbook that was executed."
+          },
+          "playbook_version": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "SemVer of the playbook that produced this report."
+          },
+          "schema_version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "schemaVersion of the playbook format that produced this report."
+          },
+          "sidebar": {
+            "type": "object",
+            "description": "Sidebar navigation metadata for the report UI."
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Version of regis that generated this report."
+          },
+          "tier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The earned tier (e.g. Gold, Silver, Bronze) based on playbook conditions."
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "scope",
+                "class"
+              ],
+              "properties": {
+                "slug": {
+                  "type": "string",
+                  "description": "Unique identifier for the badge."
+                },
+                "scope": {
+                  "type": "string",
+                  "description": "Domain of the badge (e.g., 'security', 'hygiene')."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Display value or grade (e.g., 'A', '95%')."
+                },
+                "class": {
+                  "type": "string",
+                  "enum": [
+                    "success",
+                    "warning",
+                    "error",
+                    "information"
+                  ],
+                  "description": "Visual style indicator."
+                },
+                "label": {
+                  "type": "string",
+                  "description": "The full label string (scope or scope: value)."
+                }
+              }
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "slug",
+                "description",
+                "passed",
+                "status",
+                "message"
+              ],
+              "properties": {
+                "slug": {
+                  "type": "string",
+                  "description": "Unique identifier for the rule."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Human-readable name of the rule."
+                },
+                "level": {
+                  "type": "string",
+                  "description": "Priority level (Gold, Silver, Bronze)."
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Associated metadata tags."
+                },
+                "passed": {
+                  "type": "boolean",
+                  "description": "Whether the rule criteria were met."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "incomplete"
+                  ],
+                  "description": "Detailed execution status."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Reasoning or details for the rule result."
+                },
+                "analyzers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of analyzers that contributed data to this rule."
+                }
+              }
+            }
+          },
+          "rules_summary": {
+            "type": "object",
+            "required": [
+              "score",
+              "total",
+              "passed"
+            ],
+            "properties": {
+              "score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "total": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "passed": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "by_tag": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "required": [
+                    "rules",
+                    "passed_rules",
+                    "score"
+                  ],
+                  "properties": {
+                    "rules": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "passed_rules": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "score": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Overall percentage score for the playbook."
+          },
+          "total_scorecards": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of scorecards evaluated."
+          },
+          "passed_scorecards": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of scorecards that passed."
+          },
+          "links": {
+            "type": "array",
+            "description": "External links associated with this playbook result.",
+            "items": {
+              "type": "object",
+              "required": [
+                "label",
+                "url"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the link."
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Target URL."
+                }
+              }
+            }
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "score",
+                "total_scorecards",
+                "passed_scorecards",
+                "sections"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Page title."
+                },
+                "slug": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "URL-friendly identifier for the page."
+                },
+                "score": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage score for this page."
+                },
+                "total_scorecards": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Total scorecards on this page."
+                },
+                "passed_scorecards": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Passed scorecards on this page."
+                },
+                "sections": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "score",
+                      "total_scorecards",
+                      "passed_scorecards",
+                      "scorecards"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Section name."
+                      },
+                      "hint": {
+                        "type": "string",
+                        "description": "Informative text for the section."
+                      },
+                      "score": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Percentage score for this section."
+                      },
+                      "total_scorecards": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total scorecards in this section."
+                      },
+                      "passed_scorecards": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Passed scorecards in this section."
+                      },
+                      "levels_summary": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "required": [
+                            "total",
+                            "passed",
+                            "percentage"
+                          ],
+                          "properties": {
+                            "total": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "passed": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "percentage": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            }
+                          }
+                        }
+                      },
+                      "tags_summary": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "required": [
+                            "total",
+                            "passed",
+                            "percentage"
+                          ],
+                          "properties": {
+                            "total": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "passed": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "percentage": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            }
+                          }
+                        }
+                      },
+                      "scorecards": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "description",
+                            "passed"
+                          ],
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "Unique scorecard identifier."
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "Display description."
+                            },
+                            "level": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Assigned severity level name."
+                            },
+                            "tags": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Associated search tags."
+                            },
+                            "analyzers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Analyzers used for this scorecard."
+                            },
+                            "passed": {
+                              "type": "boolean",
+                              "description": "True if condition was met."
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "passed",
+                                "failed",
+                                "incomplete"
+                              ],
+                              "description": "Execution status."
+                            },
+                            "condition": {
+                              "type": "string",
+                              "description": "The JsonLogic expression evaluated."
+                            },
+                            "details": {
+                              "type": "string",
+                              "description": "Detailed explanation of calculated result."
+                            }
+                          }
+                        }
+                      },
+                      "display": {
+                        "type": "object",
+                        "properties": {
+                          "analyzers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "widgets": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "type": "string",
+                                  "description": "Widget display label."
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "description": "Data resolution path."
+                                },
+                                "icon": {
+                                  "type": "string",
+                                  "description": "Icon identifier or emoji."
+                                },
+                                "resolved_value": {
+                                  "description": "The actual value fetched after resolution."
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "mr_templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "directory": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Cookiecutter templates to be run for MR descriptions."
+          }
+        }
+      }
+    },
+    "playbook": {
+      "description": "Primary playbook result (shorthand for playbooks[0]).",
+      "$ref": "#/properties/playbooks/items"
+    },
+    "rules": {
+      "type": "array",
+      "description": "List of unified rule results (promoted from playbooks[0]).",
+      "items": {
+        "type": "object",
+        "required": [
+          "slug",
+          "description",
+          "passed",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Unique identifier for the rule."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable name of the rule."
+          },
+          "level": {
+            "type": "string",
+            "description": "Priority level (Gold, Silver, Bronze)."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Associated metadata tags."
+          },
+          "passed": {
+            "type": "boolean",
+            "description": "Whether the rule criteria were met."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "incomplete"
+            ],
+            "description": "Detailed execution status."
+          },
+          "message": {
+            "type": "string",
+            "description": "Reasoning or details for the rule result."
+          },
+          "analyzers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of analyzers that contributed data to this rule."
+          }
+        }
+      }
+    },
+    "rules_summary": {
+      "type": "object",
+      "description": "Summary of rule evaluation results.",
+      "properties": {
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "total": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "passed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "by_tag": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "rules",
+              "passed_rules",
+              "score"
+            ],
+            "properties": {
+              "rules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of rule slugs in this group."
+              },
+              "passed_rules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of slugs for rules that passed."
+              },
+              "score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage score for this group."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
