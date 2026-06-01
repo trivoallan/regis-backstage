@@ -54,13 +54,17 @@ export const regisPlugin = createBackendPlugin({
         );
         httpRouter.addAuthPolicy({ path: '/health', allow: 'unauthenticated' });
 
+        // Warm the snapshot shortly after boot so the catalog page is populated
+        // without waiting for the first 30-minute tick. (GET /reports also
+        // refreshes on demand via CatalogAggregator.ensureFresh.) `scope:
+        // 'local'` warms every replica's own in-memory snapshot — the scheduler
+        // default of 'global' would run the warm-up on only one replica.
         await scheduler.scheduleTask({
           id: 'regis-aggregate',
           frequency: { minutes: 30 },
           timeout: { minutes: 5 },
-          // Run once shortly after startup (past catalog ingestion) so the
-          // catalog page is populated without waiting for the first 30-min tick.
           initialDelay: { seconds: 15 },
+          scope: 'local',
           fn: async () => {
             await aggregator.refresh();
           },
