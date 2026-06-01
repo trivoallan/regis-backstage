@@ -12,6 +12,7 @@ export interface CatalogAggregatorDeps {
   reportService: ReportService;
   logger: LoggerService;
   concurrency?: number;
+  now?: () => number;
 }
 
 /** Maps an array through `fn` with a bounded number of in-flight promises. */
@@ -37,11 +38,34 @@ async function mapBounded<T, R>(
 
 export class CatalogAggregator {
   private snapshot: ReportSummary[] = [];
+  private lastRunAt = 0;
+  private inFlight: Promise<void> | null = null;
+  private readonly now: () => number;
 
-  constructor(private readonly deps: CatalogAggregatorDeps) {}
+  constructor(private readonly deps: CatalogAggregatorDeps) {
+    this.now = deps.now ?? (() => Date.now());
+  }
 
   getSnapshot(): ReportSummary[] {
     return this.snapshot;
+  }
+
+  /**
+   * Refresh if the snapshot has never been built, is empty, or is older than
+   * `maxAgeMs`. Concurrent callers share one in-flight refresh. Lets the catalog
+   * page populate on first view (cold start) without waiting for the scheduled
+   * warm-up, while still caching once it holds data.
+   */
+  async ensureFresh(maxAgeMs: number): Promise<void> {
+    const isFresh =
+      this.lastRunAt !== 0 && this.now() - this.lastRunAt < maxAgeMs;
+    if (isFresh && this.snapshot.length > 0) return;
+    if (!this.inFlight) {
+      this.inFlight = this.refresh().finally(() => {
+        this.inFlight = null;
+      });
+    }
+    await this.inFlight;
   }
 
   async refresh(): Promise<void> {
@@ -91,5 +115,6 @@ export class CatalogAggregator {
         }
       },
     );
+    this.lastRunAt = this.now();
   }
 }

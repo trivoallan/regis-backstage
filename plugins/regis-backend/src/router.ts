@@ -43,6 +43,7 @@ export async function createRouter(
 
   router.get('/reports', async (req, res) => {
     await httpAuth.credentials(req); // require an authenticated principal
+    await aggregator.ensureFresh(30_000);
     res.json(aggregator.getSnapshot());
   });
 

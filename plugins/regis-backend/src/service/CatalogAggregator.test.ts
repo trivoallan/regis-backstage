@@ -49,4 +49,42 @@ describe('CatalogAggregator', () => {
       .sort();
     expect(byStatus).toEqual(['error', 'ok']);
   });
+
+  it('ensureFresh refreshes while empty and caches once populated', async () => {
+    let now = 1000;
+    const getReport = jest.fn().mockResolvedValue({
+      report: { tier: 'Gold', rules_summary: { score: 90, by_tag: {} } },
+      meta: {},
+    });
+    const catalog = {
+      getEntities: jest.fn().mockResolvedValue({
+        items: [
+          {
+            apiVersion: 'backstage.io/v1alpha1',
+            kind: 'Component',
+            metadata: { name: 'a', namespace: 'default' },
+          },
+        ],
+      }),
+    };
+    const agg = new CatalogAggregator({
+      catalog: catalog as any,
+      auth: mockServices.auth(),
+      reportService: { getReport } as any,
+      logger: mockServices.logger.mock(),
+      now: () => now,
+    });
+
+    await agg.ensureFresh(30_000); // first call -> refresh
+    expect(catalog.getEntities).toHaveBeenCalledTimes(1);
+    expect(agg.getSnapshot()).toHaveLength(1);
+
+    now += 5_000; // fresh + non-empty -> cached
+    await agg.ensureFresh(30_000);
+    expect(catalog.getEntities).toHaveBeenCalledTimes(1);
+
+    now += 40_000; // stale -> refresh again
+    await agg.ensureFresh(30_000);
+    expect(catalog.getEntities).toHaveBeenCalledTimes(2);
+  });
 });

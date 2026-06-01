@@ -58,6 +58,9 @@ export const regisPlugin = createBackendPlugin({
           id: 'regis-aggregate',
           frequency: { minutes: 30 },
           timeout: { minutes: 5 },
+          // Run once shortly after startup (past catalog ingestion) so the
+          // catalog page is populated without waiting for the first 30-min tick.
+          initialDelay: { seconds: 15 },
           fn: async () => {
             await aggregator.refresh();
           },
