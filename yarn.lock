@@ -2328,7 +2328,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/frontend-plugin-api@npm:^0.17.0":
+"@backstage/frontend-plugin-api@npm:^0.17.0, @backstage/frontend-plugin-api@npm:^0.17.1":
   version: 0.17.1
   resolution: "@backstage/frontend-plugin-api@npm:0.17.1"
   dependencies:
@@ -9018,7 +9018,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@regis/backstage-plugin-regis-backend@workspace:plugins/regis-backend":
+"@regis/backstage-plugin-regis-backend@workspace:^, @regis/backstage-plugin-regis-backend@workspace:plugins/regis-backend":
   version: 0.0.0-use.local
   resolution: "@regis/backstage-plugin-regis-backend@workspace:plugins/regis-backend"
   dependencies:
@@ -9047,6 +9047,26 @@ __metadata:
     ajv-formats: "npm:^3.0.1"
     json-schema-to-typescript: "npm:^15.0.3"
     tsx: "npm:^4.19.2"
+  languageName: unknown
+  linkType: soft
+
+"@regis/backstage-plugin-regis@workspace:^, @regis/backstage-plugin-regis@workspace:plugins/regis":
+  version: 0.0.0-use.local
+  resolution: "@regis/backstage-plugin-regis@workspace:plugins/regis"
+  dependencies:
+    "@backstage/catalog-model": "npm:^1.9.0"
+    "@backstage/core-components": "npm:^0.18.10"
+    "@backstage/core-plugin-api": "npm:^1.12.6"
+    "@backstage/frontend-plugin-api": "npm:^0.17.1"
+    "@backstage/frontend-test-utils": "npm:^0.6.0"
+    "@backstage/plugin-catalog-react": "npm:^3.0.0"
+    "@material-ui/core": "npm:^4.12.4"
+    "@regis/backstage-plugin-regis-common": "workspace:^"
+    "@testing-library/jest-dom": "npm:^6.9.1"
+    "@testing-library/react": "npm:^14.0.0"
+    react-use: "npm:^17.6.0"
+  peerDependencies:
+    react: ^18.0.0
   languageName: unknown
   linkType: soft
 
@@ -11038,7 +11058,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.0.0":
+"@testing-library/jest-dom@npm:^6.0.0, @testing-library/jest-dom@npm:^6.9.1":
   version: 6.9.1
   resolution: "@testing-library/jest-dom@npm:6.9.1"
   dependencies:
@@ -13157,6 +13177,7 @@ __metadata:
     "@material-ui/core": "npm:^4.12.2"
     "@material-ui/icons": "npm:^4.9.1"
     "@playwright/test": "npm:^1.32.3"
+    "@regis/backstage-plugin-regis": "workspace:^"
     "@testing-library/dom": "npm:^9.0.0"
     "@testing-library/jest-dom": "npm:^6.0.0"
     "@testing-library/react": "npm:^14.0.0"
@@ -13780,6 +13801,7 @@ __metadata:
     "@backstage/plugin-search-backend-node": "npm:^1.4.4"
     "@backstage/plugin-signals-backend": "npm:^0.3.15"
     "@backstage/plugin-techdocs-backend": "npm:^2.2.0"
+    "@regis/backstage-plugin-regis-backend": "workspace:^"
     app: "link:../app"
     better-sqlite3: "npm:^12.0.0"
     node-gyp: "npm:^10.0.0"
@@ -27641,7 +27663,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-use@npm:^17.2.4, react-use@npm:^17.3.2, react-use@npm:^17.4.0":
+"react-use@npm:^17.2.4, react-use@npm:^17.3.2, react-use@npm:^17.4.0, react-use@npm:^17.6.0":
   version: 17.6.0
   resolution: "react-use@npm:17.6.0"
   dependencies:

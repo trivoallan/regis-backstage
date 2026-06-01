@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nginx-demo
+  description: Demo image carrying a Regis report (used to showcase the plugin)
+  annotations:
+    regis.io/report-url: https://raw.githubusercontent.com/trivoallan/regis/ec31f8fd497301da8bdee1521768591034a539fd/tests/fixtures/report.v1.json
+spec:
+  type: service
+  owner: guests
+  lifecycle: production

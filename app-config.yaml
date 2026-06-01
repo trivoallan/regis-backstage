@@ -109,6 +109,12 @@ catalog:
     - type: file
       target: ../../examples/entities.yaml
 
+    # Regis plugin demo component (annotated with a real report-url)
+    - type: file
+      target: ../../examples/regis-demo.yaml
+      rules:
+        - allow: [Component]
+
     # Local example template
     - type: file
       target: ../../examples/template/template.yaml

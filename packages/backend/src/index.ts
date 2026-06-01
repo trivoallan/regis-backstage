@@ -66,4 +66,7 @@ backend.add(import('@backstage/plugin-signals-backend'));
 // mcp actions plugin
 backend.add(import('@backstage/plugin-mcp-actions-backend'));
 
+// regis plugin (this repo)
+backend.add(import('@regis/backstage-plugin-regis-backend'));
+
 backend.start();
