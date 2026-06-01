@@ -26,7 +26,7 @@ function makeProvider(fetchResult: unknown) {
   // A task runner that runs the scheduled task immediately when connect() schedules it.
   const taskRunner: SchedulerServiceTaskRunner = {
     run: async task => {
-      await task.fn();
+      await task.fn(new AbortController().signal);
     },
   };
   const provider = new RegisEntityProvider({

@@ -80,8 +80,8 @@ describe('imageEntityName', () => {
 
   it('truncates over-long names to <=63 chars with a hash suffix', () => {
     const taken = new Set<string>();
-    const longRepo = 'org/' + 'a'.repeat(80);
-    const name = imageEntityName(longRepo, 'v1', 'reg/' + longRepo + ':v1', taken);
+    const longRepo = `org/${'a'.repeat(80)}`;
+    const name = imageEntityName(longRepo, 'v1', `reg/${longRepo}:v1`, taken);
     expect(name.length).toBeLessThanOrEqual(63);
     expect(name).toMatch(/-[0-9a-f]{8}$/);
   });
