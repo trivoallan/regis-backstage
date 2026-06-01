@@ -1,0 +1,93 @@
+# Regis Backstage — example catalog (hand-authored).
+#
+# Demonstrates the canonical entity model from
+# docs/superpowers/specs/2026-06-01-regis-backstage-entity-model-design.md:
+#   - two analyzed nginx tags sharing ONE digest -> cross-linked aliases,
+#     modelled as `container-image` Resources carrying Regis posture
+#     (tier/score-band labels + annotation pointers),
+#   - the playbook they were assessed against as a `regis-playbook` Resource,
+#   - a System grouping and a service Component that depends on the image.
+#
+# This mirrors what the Phase 2 entity provider mints from
+# examples/regis-index.json (the provider is disabled by default; this static
+# catalog shows the same model without hosting/enabling an index).
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: regis-playbook-default
+  title: Regis Default Playbook
+  description: Quality standard images are assessed against.
+  labels:
+    app.kubernetes.io/version: '1.0.0'
+  annotations:
+    regis.io/playbook-id: default
+spec:
+  type: regis-playbook
+  owner: guests
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: nginx
+  description: The nginx image family.
+spec:
+  owner: guests
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: library-nginx-1.27
+  title: 'nginx:1.27'
+  description: Container image registry-1.docker.io/library/nginx:1.27
+  labels:
+    regis.io/tier: gold
+    regis.io/score-band: '90-100'
+  annotations:
+    # A real, fetchable Regis report so the entity tab/card render in the demo.
+    regis.io/report-url: https://raw.githubusercontent.com/trivoallan/regis/ec31f8fd497301da8bdee1521768591034a539fd/tests/fixtures/report.v1.json
+    regis.io/image-ref: registry-1.docker.io/library/nginx:1.27
+    regis.io/image-digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000'
+    regis.io/image-aliases: registry-1.docker.io/library/nginx:latest
+    regis.io/score: '100'
+    regis.io/playbook: resource:default/regis-playbook-default
+spec:
+  type: container-image
+  owner: guests
+  system: nginx
+  dependsOn:
+    - resource:default/regis-playbook-default
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: library-nginx-latest
+  title: 'nginx:latest'
+  description: Container image registry-1.docker.io/library/nginx:latest
+  labels:
+    regis.io/tier: gold
+    regis.io/score-band: '90-100'
+  annotations:
+    regis.io/report-url: https://raw.githubusercontent.com/trivoallan/regis/ec31f8fd497301da8bdee1521768591034a539fd/tests/fixtures/report.v1.json
+    regis.io/image-ref: registry-1.docker.io/library/nginx:latest
+    regis.io/image-digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000'
+    regis.io/image-aliases: registry-1.docker.io/library/nginx:1.27
+    regis.io/score: '100'
+    regis.io/playbook: resource:default/regis-playbook-default
+spec:
+  type: container-image
+  owner: guests
+  dependsOn:
+    - resource:default/regis-playbook-default
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: storefront
+  description: Demo service that ships the nginx image.
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  dependsOn:
+    - resource:default/library-nginx-1.27

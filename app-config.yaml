@@ -115,6 +115,12 @@ catalog:
       rules:
         - allow: [Component]
 
+    # Regis canonical entity-model example (image + playbook Resources, a consuming service)
+    - type: file
+      target: ../../examples/regis-catalog.yaml
+      rules:
+        - allow: [Component, Resource, System]
+
     # Local example template
     - type: file
       target: ../../examples/template/template.yaml
