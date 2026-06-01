@@ -71,4 +71,9 @@ describe('RegisEntityProvider', () => {
     ).rejects.toThrow(/schemaVersion 999/);
     expect(connection.applyMutation).not.toHaveBeenCalled();
   });
+
+  it('throws if run() is called before connect()', async () => {
+    const { provider } = makeProvider(validIndex);
+    await expect(provider.run()).rejects.toThrow(/not connected/);
+  });
 });

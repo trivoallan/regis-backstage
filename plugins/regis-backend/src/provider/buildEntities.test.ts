@@ -168,5 +168,9 @@ describe('buildEntities', () => {
     expect(first?.metadata.annotations?.['regis.io/image-aliases']).toBe(
       'registry-1.docker.io/library/nginx:latest',
     );
+    const second = entities.find(e => e.metadata.name === 'library-nginx-latest');
+    expect(second?.metadata.annotations?.['regis.io/image-aliases']).toBe(
+      'registry-1.docker.io/library/nginx:1.27',
+    );
   });
 });

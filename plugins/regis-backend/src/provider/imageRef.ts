@@ -70,6 +70,8 @@ export function imageEntityName(
   let name = base;
   if (name.length > MAX_NAME || taken.has(name)) {
     const suffix = `-${shortHash(imageRef)}`; // 9 chars
+    // Re-sanitise the truncated slice: the cut can expose a trailing separator
+    // that would otherwise double up against the leading '-' of the suffix.
     const head = sanitizeName(base.slice(0, MAX_NAME - suffix.length));
     name = `${head}${suffix}`;
   }
