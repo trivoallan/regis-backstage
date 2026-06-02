@@ -5,6 +5,7 @@ import {
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { HttpReportSource } from './service/ReportSource';
 import { RegisEntityProvider } from './provider/RegisEntityProvider';
+import { RegisAliasRelationProcessor } from './processor/RegisAliasRelationProcessor';
 
 /**
  * Registers the Regis entity provider with the catalog. Disabled (no-op) unless
@@ -22,10 +23,12 @@ export const catalogModuleRegisEntityProvider = createBackendModule({
         logger: coreServices.logger,
       },
       async init({ catalog, scheduler, config, logger }) {
+        catalog.addProcessor(new RegisAliasRelationProcessor());
+
         const indexUrl = config.getOptionalString('regis.catalog.indexUrl');
         if (!indexUrl) {
           logger.info(
-            'regis: regis.catalog.indexUrl not set — entity provider disabled',
+            'regis: regis.catalog.indexUrl not set — entity provider disabled (alias relations still active)',
           );
           return;
         }

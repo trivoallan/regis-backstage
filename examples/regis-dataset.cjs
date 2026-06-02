@@ -193,6 +193,9 @@ function imageEntities() {
       const name = entityNameOf(img.repository, tag);
       const leaf = img.repository.split('/').pop();
       const aliases = refs.filter(r => r !== ref);
+      const aliasEntityRefs = aliases.map(
+        a => `resource:default/${entityNameOf(img.repository, a.split(':').pop())}`,
+      );
       out.push(
         [
           'apiVersion: backstage.io/v1alpha1',
@@ -209,6 +212,9 @@ function imageEntities() {
           `    regis.io/image-ref: ${ref}`,
           `    regis.io/image-digest: '${img.digest}'`,
           ...(aliases.length ? [`    regis.io/image-aliases: ${aliases.join(', ')}`] : []),
+          ...(aliasEntityRefs.length
+            ? [`    regis.io/alias-of: ${aliasEntityRefs.join(', ')}`]
+            : []),
           `    regis.io/score: '${img.score}'`,
           `    regis.io/playbook: resource:default/regis-playbook-${img.playbook}`,
           'spec:',

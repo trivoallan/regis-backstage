@@ -25,6 +25,12 @@ export const REGIS_LABEL_TIER = 'regis.io/tier';
 /** Label: score band bucket (queryable). */
 export const REGIS_LABEL_SCORE_BAND = 'regis.io/score-band';
 
+/** Annotation: entity refs of sibling images sharing this digest (source for the aliasOf relation). */
+export const REGIS_ANNOTATION_ALIAS_OF = 'regis.io/alias-of';
+
+/** Catalog relation type linking image Resources that share a digest (symmetric). */
+export const REGIS_RELATION_ALIAS_OF = 'aliasOf';
+
 /** Maps a 0-100 score to its band bucket label value. */
 export function scoreBand(score: number): string {
   const s = Math.max(0, Math.min(100, score));

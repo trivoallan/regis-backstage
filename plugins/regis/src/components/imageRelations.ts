@@ -30,3 +30,8 @@ export function isComponentWithImageDeps(entity: Entity): boolean {
 export function isRegisPlaybook(entity: Entity): boolean {
   return entity.kind === 'Resource' && entity.spec?.type === 'regis-playbook';
 }
+
+/** A Resource minted as a Regis container image. */
+export function isContainerImage(entity: Entity): boolean {
+  return entity.kind === 'Resource' && entity.spec?.type === 'container-image';
+}
