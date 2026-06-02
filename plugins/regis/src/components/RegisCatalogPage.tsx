@@ -9,13 +9,28 @@ import {
   Table,
   type TableColumn,
 } from '@backstage/core-components';
+import { parseEntityRef } from '@backstage/catalog-model';
 import { regisApiRef, type ReportSummary } from '../api/RegisApi';
 
+function failingTags(byTag?: Record<string, number>): string {
+  if (!byTag) return '';
+  return Object.entries(byTag)
+    .filter(([, score]) => score < 100)
+    .map(([tag]) => tag)
+    .join(', ');
+}
+
 const columns: TableColumn<ReportSummary>[] = [
-  { title: 'Entity', field: 'entityRef' },
-  { title: 'Status', field: 'status' },
+  {
+    title: 'Image',
+    field: 'imageRef',
+    render: row => row.imageRef ?? row.entityRef,
+  },
+  { title: 'Kind', render: row => parseEntityRef(row.entityRef).kind },
   { title: 'Tier', field: 'tier' },
   { title: 'Score', field: 'score', type: 'numeric' },
+  { title: 'Failing tags', render: row => failingTags(row.byTag) },
+  { title: 'Status', field: 'status' },
 ];
 
 /** Global table of every annotated entity's posture. */

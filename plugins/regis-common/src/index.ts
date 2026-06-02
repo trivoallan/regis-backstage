@@ -36,3 +36,4 @@ export {
   scoreBand,
 } from './catalog';
 export type { Report } from './types';
+export type { ReportEnvelope, ReportSummary } from './report-api';

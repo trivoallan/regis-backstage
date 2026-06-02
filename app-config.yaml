@@ -164,7 +164,8 @@ regis:
   # (the Phase 1 report viewer still works via the regis.io/report-url annotation).
   catalog:
     # URL of a published Regis report index (see examples/regis-index.json for the shape).
-    # indexUrl: https://trivoallan.github.io/regis/index.json
+    # For the bundled demo dataset, serve it locally: npx http-server examples -p 8080
+    # indexUrl: http://localhost:8080/regis-index.json
     # Owner assigned to minted Resources that don't carry their own owner.
     defaultOwner: group:default/guests
     # Namespace for minted entities.

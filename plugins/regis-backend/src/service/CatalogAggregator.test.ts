@@ -50,6 +50,26 @@ describe('CatalogAggregator', () => {
     expect(byStatus).toEqual(['error', 'ok']);
   });
 
+  it('includes the canonical imageRef from the report request', async () => {
+    const getReport = jest.fn().mockResolvedValue({
+      report: {
+        tier: 'Gold',
+        rules_summary: { score: 100, by_tag: {} },
+        request: {
+          registry: 'registry-1.docker.io',
+          repository: 'library/nginx',
+          tag: '1.27',
+        },
+      },
+      meta: {},
+    });
+    const agg = makeAggregator(['a'], getReport);
+    await agg.refresh();
+    expect(agg.getSnapshot()[0].imageRef).toBe(
+      'registry-1.docker.io/library/nginx:1.27',
+    );
+  });
+
   it('ensureFresh refreshes while empty and caches once populated', async () => {
     let now = 1000;
     const getReport = jest.fn().mockResolvedValue({
