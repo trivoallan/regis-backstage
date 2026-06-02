@@ -11,6 +11,7 @@ import { CatalogAggregator } from './service/CatalogAggregator';
 import { KnexReportHistoryStore } from './service/KnexReportHistoryStore';
 import { ReportHistoryService } from './service/ReportHistoryService';
 import { RegisHistoryRecorder } from './service/RegisHistoryRecorder';
+import { seedHistory } from './service/seedHistory';
 
 /** The Regis backend plugin (new backend system). */
 export const regisPlugin = createBackendPlugin({
@@ -60,6 +61,22 @@ export const regisPlugin = createBackendPlugin({
           catalog,
           store: historyStore,
         });
+
+        const historySeedUrl = config.getOptionalString(
+          'regis.catalog.historySeedUrl',
+        );
+        if (historySeedUrl) {
+          try {
+            await seedHistory({
+              source,
+              store: historyStore,
+              seedUrl: historySeedUrl,
+              logger,
+            });
+          } catch (error) {
+            logger.warn(`regis: history seed failed: ${error}`);
+          }
+        }
 
         httpRouter.use(
           await createRouter({
