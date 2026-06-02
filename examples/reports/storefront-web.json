@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "version": "0.34.0",
+  "snapshot_date": "2026-06-01",
+  "tier": "Gold",
+  "badges": [
+    {
+      "slug": "tier",
+      "scope": "tier",
+      "value": "Gold",
+      "class": "success",
+      "label": "Tier: Gold"
+    },
+    {
+      "slug": "security",
+      "scope": "security",
+      "value": "A",
+      "class": "success",
+      "label": "Security: A"
+    }
+  ],
+  "links": [
+    {
+      "label": "Playbook",
+      "url": "https://example.test/playbooks/default"
+    }
+  ],
+  "request": {
+    "url": "ghcr.io/shop/storefront-web:2.3.0",
+    "registry": "ghcr.io",
+    "repository": "shop/storefront-web",
+    "tag": "2.3.0",
+    "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "analyzers": [
+      "cve",
+      "oci"
+    ],
+    "timestamp": "2026-06-01T08:00:00+00:00"
+  },
+  "results": {
+    "oci": {
+      "analyzer": "oci",
+      "repository": "shop/storefront-web",
+      "tag": "2.3.0",
+      "platforms": [
+        {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        {
+          "architecture": "arm64",
+          "os": "linux"
+        }
+      ]
+    },
+    "cve": {
+      "analyzer": "cve",
+      "repository": "shop/storefront-web",
+      "tag": "2.3.0",
+      "scanner_version": "0.74.1",
+      "vulnerability_count": 6,
+      "critical_count": 0,
+      "high_count": 0,
+      "medium_count": 1,
+      "low_count": 5,
+      "negligible_count": 0,
+      "unknown_count": 0,
+      "fixed_count": 2,
+      "targets": []
+    }
+  },
+  "rules": [
+    {
+      "slug": "no-critical-cve",
+      "description": "No critical vulnerabilities",
+      "level": "Gold",
+      "tags": [
+        "security"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "No critical vulnerabilities: OK",
+      "analyzers": [
+        "cve"
+      ]
+    },
+    {
+      "slug": "no-high-cve",
+      "description": "No high vulnerabilities",
+      "level": "Silver",
+      "tags": [
+        "security"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "No high vulnerabilities: OK",
+      "analyzers": [
+        "cve"
+      ]
+    },
+    {
+      "slug": "fixable-cves-patched",
+      "description": "All fixable CVEs are patched",
+      "level": "Bronze",
+      "tags": [
+        "security"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "All fixable CVEs are patched: OK",
+      "analyzers": [
+        "cve"
+      ]
+    },
+    {
+      "slug": "runs-as-nonroot",
+      "description": "Runs as a non-root user",
+      "level": "Silver",
+      "tags": [
+        "hygiene"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "Runs as a non-root user: OK",
+      "analyzers": [
+        "oci"
+      ]
+    },
+    {
+      "slug": "has-healthcheck",
+      "description": "Declares a HEALTHCHECK",
+      "level": "Bronze",
+      "tags": [
+        "hygiene"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "Declares a HEALTHCHECK: OK",
+      "analyzers": [
+        "oci"
+      ]
+    },
+    {
+      "slug": "pinned-base-image",
+      "description": "Base image pinned by digest",
+      "level": "Silver",
+      "tags": [
+        "supply-chain"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "Base image pinned by digest: OK",
+      "analyzers": [
+        "oci"
+      ]
+    },
+    {
+      "slug": "image-signed",
+      "description": "Image is signed (cosign)",
+      "level": "Gold",
+      "tags": [
+        "supply-chain"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "Image is signed (cosign): OK",
+      "analyzers": [
+        "oci"
+      ]
+    },
+    {
+      "slug": "oci-source-labels",
+      "description": "OCI source/revision labels present",
+      "level": "Bronze",
+      "tags": [
+        "observability"
+      ],
+      "passed": true,
+      "status": "passed",
+      "message": "OCI source/revision labels present: OK",
+      "analyzers": [
+        "oci"
+      ]
+    }
+  ],
+  "rules_summary": {
+    "score": 100,
+    "total": [
+      "no-critical-cve",
+      "no-high-cve",
+      "fixable-cves-patched",
+      "runs-as-nonroot",
+      "has-healthcheck",
+      "pinned-base-image",
+      "image-signed",
+      "oci-source-labels"
+    ],
+    "passed": [
+      "no-critical-cve",
+      "no-high-cve",
+      "fixable-cves-patched",
+      "runs-as-nonroot",
+      "has-healthcheck",
+      "pinned-base-image",
+      "image-signed",
+      "oci-source-labels"
+    ],
+    "by_tag": {
+      "security": {
+        "rules": [
+          "no-critical-cve",
+          "no-high-cve",
+          "fixable-cves-patched"
+        ],
+        "passed_rules": [
+          "no-critical-cve",
+          "no-high-cve",
+          "fixable-cves-patched"
+        ],
+        "score": 100
+      },
+      "hygiene": {
+        "rules": [
+          "runs-as-nonroot",
+          "has-healthcheck"
+        ],
+        "passed_rules": [
+          "runs-as-nonroot",
+          "has-healthcheck"
+        ],
+        "score": 100
+      },
+      "supply-chain": {
+        "rules": [
+          "pinned-base-image",
+          "image-signed"
+        ],
+        "passed_rules": [
+          "pinned-base-image",
+          "image-signed"
+        ],
+        "score": 100
+      },
+      "observability": {
+        "rules": [
+          "oci-source-labels"
+        ],
+        "passed_rules": [
+          "oci-source-labels"
+        ],
+        "score": 100
+      }
+    }
+  }
+}
