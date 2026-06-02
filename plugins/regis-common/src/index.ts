@@ -36,6 +36,12 @@ export {
   REGIS_ANNOTATION_ALIAS_OF,
   REGIS_RELATION_ALIAS_OF,
   scoreBand,
+  getRegisImageRef,
 } from './catalog';
 export type { Report } from './types';
-export type { ReportEnvelope, ReportSummary } from './report-api';
+export type {
+  ReportEnvelope,
+  ReportSummary,
+  ReportSnapshot,
+  ReportHistory,
+} from './report-api';

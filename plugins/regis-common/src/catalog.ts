@@ -1,3 +1,5 @@
+import type { Entity } from '@backstage/catalog-model';
+
 /** `spec.type` for a minted container-image Resource. */
 export const REGIS_RESOURCE_TYPE_IMAGE = 'container-image';
 /** `spec.type` for a minted playbook Resource. */
@@ -30,6 +32,11 @@ export const REGIS_ANNOTATION_ALIAS_OF = 'regis.io/alias-of';
 
 /** Catalog relation type linking image Resources that share a digest (symmetric). */
 export const REGIS_RELATION_ALIAS_OF = 'aliasOf';
+
+/** Reads the canonical analyzed image reference from an entity, if annotated. */
+export function getRegisImageRef(entity: Entity): string | undefined {
+  return entity.metadata.annotations?.[REGIS_ANNOTATION_IMAGE_REF];
+}
 
 /** Maps a 0-100 score to its band bucket label value. */
 export function scoreBand(score: number): string {
