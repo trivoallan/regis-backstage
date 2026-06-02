@@ -15,7 +15,7 @@ const TIER_ORDER = ['Gold', 'Silver', 'Bronze'];
 function distribution(rows: ReportSummary[]): string {
   const counts = new Map<string, number>();
   for (const r of rows) {
-    const key = r.status === 'ok' ? r.tier ?? 'untiered' : 'error';
+    const key = r.status === 'ok' ? r.tier ?? 'untiered' : r.status;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   const rank = (k: string) =>
@@ -29,7 +29,7 @@ function distribution(rows: ReportSummary[]): string {
 const columns: TableColumn<ReportSummary>[] = [
   {
     title: 'Image',
-    field: 'imageRef',
+    field: 'entityRef',
     render: row => (
       <EntityRefLink entityRef={row.entityRef}>
         {row.imageRef ?? row.entityRef}
