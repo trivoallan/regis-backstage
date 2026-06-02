@@ -13,9 +13,9 @@ import {
   REGIS_LABEL_SCORE_BAND,
   REGIS_ANNOTATION_ALIAS_OF,
   REGIS_RELATION_ALIAS_OF,
+  getRegisImageRef,
   scoreBand,
 } from './catalog';
-import { getRegisImageRef } from './catalog';
 
 describe('entity vocabulary', () => {
   it('uses the documented constant values', () => {
