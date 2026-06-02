@@ -58,3 +58,9 @@ the static `regis-catalog.yaml`.
 To populate the **Trajectory** card with history, also set
 `regis.catalog.historySeedUrl: http://localhost:8080/regis-history.json` in
 `app-config.yaml`. The backend loads it once on boot (idempotent).
+
+**Note:** the synthetic history seed covers the **canonical** image tags only. Alias
+entities (e.g. `nginx:latest`, which shares a digest with `nginx:1.27`) are tracked
+as separate image refs, so their Trajectory card stays empty under seed-only data —
+browse `nginx:1.27` to see the seeded trajectory. (Alias refs do populate over time
+once `regis.catalog.indexUrl` is set and the recorder runs.)
