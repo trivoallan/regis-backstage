@@ -44,6 +44,15 @@ describe('toSnapshots', () => {
     expect(s.tier).toBeUndefined();
     expect(s.score).toBeUndefined();
   });
+
+  it('passes null tier through as null', () => {
+    const index: ReportIndex = {
+      schemaVersion: 1,
+      images: [{ imageRef: 'r/n:1', reportUrl: 'https://x/r.json', tier: null }],
+    };
+    const [s] = toSnapshots(index, RUN);
+    expect(s.tier).toBeNull();
+  });
 });
 
 describe('RegisHistoryRecorder.record', () => {
