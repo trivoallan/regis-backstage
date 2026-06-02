@@ -62,7 +62,7 @@ export async function createRouter(
     res.json(history);
   });
 
-  // Error -> HTTP mapping. NoReport=404; version/schema=422 (distinct kinds);
+  // Error -> HTTP mapping. NoReport/NoImageRef=404; version/schema=422 (distinct kinds);
   // fetch=502; everything else falls through to the default error handler.
   router.use(
     (

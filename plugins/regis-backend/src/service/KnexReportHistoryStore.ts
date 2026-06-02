@@ -20,7 +20,7 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
   private constructor(private readonly db: Knex) {}
 
   static async create(db: Knex): Promise<KnexReportHistoryStore> {
-    if (!(await db.schema.hasTable(TABLE))) {
+    try {
       await db.schema.createTable(TABLE, t => {
         t.text('image_ref').notNullable();
         t.text('snapshot_date').notNullable();
@@ -33,6 +33,9 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
         t.primary(['image_ref', 'snapshot_date']);
         t.index(['image_ref']);
       });
+    } catch (err) {
+      // Table may already exist (another replica created it concurrently).
+      if (!String((err as Error).message).includes('already exists')) throw err;
     }
     return new KnexReportHistoryStore(db);
   }
