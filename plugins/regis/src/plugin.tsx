@@ -13,6 +13,7 @@ import {
 import { isRegisAvailable } from '@regis/backstage-plugin-regis-common';
 import {
   isComponentWithImageDeps,
+  isContainerImage,
   isRegisPlaybook,
 } from './components/imageRelations';
 import { regisApiRef } from './api/RegisApi';
@@ -84,6 +85,15 @@ const playbookImagesCard = EntityCardBlueprint.make({
   },
 });
 
+const aliasesCard = EntityCardBlueprint.make({
+  name: 'aliases',
+  params: {
+    filter: isContainerImage,
+    loader: () =>
+      import('./components/RegisAliasesCard').then(m => <m.RegisAliasesCard />),
+  },
+});
+
 export const regisPlugin = createFrontendPlugin({
   pluginId: 'regis',
   extensions: [
@@ -93,5 +103,6 @@ export const regisPlugin = createFrontendPlugin({
     catalogPage,
     serviceImagesCard,
     playbookImagesCard,
+    aliasesCard,
   ],
 });

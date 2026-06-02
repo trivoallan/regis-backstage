@@ -63,3 +63,29 @@ describe('isRegisPlaybook', () => {
     ).toBe(false);
   });
 });
+
+import { isContainerImage } from './imageRelations';
+
+describe('isContainerImage', () => {
+  it('is true for a container-image Resource', () => {
+    expect(
+      isContainerImage({
+        apiVersion: 'backstage.io/v1alpha1',
+        kind: 'Resource',
+        metadata: { name: 'img' },
+        spec: { type: 'container-image' },
+      }),
+    ).toBe(true);
+  });
+
+  it('is false for a playbook Resource', () => {
+    expect(
+      isContainerImage({
+        apiVersion: 'backstage.io/v1alpha1',
+        kind: 'Resource',
+        metadata: { name: 'pb' },
+        spec: { type: 'regis-playbook' },
+      }),
+    ).toBe(false);
+  });
+});
