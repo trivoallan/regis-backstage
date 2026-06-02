@@ -27,10 +27,19 @@
 - `src/service/KnexReportHistoryStore.ts` — Knex impl with idempotent upsert + self-creating schema.
 - `src/service/RegisHistoryRecorder.ts` — pure `toSnapshots()` + `RegisHistoryRecorder.record()`.
 - `src/service/ReportHistoryService.ts` — entityRef → image-ref → store query; `NoImageRefError`.
+- `src/service/seedHistory.ts` — dev convenience: load a JSON snapshot array from a URL into the store (idempotent).
 - `src/provider/RegisEntityProvider.ts` — refactor to use `fetchIndex` (no behaviour change).
 - `src/router.ts` — add `GET /report/history`; extend `RouterOptions`; map `NoImageRefError` → 404.
-- `src/plugin.ts` — wire `coreServices.database`, build the store/service/recorder, schedule the recorder, pass the service to the router.
+- `src/plugin.ts` — wire `coreServices.database`, build the store/service/recorder, schedule the recorder, optionally seed history, pass the service to the router.
 - `package.json` — add `knex` dependency (for the `Knex` type).
+
+**`examples/`** (demo dataset — single source of truth is the generator):
+- `regis-dataset.cjs` — extend to emit `regis-history.json` (a synthetic multi-snapshot trajectory per image).
+- `regis-history.json` — generated artifact (the snapshot seed served over HTTP).
+- `README.md` — document the history file + `historySeedUrl`.
+
+**Root config:**
+- `app-config.yaml` — commented `regis.catalog.historySeedUrl` example.
 
 **`plugins/regis/`** (frontend):
 - `src/api/RegisApi.ts` — add `getHistory` to `RegisApi`; re-export `ReportHistory`.
@@ -1435,7 +1444,263 @@ git commit -m "feat(regis): register trajectory card on container-image entities
 
 ---
 
-## Task 13: Full verification
+## Task 13: History seed loader (dev convenience)
+
+**Files:**
+- Create: `plugins/regis-backend/src/service/seedHistory.ts`
+- Test: `plugins/regis-backend/src/service/seedHistory.test.ts`
+- Modify: `plugins/regis-backend/src/plugin.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `plugins/regis-backend/src/service/seedHistory.test.ts`:
+
+```ts
+import { mockServices } from '@backstage/backend-test-utils';
+import { seedHistory } from './seedHistory';
+import { InMemoryReportHistoryStore } from './ReportHistoryStore';
+
+describe('seedHistory', () => {
+  it('appends the snapshots fetched from the seed URL', async () => {
+    const store = new InMemoryReportHistoryStore();
+    const source = {
+      fetch: jest.fn().mockResolvedValue([
+        { imageRef: 'r/n:1', snapshotDate: '2026-04-01', score: 70, tier: 'Silver', recordedAt: '2026-04-01T08:00:00.000Z' },
+        { imageRef: 'r/n:1', snapshotDate: '2026-05-01', score: 100, tier: 'Gold', recordedAt: '2026-05-01T08:00:00.000Z' },
+      ]),
+    };
+    await seedHistory({
+      source: source as any,
+      store,
+      seedUrl: 'http://localhost:8080/regis-history.json',
+      logger: mockServices.logger.mock(),
+    });
+    expect(source.fetch).toHaveBeenCalledWith('http://localhost:8080/regis-history.json');
+    expect(await store.getByImageRef('r/n:1')).toHaveLength(2);
+  });
+
+  it('throws when the seed payload is not an array', async () => {
+    const source = { fetch: jest.fn().mockResolvedValue({ nope: true }) };
+    await expect(
+      seedHistory({
+        source: source as any,
+        store: new InMemoryReportHistoryStore(),
+        seedUrl: 'http://x',
+        logger: mockServices.logger.mock(),
+      }),
+    ).rejects.toThrow(/array/);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `yarn workspace @regis/backstage-plugin-regis-backend test seedHistory`
+Expected: FAIL — module not found.
+
+- [ ] **Step 3: Implement the loader**
+
+Create `plugins/regis-backend/src/service/seedHistory.ts`:
+
+```ts
+import type { LoggerService } from '@backstage/backend-plugin-api';
+import type { ReportSnapshot } from '@regis/backstage-plugin-regis-common';
+import type { ReportSource } from './ReportSource';
+import type { ReportHistoryStore } from './ReportHistoryStore';
+
+export interface SeedHistoryDeps {
+  source: ReportSource;
+  store: ReportHistoryStore;
+  seedUrl: string;
+  logger: LoggerService;
+}
+
+/**
+ * Dev convenience: load a JSON array of `ReportSnapshot` from `seedUrl` into the
+ * history store. Idempotent (the store upserts by (imageRef, snapshotDate)), so
+ * it is safe to run on every boot. Not used in production — gated on config.
+ */
+export async function seedHistory(deps: SeedHistoryDeps): Promise<void> {
+  const raw = await deps.source.fetch(deps.seedUrl);
+  if (!Array.isArray(raw)) {
+    throw new Error('regis: history seed must be a JSON array of snapshots');
+  }
+  const snapshots = raw as ReportSnapshot[];
+  await deps.store.append(snapshots);
+  deps.logger.info(`regis: seeded ${snapshots.length} history snapshot(s)`);
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `yarn workspace @regis/backstage-plugin-regis-backend test seedHistory`
+Expected: PASS.
+
+- [ ] **Step 5: Wire it into `plugin.ts` (gated on config, non-fatal)**
+
+In `plugins/regis-backend/src/plugin.ts`, add the import:
+
+```ts
+import { seedHistory } from './service/seedHistory';
+```
+
+After the `historyService` is built (Task 9, Step 3), add:
+
+```ts
+        const historySeedUrl = config.getOptionalString(
+          'regis.catalog.historySeedUrl',
+        );
+        if (historySeedUrl) {
+          try {
+            await seedHistory({
+              source,
+              store: historyStore,
+              seedUrl: historySeedUrl,
+              logger,
+            });
+          } catch (error) {
+            logger.warn(`regis: history seed failed: ${error}`);
+          }
+        }
+```
+
+- [ ] **Step 6: Confirm the backend suite still passes**
+
+Run: `yarn workspace @regis/backstage-plugin-regis-backend test`
+Expected: PASS (the existing `startTestBackend` router tests boot the plugin with no `historySeedUrl`, so the seed path is skipped).
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add plugins/regis-backend/src/service/seedHistory.ts plugins/regis-backend/src/service/seedHistory.test.ts plugins/regis-backend/src/plugin.ts
+git commit -m "feat(regis-backend): optional history seed loader (historySeedUrl)"
+```
+
+---
+
+## Task 14: Generate example history data + docs
+
+**Files:**
+- Modify: `examples/regis-dataset.cjs`
+- Generate: `examples/regis-history.json` (by running the generator)
+- Modify: `examples/README.md`
+- Modify: `app-config.yaml`
+
+- [ ] **Step 1: Add history generation to the dataset generator**
+
+In `examples/regis-dataset.cjs`, after the `SNAPSHOT` constant (near the top), add:
+
+```js
+// History trajectory: three monthly snapshots ending at each image's current score.
+const HISTORY_DATES = ['2026-04-01', '2026-05-01', SNAPSHOT];
+const tierFor = s => (s >= 90 ? 'Gold' : s >= 70 ? 'Silver' : 'Bronze');
+
+// Per-image score path; the last element is always the image's current score.
+function scorePath(img) {
+  if (img.key === 'search') return [91, 78, img.score]; // a decline (drift demo)
+  if (img.tier === 'Gold') return [82, 92, img.score];
+  if (img.tier === 'Silver') return [65, 74, img.score];
+  return [60, 62, img.score];
+}
+```
+
+Then, alongside the other `build*` functions (e.g. after `buildIndex`), add:
+
+```js
+function buildHistory() {
+  const snapshots = [];
+  for (const img of IMAGES) {
+    const path = scorePath(img);
+    HISTORY_DATES.forEach((date, i) => {
+      const score = path[i];
+      snapshots.push({
+        imageRef: imageRefOf(img),
+        snapshotDate: date,
+        digest: img.digest,
+        tier: tierFor(score),
+        score,
+        playbook: img.playbook,
+        reportUrl: `${REPORT_BASE}/${img.key}.json`,
+        recordedAt: `${date}T08:00:00.000Z`,
+      });
+    });
+  }
+  return snapshots;
+}
+```
+
+- [ ] **Step 2: Write the history file in the output section**
+
+In the file-writing section (near the `regis-index.json` write at the bottom), add:
+
+```js
+fs.writeFileSync(path.join(root, 'regis-history.json'), `${JSON.stringify(buildHistory(), null, 2)}\n`);
+```
+
+And update the final `console.log` line to mention it, e.g. append `, regis-history.json` to the message string.
+
+- [ ] **Step 3: Update the generator's header comment**
+
+In the top doc-comment "Emits (under examples/)" list, add a line:
+
+```
+ *   regis-history.json     — synthetic per-image snapshot history (history seed)
+```
+
+- [ ] **Step 4: Run the generator**
+
+Run: `node examples/regis-dataset.cjs`
+Expected: stdout reports the files written including `regis-history.json`; the file now exists.
+
+- [ ] **Step 5: Sanity-check the generated file**
+
+Run: `node -e "const h=require('./examples/regis-history.json'); const s=h.filter(x=>x.imageRef.endsWith('search:8.12.0')); console.log(s.map(x=>x.snapshotDate+':'+x.score+':'+x.tier).join(' | ')); console.log('total', h.length)"`
+Expected: prints the `search` trajectory `2026-04-01:91:Gold | 2026-05-01:78:Silver | 2026-06-01:64:Bronze` and a total count (3 × number of images).
+
+- [ ] **Step 6: Document it in the examples README**
+
+In `examples/README.md`:
+
+- add a row to the "What's here" table:
+
+```
+| `regis-history.json` | Synthetic per-image score/tier **history** (3 monthly snapshots each); fed to the backend via `regis.catalog.historySeedUrl` to populate the **Trajectory** card. |
+```
+
+- add to the "To also exercise the entity provider (Phase 2)" area a sentence:
+
+> To populate the **Trajectory** card with history, also set
+> `regis.catalog.historySeedUrl: http://localhost:8080/regis-history.json` in
+> `app-config.yaml`. The backend loads it once on boot (idempotent).
+
+- add a "What to look at" bullet:
+
+```
+- **Trajectory** (on an image, e.g. `shop-search-8.12.0`): the score/tier
+  sparkline over time — `search` visibly declines Gold → Silver → Bronze.
+```
+
+- [ ] **Step 7: Add the commented config to `app-config.yaml`**
+
+In `app-config.yaml`, under `regis.catalog` (next to the commented `indexUrl`), add:
+
+```yaml
+    # Dev only: seed the persistent report-history store from a served JSON
+    # snapshot array, so the Trajectory card has data without waiting for the
+    # scheduler to accumulate it. Idempotent.
+    # historySeedUrl: http://localhost:8080/regis-history.json
+```
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add examples/regis-dataset.cjs examples/regis-history.json examples/README.md app-config.yaml
+git commit -m "docs(examples): synthetic report history dataset + historySeedUrl"
+```
+
+---
+
+## Task 15: Full verification
 
 - [ ] **Step 1: Run all three package test suites**
 
