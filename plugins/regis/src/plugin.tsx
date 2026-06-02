@@ -94,6 +94,17 @@ const aliasesCard = EntityCardBlueprint.make({
   },
 });
 
+const trajectoryCard = EntityCardBlueprint.make({
+  name: 'trajectory',
+  params: {
+    filter: isContainerImage,
+    loader: () =>
+      import('./components/RegisTrajectoryCard').then(m => (
+        <m.RegisTrajectoryCard />
+      )),
+  },
+});
+
 export const regisPlugin = createFrontendPlugin({
   pluginId: 'regis',
   extensions: [
@@ -104,5 +115,6 @@ export const regisPlugin = createFrontendPlugin({
     serviceImagesCard,
     playbookImagesCard,
     aliasesCard,
+    trajectoryCard,
   ],
 });
