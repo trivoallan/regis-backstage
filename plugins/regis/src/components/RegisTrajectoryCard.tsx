@@ -13,7 +13,7 @@ const TIER_COLOR: Record<string, string> = {
   gold: '#d4af37',
   silver: '#9ca3af',
   bronze: '#cd7f32',
-  none: '#9ca3af',
+  none: '#9ca3af', // intentional: untiered snapshots use the same neutral weight as Silver
 };
 
 /** Dependency-free SVG sparkline of score over time, dots coloured by tier. */
@@ -74,7 +74,7 @@ export function RegisTrajectoryCard() {
   }
 
   const snapshots = value?.snapshots ?? [];
-  if (snapshots.length === 0) {
+  if (!value || snapshots.length === 0) {
     return <InfoCard title="Trajectory">No history recorded yet.</InfoCard>;
   }
 
@@ -86,7 +86,7 @@ export function RegisTrajectoryCard() {
         latest.tier ?? 'none'
       } (${latest.score ?? '—'})`}
     >
-      <Sparkline history={value!} />
+      <Sparkline history={value} />
     </InfoCard>
   );
 }
