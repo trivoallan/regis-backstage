@@ -99,6 +99,9 @@ export class CatalogAggregator {
           return {
             entityRef,
             status: 'ok' as const,
+            imageRef: report.request
+              ? `${report.request.registry}/${report.request.repository}:${report.request.tag}`
+              : undefined,
             tier: report.tier ?? null,
             score: report.rules_summary?.score,
             byTag,
