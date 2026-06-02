@@ -239,6 +239,7 @@ metadata:
     regis.io/image-ref: registry-1.docker.io/library/nginx:1.27
     regis.io/image-digest: 'sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6'
     regis.io/image-aliases: registry-1.docker.io/library/nginx:latest
+    regis.io/alias-of: resource:default/library-nginx-latest
     regis.io/score: '100'
     regis.io/playbook: resource:default/regis-playbook-default
 spec:
@@ -262,6 +263,7 @@ metadata:
     regis.io/image-ref: registry-1.docker.io/library/nginx:latest
     regis.io/image-digest: 'sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6'
     regis.io/image-aliases: registry-1.docker.io/library/nginx:1.27
+    regis.io/alias-of: resource:default/library-nginx-1.27
     regis.io/score: '100'
     regis.io/playbook: resource:default/regis-playbook-default
 spec:
