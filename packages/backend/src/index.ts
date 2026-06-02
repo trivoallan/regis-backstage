@@ -7,6 +7,7 @@
  */
 
 import { createBackend } from '@backstage/backend-defaults';
+import { catalogModuleRegisEntityProvider } from '@regis/backstage-plugin-regis-backend';
 
 const backend = createBackend();
 
@@ -68,5 +69,6 @@ backend.add(import('@backstage/plugin-mcp-actions-backend'));
 
 // regis plugin (this repo)
 backend.add(import('@regis/backstage-plugin-regis-backend'));
+backend.add(catalogModuleRegisEntityProvider);
 
 backend.start();

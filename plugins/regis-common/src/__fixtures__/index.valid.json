@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "playbooks": [
+    {
+      "id": "default",
+      "title": "Regis Default Playbook",
+      "version": "1.0.0",
+      "owner": "group:default/team-platform"
+    }
+  ],
+  "images": [
+    {
+      "imageRef": "registry-1.docker.io/library/nginx:1.27",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "reportUrl": "https://example.test/reports/nginx-1.27/report.json",
+      "tier": "Gold",
+      "score": 100,
+      "playbook": "default",
+      "owner": "group:default/team-platform",
+      "system": "nginx"
+    },
+    {
+      "imageRef": "registry-1.docker.io/library/nginx:latest",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "reportUrl": "https://example.test/reports/nginx-latest/report.json",
+      "tier": "Gold",
+      "score": 100,
+      "playbook": "default"
+    }
+  ]
+}

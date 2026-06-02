@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "playbooks": [
+    {
+      "id": "default",
+      "title": "Regis Default Playbook",
+      "version": "1.0.0",
+      "owner": "group:default/guests"
+    }
+  ],
+  "images": [
+    {
+      "imageRef": "registry-1.docker.io/library/nginx:1.27",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "reportUrl": "https://trivoallan.github.io/regis/reports/nginx-1.27/report.json",
+      "tier": "Gold",
+      "score": 100,
+      "playbook": "default",
+      "system": "nginx"
+    },
+    {
+      "imageRef": "registry-1.docker.io/library/nginx:latest",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "reportUrl": "https://trivoallan.github.io/regis/reports/nginx-latest/report.json",
+      "tier": "Gold",
+      "score": 100,
+      "playbook": "default"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trivoallan.github.io/regis-backstage/schemas/report-index.schema.json",
+  "title": "Regis Report Index",
+  "description": "Registry-agnostic index of analyzed images and playbooks, consumed by the Regis Backstage entity provider.",
+  "type": "object",
+  "required": ["schemaVersion", "images"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "playbooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "version": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["imageRef", "reportUrl"],
+        "properties": {
+          "imageRef": { "type": "string", "minLength": 1 },
+          "digest": { "type": "string" },
+          "reportUrl": { "type": "string", "minLength": 1 },
+          "tier": { "type": ["string", "null"] },
+          "score": { "type": "number" },
+          "playbook": { "type": "string" },
+          "owner": { "type": "string" },
+          "system": { "type": "string" }
+        }
+      }
+    }
+  }
+}
