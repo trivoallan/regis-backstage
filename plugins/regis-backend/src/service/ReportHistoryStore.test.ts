@@ -34,4 +34,11 @@ describe('InMemoryReportHistoryStore', () => {
     expect(await store.getByImageRef('a:1')).toHaveLength(1);
     expect(await store.getByImageRef('missing')).toEqual([]);
   });
+
+  it('normalizes tier null to undefined on read (matches Knex store contract)', async () => {
+    const store = new InMemoryReportHistoryStore();
+    await store.append([snap({ tier: null as unknown as undefined })]);
+    const rows = await store.getByImageRef('r/n:1');
+    expect(rows[0].tier).toBeUndefined();
+  });
 });

@@ -30,7 +30,7 @@
           "digest": { "type": "string" },
           "reportUrl": { "type": "string", "minLength": 1 },
           "tier": { "type": ["string", "null"] },
-          "score": { "type": "number" },
+          "score": { "type": "integer" },
           "playbook": { "type": "string" },
           "owner": { "type": "string" },
           "system": { "type": "string" },

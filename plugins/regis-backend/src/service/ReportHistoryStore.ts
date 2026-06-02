@@ -20,9 +20,11 @@ export class InMemoryReportHistoryStore implements ReportHistoryStore {
     for (const s of snapshots) this.rows.set(this.key(s), s);
   }
 
+  // Reads normalize null → undefined to match the Knex store's read contract.
   async getByImageRef(imageRef: string): Promise<ReportSnapshot[]> {
     return [...this.rows.values()]
       .filter(s => s.imageRef === imageRef)
-      .sort((a, b) => a.snapshotDate.localeCompare(b.snapshotDate));
+      .sort((a, b) => a.snapshotDate.localeCompare(b.snapshotDate))
+      .map(s => ({ ...s, tier: s.tier ?? undefined }));
   }
 }
