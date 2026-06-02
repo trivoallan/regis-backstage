@@ -8,6 +8,9 @@ import { HttpReportSource } from './service/ReportSource';
 import { InMemoryTtlStore } from './service/ReportStore';
 import { ReportService } from './service/ReportService';
 import { CatalogAggregator } from './service/CatalogAggregator';
+import { KnexReportHistoryStore } from './service/KnexReportHistoryStore';
+import { ReportHistoryService } from './service/ReportHistoryService';
+import { RegisHistoryRecorder } from './service/RegisHistoryRecorder';
 
 /** The Regis backend plugin (new backend system). */
 export const regisPlugin = createBackendPlugin({
@@ -22,6 +25,7 @@ export const regisPlugin = createBackendPlugin({
         scheduler: coreServices.scheduler,
         config: coreServices.rootConfig,
         catalog: catalogServiceRef,
+        database: coreServices.database,
       },
       async init({
         logger,
@@ -31,6 +35,7 @@ export const regisPlugin = createBackendPlugin({
         scheduler,
         config,
         catalog,
+        database,
       }) {
         const ttlMs =
           (config.getOptionalNumber('regis.cacheTtlSeconds') ?? 1800) * 1000;
@@ -48,9 +53,22 @@ export const regisPlugin = createBackendPlugin({
           reportService,
           logger,
         });
+        const historyStore = await KnexReportHistoryStore.create(
+          await database.getClient(),
+        );
+        const historyService = new ReportHistoryService({
+          catalog,
+          store: historyStore,
+        });
 
         httpRouter.use(
-          await createRouter({ logger, httpAuth, reportService, aggregator }),
+          await createRouter({
+            logger,
+            httpAuth,
+            reportService,
+            aggregator,
+            historyService,
+          }),
         );
         httpRouter.addAuthPolicy({ path: '/health', allow: 'unauthenticated' });
 
@@ -69,6 +87,31 @@ export const regisPlugin = createBackendPlugin({
             await aggregator.refresh();
           },
         });
+
+        // Persistent report history: on each tick, fetch the published index and
+        // record one snapshot per image. `scope: 'global'` because the DB is
+        // shared across replicas, so only one replica should write per tick.
+        const indexUrl = config.getOptionalString('regis.catalog.indexUrl');
+        if (indexUrl) {
+          const refreshMinutes =
+            config.getOptionalNumber('regis.catalog.refreshMinutes') ?? 30;
+          const recorder = new RegisHistoryRecorder({
+            source,
+            store: historyStore,
+            indexUrl,
+            logger,
+          });
+          await scheduler.scheduleTask({
+            id: 'regis-history-record',
+            frequency: { minutes: refreshMinutes },
+            timeout: { minutes: 5 },
+            initialDelay: { seconds: 20 },
+            scope: 'global',
+            fn: async () => {
+              await recorder.record();
+            },
+          });
+        }
       },
     });
   },
