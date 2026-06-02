@@ -33,7 +33,8 @@
           "score": { "type": "number" },
           "playbook": { "type": "string" },
           "owner": { "type": "string" },
-          "system": { "type": "string" }
+          "system": { "type": "string" },
+          "snapshotDate": { "type": "string" }
         }
       }
     }

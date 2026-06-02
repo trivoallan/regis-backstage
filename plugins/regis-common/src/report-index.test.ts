@@ -32,4 +32,18 @@ describe('validateReportIndex', () => {
   it('exposes the supported version', () => {
     expect(SUPPORTED_INDEX_SCHEMA_VERSION).toBe(1);
   });
+
+  it('accepts an optional snapshotDate on an image entry', () => {
+    const index = validateReportIndex({
+      schemaVersion: 1,
+      images: [
+        {
+          imageRef: 'registry-1.docker.io/library/nginx:1.27',
+          reportUrl: 'https://example.test/report.json',
+          snapshotDate: '2026-05-31',
+        },
+      ],
+    });
+    expect(index.images[0].snapshotDate).toBe('2026-05-31');
+  });
 });
