@@ -87,6 +87,7 @@ describe('buildImageEntity', () => {
       entry,
       'library-nginx-1.27',
       ['registry-1.docker.io/library/nginx:latest'],
+      ['resource:default/library-nginx-latest'],
       opts,
     );
     expect(entity.kind).toBe('Resource');
@@ -103,6 +104,7 @@ describe('buildImageEntity', () => {
     expect(ann['regis.io/image-aliases']).toBe(
       'registry-1.docker.io/library/nginx:latest',
     );
+    expect(ann['regis.io/alias-of']).toBe('resource:default/library-nginx-latest');
     expect(ann['regis.io/score']).toBe('100');
     expect(ann['regis.io/playbook']).toBe('resource:default/default');
     expect(entity.spec?.type).toBe('container-image');
@@ -116,12 +118,14 @@ describe('buildImageEntity', () => {
       { imageRef: 'ghcr.io/acme/api:dev', reportUrl: 'https://h/api.json' },
       'acme-api-dev',
       [],
+      [],
       opts,
     );
     const ann = entity.metadata.annotations ?? {};
     expect(entity.metadata.labels).toBeUndefined();
     expect(ann['regis.io/image-digest']).toBeUndefined();
     expect(ann['regis.io/image-aliases']).toBeUndefined();
+    expect(ann['regis.io/alias-of']).toBeUndefined();
     expect(ann['regis.io/playbook']).toBeUndefined();
     expect(entity.spec?.owner).toBe('group:default/guests');
     expect(entity.spec?.dependsOn).toBeUndefined();
@@ -168,9 +172,15 @@ describe('buildEntities', () => {
     expect(first?.metadata.annotations?.['regis.io/image-aliases']).toBe(
       'registry-1.docker.io/library/nginx:latest',
     );
+    expect(first?.metadata.annotations?.['regis.io/alias-of']).toBe(
+      'resource:default/library-nginx-latest',
+    );
     const second = entities.find(e => e.metadata.name === 'library-nginx-latest');
     expect(second?.metadata.annotations?.['regis.io/image-aliases']).toBe(
       'registry-1.docker.io/library/nginx:1.27',
+    );
+    expect(second?.metadata.annotations?.['regis.io/alias-of']).toBe(
+      'resource:default/library-nginx-1.27',
     );
   });
 });

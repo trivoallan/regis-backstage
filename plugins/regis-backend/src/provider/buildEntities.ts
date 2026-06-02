@@ -10,6 +10,7 @@ import {
   REGIS_ANNOTATION_IMAGE_REF,
   REGIS_ANNOTATION_IMAGE_DIGEST,
   REGIS_ANNOTATION_IMAGE_ALIASES,
+  REGIS_ANNOTATION_ALIAS_OF,
   REGIS_ANNOTATION_SCORE,
   REGIS_ANNOTATION_PLAYBOOK,
   REGIS_ANNOTATION_PLAYBOOK_ID,
@@ -91,6 +92,7 @@ export function buildImageEntity(
   entry: IndexImageEntry,
   name: string,
   aliases: string[],
+  aliasEntityRefs: string[],
   opts: BuildOpts,
 ): Entity {
   const location = locationRef(opts.indexUrl);
@@ -109,6 +111,9 @@ export function buildImageEntity(
   if (entry.digest) annotations[REGIS_ANNOTATION_IMAGE_DIGEST] = entry.digest;
   if (aliases.length) {
     annotations[REGIS_ANNOTATION_IMAGE_ALIASES] = aliases.join(', ');
+  }
+  if (aliasEntityRefs.length) {
+    annotations[REGIS_ANNOTATION_ALIAS_OF] = aliasEntityRefs.join(', ');
   }
   if (typeof entry.score === 'number') {
     annotations[REGIS_ANNOTATION_SCORE] = String(entry.score);
@@ -149,12 +154,27 @@ export function buildEntities(index: ReportIndex, opts: BuildOpts): Entity[] {
   }
 
   const aliasMap = groupAliasesByDigest(index.images);
+
+  // Pass 1: assign a stable, collision-safe entity name to every image ref.
   const taken = new Set<string>();
-  for (const image of index.images) {
+  const named = index.images.map(image => {
     const { repository, tag } = parseImageRef(image.imageRef);
-    const name = imageEntityName(repository, tag, image.imageRef, taken);
+    return {
+      image,
+      name: imageEntityName(repository, tag, image.imageRef, taken),
+    };
+  });
+  const nameByRef = new Map(named.map(n => [n.image.imageRef, n.name]));
+
+  // Pass 2: build each image, resolving sibling image refs to entity refs.
+  for (const { image, name } of named) {
+    const aliasImageRefs = aliasMap.get(image.imageRef) ?? [];
+    const aliasEntityRefs = aliasImageRefs
+      .map(ref => nameByRef.get(ref))
+      .filter((n): n is string => Boolean(n))
+      .map(n => `resource:${opts.namespace}/${n}`);
     entities.push(
-      buildImageEntity(image, name, aliasMap.get(image.imageRef) ?? [], opts),
+      buildImageEntity(image, name, aliasImageRefs, aliasEntityRefs, opts),
     );
   }
 
