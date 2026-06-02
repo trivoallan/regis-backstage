@@ -11,6 +11,8 @@ import {
   REGIS_ANNOTATION_PLAYBOOK_ID,
   REGIS_LABEL_TIER,
   REGIS_LABEL_SCORE_BAND,
+  REGIS_ANNOTATION_ALIAS_OF,
+  REGIS_RELATION_ALIAS_OF,
   scoreBand,
 } from './catalog';
 
@@ -28,6 +30,8 @@ describe('entity vocabulary', () => {
     expect(REGIS_ANNOTATION_PLAYBOOK_ID).toBe('regis.io/playbook-id');
     expect(REGIS_LABEL_TIER).toBe('regis.io/tier');
     expect(REGIS_LABEL_SCORE_BAND).toBe('regis.io/score-band');
+    expect(REGIS_ANNOTATION_ALIAS_OF).toBe('regis.io/alias-of');
+    expect(REGIS_RELATION_ALIAS_OF).toBe('aliasOf');
   });
 });
 
