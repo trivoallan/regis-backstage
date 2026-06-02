@@ -11,6 +11,10 @@ import {
   EntityContentBlueprint,
 } from '@backstage/plugin-catalog-react/alpha';
 import { isRegisAvailable } from '@regis/backstage-plugin-regis-common';
+import {
+  isComponentWithImageDeps,
+  isRegisPlaybook,
+} from './components/imageRelations';
 import { regisApiRef } from './api/RegisApi';
 import { RegisClient } from './api/RegisClient';
 import { rootRouteRef } from './routes';
@@ -58,7 +62,36 @@ const catalogPage = PageBlueprint.make({
   },
 });
 
+const serviceImagesCard = EntityCardBlueprint.make({
+  name: 'service-images',
+  params: {
+    filter: isComponentWithImageDeps,
+    loader: () =>
+      import('./components/RegisRelatedImagesCards').then(m => (
+        <m.RegisServiceImagesCard />
+      )),
+  },
+});
+
+const playbookImagesCard = EntityCardBlueprint.make({
+  name: 'playbook-images',
+  params: {
+    filter: isRegisPlaybook,
+    loader: () =>
+      import('./components/RegisRelatedImagesCards').then(m => (
+        <m.RegisPlaybookImagesCard />
+      )),
+  },
+});
+
 export const regisPlugin = createFrontendPlugin({
   pluginId: 'regis',
-  extensions: [regisApi, scorecardCard, reportTab, catalogPage],
+  extensions: [
+    regisApi,
+    scorecardCard,
+    reportTab,
+    catalogPage,
+    serviceImagesCard,
+    playbookImagesCard,
+  ],
 });
