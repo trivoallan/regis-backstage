@@ -11,6 +11,7 @@ e-commerce platform (`System: shop`).
 | `regis-catalog.yaml` | The `shop` System, 5 services, 7 `container-image` Resources (incl. a shared `nginx` with a linked alias), and 2 `regis-playbook` Resources. |
 | `reports/*.json` | One realistic `report.json` per image — varied tiers (Gold/Silver/Bronze), scores, rules grouped by tag (security / supply-chain / hygiene / observability), and CVE counts. |
 | `regis-index.json` | The published **report index** consumed by the Phase 2 entity provider (same data, provider-shaped). |
+| `regis-history.json` | Synthetic per-image score/tier **history** (3 monthly snapshots each); fed to the backend via `regis.catalog.historySeedUrl` to populate the **Trajectory** card. |
 | `regis-dataset.cjs` | Generator — the single source of truth. Edit this, then run `node examples/regis-dataset.cjs`, not the generated files. |
 | `regis-demo.yaml` | A standalone Phase 1 example: a `Component` carrying `regis.io/report-url` directly. |
 
@@ -46,8 +47,14 @@ What to look at:
   summarising the posture of the images it depends on.
 - **A playbook** (e.g. `regis-playbook-pci-dss`): the **"Assessed images"** card.
 - **The `/regis` page**: every image with Image / Kind / Tier / Score / Failing tags.
+- **Trajectory** (on an image, e.g. `shop-search-8.12.0`): the score/tier
+  sparkline over time — `search` visibly declines Gold → Silver → Bronze.
 
 To also exercise the **entity provider** (Phase 2), set
 `regis.catalog.indexUrl: http://localhost:8080/regis-index.json` in `app-config.yaml`
 (commented out by default) — it mints the same entities from the index instead of
 the static `regis-catalog.yaml`.
+
+To populate the **Trajectory** card with history, also set
+`regis.catalog.historySeedUrl: http://localhost:8080/regis-history.json` in
+`app-config.yaml`. The backend loads it once on boot (idempotent).

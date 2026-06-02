@@ -1,0 +1,182 @@
+[
+  {
+    "imageRef": "ghcr.io/shop/storefront-web:2.3.0",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "tier": "Silver",
+    "score": 82,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/storefront-web.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/storefront-web:2.3.0",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "tier": "Gold",
+    "score": 92,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/storefront-web.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/storefront-web:2.3.0",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "tier": "Gold",
+    "score": 100,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/storefront-web.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/catalog-api:4.1.0",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+    "tier": "Silver",
+    "score": 82,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/catalog-api.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/catalog-api:4.1.0",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+    "tier": "Gold",
+    "score": 92,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/catalog-api.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/catalog-api:4.1.0",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+    "tier": "Gold",
+    "score": 95,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/catalog-api.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/checkout-api:1.8.2",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+    "tier": "Bronze",
+    "score": 65,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/checkout-api.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/checkout-api:1.8.2",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+    "tier": "Silver",
+    "score": 74,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/checkout-api.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/checkout-api:1.8.2",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+    "tier": "Silver",
+    "score": 82,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/checkout-api.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/payments-gateway:3.0.1",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4",
+    "tier": "Bronze",
+    "score": 65,
+    "playbook": "pci-dss",
+    "reportUrl": "http://localhost:8080/reports/payments-gateway.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/payments-gateway:3.0.1",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4",
+    "tier": "Silver",
+    "score": 74,
+    "playbook": "pci-dss",
+    "reportUrl": "http://localhost:8080/reports/payments-gateway.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/payments-gateway:3.0.1",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4",
+    "tier": "Silver",
+    "score": 78,
+    "playbook": "pci-dss",
+    "reportUrl": "http://localhost:8080/reports/payments-gateway.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/search:8.12.0",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+    "tier": "Gold",
+    "score": 91,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/search.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/search:8.12.0",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+    "tier": "Silver",
+    "score": 78,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/search.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "ghcr.io/shop/search:8.12.0",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+    "tier": "Bronze",
+    "score": 64,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/search.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "registry-1.docker.io/library/nginx:1.27",
+    "snapshotDate": "2026-04-01",
+    "digest": "sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6",
+    "tier": "Silver",
+    "score": 82,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/nginx.json",
+    "recordedAt": "2026-04-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "registry-1.docker.io/library/nginx:1.27",
+    "snapshotDate": "2026-05-01",
+    "digest": "sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6",
+    "tier": "Gold",
+    "score": 92,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/nginx.json",
+    "recordedAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "imageRef": "registry-1.docker.io/library/nginx:1.27",
+    "snapshotDate": "2026-06-01",
+    "digest": "sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6",
+    "tier": "Gold",
+    "score": 100,
+    "playbook": "default",
+    "reportUrl": "http://localhost:8080/reports/nginx.json",
+    "recordedAt": "2026-06-01T08:00:00.000Z"
+  }
+]
