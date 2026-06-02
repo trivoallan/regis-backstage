@@ -46,4 +46,17 @@ describe('RegisClient', () => {
     const rows = await client.listReports();
     expect(rows).toHaveLength(1);
   });
+
+  it('GETs /report/history with an encoded entityRef', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ imageRef: 'r/n:1', snapshots: [] }),
+    });
+    const client = clientWith(fetchImpl);
+    const out = await client.getHistory('resource:default/library-nginx-1.27');
+    expect(out.imageRef).toBe('r/n:1');
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://localhost:7007/api/regis/report/history?entityRef=resource%3Adefault%2Flibrary-nginx-1.27',
+    );
+  });
 });
