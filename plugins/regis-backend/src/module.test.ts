@@ -2,9 +2,11 @@ import { mockServices, startTestBackend } from '@backstage/backend-test-utils';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { catalogModuleRegisEntityProvider } from './module';
 
+const stub = () => ({ addEntityProvider: jest.fn(), addProcessor: jest.fn() });
+
 describe('catalogModuleRegisEntityProvider', () => {
-  it('registers an entity provider when indexUrl is configured', async () => {
-    const extensionPoint = { addEntityProvider: jest.fn() };
+  it('registers the alias processor and the provider when indexUrl is set', async () => {
+    const extensionPoint = stub();
     await startTestBackend({
       extensionPoints: [[catalogProcessingExtensionPoint, extensionPoint]],
       features: [
@@ -14,11 +16,12 @@ describe('catalogModuleRegisEntityProvider', () => {
         }),
       ],
     });
+    expect(extensionPoint.addProcessor).toHaveBeenCalledTimes(1);
     expect(extensionPoint.addEntityProvider).toHaveBeenCalledTimes(1);
   });
 
-  it('stays disabled when no indexUrl is configured', async () => {
-    const extensionPoint = { addEntityProvider: jest.fn() };
+  it('registers the alias processor even when indexUrl is absent', async () => {
+    const extensionPoint = stub();
     await startTestBackend({
       extensionPoints: [[catalogProcessingExtensionPoint, extensionPoint]],
       features: [
@@ -26,6 +29,7 @@ describe('catalogModuleRegisEntityProvider', () => {
         mockServices.rootConfig.factory({ data: {} }),
       ],
     });
+    expect(extensionPoint.addProcessor).toHaveBeenCalledTimes(1);
     expect(extensionPoint.addEntityProvider).not.toHaveBeenCalled();
   });
 });
