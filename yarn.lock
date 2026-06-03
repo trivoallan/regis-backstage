@@ -9062,6 +9062,7 @@ __metadata:
     "@backstage/frontend-test-utils": "npm:^0.6.0"
     "@backstage/plugin-catalog-react": "npm:^3.0.0"
     "@material-ui/core": "npm:^4.12.4"
+    "@material-ui/icons": "npm:^4.9.1"
     "@regis/backstage-plugin-regis-common": "workspace:^"
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:^14.0.0"
