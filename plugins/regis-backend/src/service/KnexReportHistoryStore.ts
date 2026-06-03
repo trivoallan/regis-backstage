@@ -13,6 +13,8 @@ interface Row {
   playbook: string | null;
   report_url: string | null;
   recorded_at: string;
+  owner: string | null;
+  system: string | null;
 }
 
 /** Knex-backed persistent history store. Self-creates its table on first use. */
@@ -29,6 +31,8 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
         t.integer('score').nullable();
         t.text('playbook').nullable();
         t.text('report_url').nullable();
+        t.text('owner').nullable();
+        t.text('system').nullable();
         t.text('recorded_at').notNullable();
         t.primary(['image_ref', 'snapshot_date']);
         t.index(['image_ref']);
@@ -36,6 +40,11 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
     } catch (err) {
       // Table may already exist (another replica created it concurrently).
       if (!String((err as Error).message).includes('already exists')) throw err;
+    }
+    for (const col of ['owner', 'system'] as const) {
+      if (!(await db.schema.hasColumn(TABLE, col))) {
+        await db.schema.alterTable(TABLE, t => t.text(col).nullable());
+      }
     }
     return new KnexReportHistoryStore(db);
   }
@@ -51,6 +60,8 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
       playbook: s.playbook ?? null,
       report_url: s.reportUrl ?? null,
       recorded_at: s.recordedAt,
+      owner: s.owner ?? null,
+      system: s.system ?? null,
     }));
     await this.db<Row>(TABLE)
       .insert(rows)
@@ -71,6 +82,8 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
       playbook: r.playbook ?? undefined,
       reportUrl: r.report_url ?? undefined,
       recordedAt: r.recorded_at,
+      owner: r.owner ?? undefined,
+      system: r.system ?? undefined,
     }));
   }
 
@@ -85,6 +98,8 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
       playbook: r.playbook ?? undefined,
       reportUrl: r.report_url ?? undefined,
       recordedAt: r.recorded_at,
+      owner: r.owner ?? undefined,
+      system: r.system ?? undefined,
     }));
   }
 }
