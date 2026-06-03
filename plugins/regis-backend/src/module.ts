@@ -3,13 +3,13 @@ import {
   createBackendModule,
 } from '@backstage/backend-plugin-api';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
-import { HttpReportSource } from './service/ReportSource';
 import { RegisEntityProvider } from './provider/RegisEntityProvider';
+import { makeFragmentSource } from './provider/makeFragmentSource';
 import { RegisAliasRelationProcessor } from './processor/RegisAliasRelationProcessor';
 
 /**
  * Registers the Regis entity provider with the catalog. Disabled (no-op) unless
- * `regis.catalog.indexUrl` is configured.
+ * `regis.catalog.indexDirUrl` is configured.
  */
 export const catalogModuleRegisEntityProvider = createBackendModule({
   pluginId: 'catalog',
@@ -21,14 +21,17 @@ export const catalogModuleRegisEntityProvider = createBackendModule({
         scheduler: coreServices.scheduler,
         config: coreServices.rootConfig,
         logger: coreServices.logger,
+        urlReader: coreServices.urlReader,
       },
-      async init({ catalog, scheduler, config, logger }) {
+      async init({ catalog, scheduler, config, logger, urlReader }) {
         catalog.addProcessor(new RegisAliasRelationProcessor());
 
-        const indexUrl = config.getOptionalString('regis.catalog.indexUrl');
-        if (!indexUrl) {
+        const indexDirUrl = config.getOptionalString(
+          'regis.catalog.indexDirUrl',
+        );
+        if (!indexDirUrl) {
           logger.info(
-            'regis: regis.catalog.indexUrl not set — entity provider disabled (alias relations still active)',
+            'regis: regis.catalog.indexDirUrl not set — entity provider disabled (alias relations still active)',
           );
           return;
         }
@@ -47,15 +50,15 @@ export const catalogModuleRegisEntityProvider = createBackendModule({
 
         catalog.addEntityProvider(
           new RegisEntityProvider({
-            indexUrl,
-            source: new HttpReportSource(),
+            indexDirUrl,
+            fragmentSource: makeFragmentSource(indexDirUrl, urlReader),
             taskRunner,
             logger,
             defaultOwner,
             namespace,
           }),
         );
-        logger.info(`regis: entity provider registered for ${indexUrl}`);
+        logger.info(`regis: entity provider registered for ${indexDirUrl}`);
       },
     });
   },
