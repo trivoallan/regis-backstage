@@ -10,18 +10,16 @@ import {
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
 import { regisApiRef, type ReportSummary } from '../api/RegisApi';
 
-const TIER_ORDER = ['Gold', 'Silver', 'Bronze'];
-
-function distribution(rows: ReportSummary[]): string {
+function distribution(rows: ReportSummary[], order: string[]): string {
   const counts = new Map<string, number>();
   for (const r of rows) {
     const key = r.status === 'ok' ? r.tier ?? 'untiered' : r.status;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   const rank = (k: string) =>
-    TIER_ORDER.indexOf(k) === -1 ? TIER_ORDER.length : TIER_ORDER.indexOf(k);
+    order.indexOf(k) === -1 ? order.length : order.indexOf(k);
   return [...counts.entries()]
-    .sort((a, b) => rank(a[0]) - rank(b[0]))
+    .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
     .map(([k, n]) => `${n} ${k}`)
     .join(' · ');
 }
@@ -47,7 +45,10 @@ export function RegisImagePostureCard(props: {
 }) {
   const { title, imageRefs } = props;
   const api = useApi(regisApiRef);
-  const { value, loading, error } = useAsync(() => api.listReports(), []);
+  const { value, loading, error } = useAsync(
+    () => Promise.all([api.listReports(), api.getPlaybooks()]),
+    [],
+  );
 
   if (loading) {
     return (
@@ -64,8 +65,14 @@ export function RegisImagePostureCard(props: {
     );
   }
 
+  const [reports, playbooksResp] = value ?? [undefined, undefined];
+  const order: string[] = [];
+  for (const pb of playbooksResp?.playbooks ?? []) {
+    for (const t of pb.tiers) if (!order.includes(t.key)) order.push(t.key);
+  }
+
   const wanted = new Set(imageRefs);
-  const rows = (value ?? []).filter(r => wanted.has(r.entityRef));
+  const rows = (reports ?? []).filter(r => wanted.has(r.entityRef));
 
   if (rows.length === 0) {
     return <InfoCard title={title}>No Regis-tracked images yet.</InfoCard>;
@@ -74,7 +81,7 @@ export function RegisImagePostureCard(props: {
   return (
     <InfoCard
       title={title}
-      subheader={`${rows.length} images · ${distribution(rows)}`}
+      subheader={`${rows.length} images · ${distribution(rows, order)}`}
     >
       <Table
         columns={columns}
