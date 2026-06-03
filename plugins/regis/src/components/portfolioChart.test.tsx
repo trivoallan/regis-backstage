@@ -16,6 +16,13 @@ describe('PortfolioStackedArea', () => {
     // 4 tier bands + 1 score polyline
     expect(svg.querySelectorAll('polygon')).toHaveLength(4);
     expect(svg.querySelectorAll('polyline')).toHaveLength(1);
+    // legend labels
+    expect(screen.getByText('Gold')).toBeInTheDocument();
+    expect(screen.getByText('Untiered')).toBeInTheDocument();
+    expect(screen.getByText(/avg score/i)).toBeInTheDocument();
+    // first and last date anchors
+    expect(screen.getByText('2026-06-01')).toBeInTheDocument();
+    expect(screen.getByText('2026-06-02')).toBeInTheDocument();
   });
 
   it('renders nothing meaningful for an empty series', () => {

@@ -155,7 +155,7 @@ These are **documented future work**, not built in v1. v1 ships items 1–2 and 
 - **Stacked-area chart** of the tier distribution across the 90 daily buckets + an **average-
   score line**. Rendered as a **dependency-free inline SVG** (consistent with
   `RegisTrajectoryCard`'s sparkline): stacked bands for gold/silver/bronze/none, a score
-  polyline on a secondary scale, with date ticks. Tier colours reuse the trajectory card's map.
+  polyline on a secondary scale, with first/last date labels and a tier/score legend. Tier colours reuse the trajectory card's map.
 - Explicit **loading / empty / error** states (empty = "No portfolio history recorded yet").
 
 ## Error handling & edge cases

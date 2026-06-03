@@ -10,7 +10,7 @@ import {
 } from '@backstage/core-components';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import { regisApiRef, type PortfolioTrend } from '../api/RegisApi';
+import { regisApiRef } from '../api/RegisApi';
 import { PortfolioStackedArea } from './portfolioChart';
 
 const WINDOW_DAYS = 90;
@@ -42,21 +42,22 @@ export function RegisPortfolioTrendsPage() {
   const body = () => {
     if (loading) return <Progress />;
     if (error) return <ResponseErrorPanel error={error} />;
-    const trend = value as PortfolioTrend;
-    const buckets = trend?.buckets ?? [];
+    const buckets = value?.buckets ?? [];
     if (buckets.length === 0) return <Typography>No portfolio history recorded yet.</Typography>;
 
     const first = buckets[0];
     const last = buckets[buckets.length - 1];
+    const days = value?.days;
+    const daysLabel = days !== undefined ? `${days}d` : '';
     return (
       <Grid container spacing={3}>
-        <Kpi label="Gold" value={String(last.gold)} sub={`${delta(last.gold, first.gold)} over ${trend.days}d`} />
-        <Kpi label="Silver" value={String(last.silver)} sub={`${delta(last.silver, first.silver)} over ${trend.days}d`} />
-        <Kpi label="Bronze" value={String(last.bronze)} sub={`${delta(last.bronze, first.bronze)} over ${trend.days}d`} />
-        <Kpi label="Avg score" value={String(last.avgScore)} sub={`${delta(last.avgScore, first.avgScore)} over ${trend.days}d`} />
-        <Kpi label="Images" value={String(last.total)} sub={`${delta(last.total, first.total)} over ${trend.days}d`} />
+        <Kpi label="Gold" value={String(last.gold)} sub={`${delta(last.gold, first.gold)} over ${daysLabel}`} />
+        <Kpi label="Silver" value={String(last.silver)} sub={`${delta(last.silver, first.silver)} over ${daysLabel}`} />
+        <Kpi label="Bronze" value={String(last.bronze)} sub={`${delta(last.bronze, first.bronze)} over ${daysLabel}`} />
+        <Kpi label="Avg score" value={String(last.avgScore)} sub={`${delta(last.avgScore, first.avgScore)} over ${daysLabel}`} />
+        <Kpi label="Images" value={String(last.total)} sub={`${delta(last.total, first.total)} over ${daysLabel}`} />
         <Grid item xs={12}>
-          <InfoCard title={`Posture over the last ${trend.days} days`}>
+          <InfoCard title={`Posture over the last ${daysLabel}`}>
             <PortfolioStackedArea buckets={buckets} />
           </InfoCard>
         </Grid>

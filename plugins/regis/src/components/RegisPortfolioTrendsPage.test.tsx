@@ -39,6 +39,8 @@ describe('RegisPortfolioTrendsPage', () => {
     expect(await screen.findByRole('img', { name: /portfolio posture over time/i })).toBeInTheDocument();
     // latest avg score KPI
     expect(screen.getByText('95')).toBeInTheDocument();
+    // silver went from 1 → 0, so delta should be downward
+    expect(await screen.findByText(/▼ 1/)).toBeInTheDocument();
   });
 
   it('shows an empty state when there is no history', async () => {
