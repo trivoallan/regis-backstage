@@ -44,4 +44,6 @@ export type {
   ReportSummary,
   ReportSnapshot,
   ReportHistory,
+  TrendBucket,
+  PortfolioTrend,
 } from './report-api';

@@ -1,5 +1,5 @@
 import type { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
-import type { RegisApi, ReportEnvelope, ReportHistory, ReportSummary } from './RegisApi';
+import type { PortfolioTrend, RegisApi, ReportEnvelope, ReportHistory, ReportSummary } from './RegisApi';
 
 export class RegisClient implements RegisApi {
   private readonly discoveryApi: DiscoveryApi;
@@ -41,5 +41,9 @@ export class RegisClient implements RegisApi {
     return this.getJson<ReportHistory>(
       `/report/history?entityRef=${encodeURIComponent(entityRef)}`,
     );
+  }
+
+  async getPortfolioTrend(days: number): Promise<PortfolioTrend> {
+    return this.getJson<PortfolioTrend>(`/portfolio/trend?days=${encodeURIComponent(days)}`);
   }
 }

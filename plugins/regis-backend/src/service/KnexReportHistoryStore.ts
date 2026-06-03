@@ -73,4 +73,18 @@ export class KnexReportHistoryStore implements ReportHistoryStore {
       recordedAt: r.recorded_at,
     }));
   }
+
+  async listSnapshots(): Promise<ReportSnapshot[]> {
+    const rows = await this.db<Row>(TABLE).select('*');
+    return rows.map(r => ({
+      imageRef: r.image_ref,
+      snapshotDate: r.snapshot_date,
+      digest: r.digest ?? undefined,
+      tier: r.tier ?? undefined,
+      score: r.score ?? undefined,
+      playbook: r.playbook ?? undefined,
+      reportUrl: r.report_url ?? undefined,
+      recordedAt: r.recorded_at,
+    }));
+  }
 }

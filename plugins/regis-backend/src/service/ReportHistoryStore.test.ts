@@ -41,4 +41,15 @@ describe('InMemoryReportHistoryStore', () => {
     const rows = await store.getByImageRef('r/n:1');
     expect(rows[0].tier).toBeUndefined();
   });
+
+  it('listSnapshots returns every stored row', async () => {
+    const store = new InMemoryReportHistoryStore();
+    await store.append([
+      snap({ imageRef: 'a:1', snapshotDate: '2026-05-01' }),
+      snap({ imageRef: 'b:1', snapshotDate: '2026-05-02' }),
+    ]);
+    const all = await store.listSnapshots();
+    expect(all).toHaveLength(2);
+    expect(new Set(all.map(s => s.imageRef))).toEqual(new Set(['a:1', 'b:1']));
+  });
 });

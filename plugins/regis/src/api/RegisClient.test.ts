@@ -59,4 +59,17 @@ describe('RegisClient', () => {
       'http://localhost:7007/api/regis/report/history?entityRef=resource%3Adefault%2Flibrary-nginx-1.27',
     );
   });
+
+  it('GETs /portfolio/trend with the days param', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ generatedAt: 'x', days: 90, buckets: [] }),
+    });
+    const client = clientWith(fetchImpl);
+    const out = await client.getPortfolioTrend(90);
+    expect(out.days).toBe(90);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://localhost:7007/api/regis/portfolio/trend?days=90',
+    );
+  });
 });

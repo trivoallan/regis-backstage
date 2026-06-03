@@ -12,6 +12,7 @@ import { KnexReportHistoryStore } from './service/KnexReportHistoryStore';
 import { ReportHistoryService } from './service/ReportHistoryService';
 import { RegisHistoryRecorder } from './service/RegisHistoryRecorder';
 import { seedHistory } from './service/seedHistory';
+import { PortfolioTrendAggregator } from './service/PortfolioTrendAggregator';
 
 /** The Regis backend plugin (new backend system). */
 export const regisPlugin = createBackendPlugin({
@@ -61,6 +62,13 @@ export const regisPlugin = createBackendPlugin({
           catalog,
           store: historyStore,
         });
+        const portfolioTrend = new PortfolioTrendAggregator({
+          store: historyStore,
+          logger,
+          rowWarnThreshold: config.getOptionalNumber(
+            'regis.portfolio.inMemoryRowLimit',
+          ),
+        });
 
         const historySeedUrl = config.getOptionalString(
           'regis.catalog.historySeedUrl',
@@ -85,6 +93,7 @@ export const regisPlugin = createBackendPlugin({
             reportService,
             aggregator,
             historyService,
+            portfolioTrend,
           }),
         );
         httpRouter.addAuthPolicy({ path: '/health', allow: 'unauthenticated' });
@@ -102,6 +111,19 @@ export const regisPlugin = createBackendPlugin({
           scope: 'local',
           fn: async () => {
             await aggregator.refresh();
+          },
+        });
+
+        // Warm the portfolio-trend cache (the expensive listSnapshots read)
+        // periodically. `scope: 'local'` warms each replica's own cache.
+        await scheduler.scheduleTask({
+          id: 'regis-portfolio-trend',
+          frequency: { minutes: 30 },
+          timeout: { minutes: 5 },
+          initialDelay: { seconds: 25 },
+          scope: 'local',
+          fn: async () => {
+            await portfolioTrend.refresh();
           },
         });
 

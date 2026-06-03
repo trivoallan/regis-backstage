@@ -30,4 +30,16 @@ describe('KnexReportHistoryStore', () => {
     expect(rows[1].digest).toBe('sha256:b');
     expect(await store.getByImageRef('missing')).toEqual([]);
   }, 60_000);
+
+  it('listSnapshots returns all rows across images', async () => {
+    const knex = await databases.init('SQLITE_3');
+    const store = await KnexReportHistoryStore.create(knex);
+    await store.append([
+      snap({ imageRef: 'a:1', snapshotDate: '2026-05-01', score: 70 }),
+      snap({ imageRef: 'b:1', snapshotDate: '2026-05-02', score: 90 }),
+    ]);
+    const all = await store.listSnapshots();
+    expect(all).toHaveLength(2);
+    expect(all.map(s => s.imageRef).sort()).toEqual(['a:1', 'b:1']);
+  }, 60_000);
 });
