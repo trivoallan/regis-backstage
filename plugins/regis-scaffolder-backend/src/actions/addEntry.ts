@@ -48,6 +48,8 @@ export function createAddEntryAction() {
       output: {
         fragmentPath: z =>
           z.string().describe('Workspace-relative path of the written fragment.'),
+        slug: z =>
+          z.string().describe('Branch-safe slug derived from the image ref.'),
       },
     },
     async handler(ctx) {
@@ -78,6 +80,7 @@ export function createAddEntryAction() {
 
       ctx.logger.info(`regis: wrote intake fragment ${fragmentPath}`);
       ctx.output('fragmentPath', fragmentPath);
+      ctx.output('slug', slug);
     },
   });
 }

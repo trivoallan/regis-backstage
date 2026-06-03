@@ -101,7 +101,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: ${{ parameters.targetRepo }}
-        branchName: regis-intake-${{ parameters.imageRef }}
+        branchName: regis-intake-${{ steps['add-entry'].output.slug }}
         title: 'Onboard ${{ parameters.imageRef }} to the Regis portfolio'
         description: >-
           Intake request for `${{ parameters.imageRef }}`

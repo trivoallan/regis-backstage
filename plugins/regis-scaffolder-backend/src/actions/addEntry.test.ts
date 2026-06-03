@@ -65,6 +65,10 @@ describe('regis:index:add-entry', () => {
       'fragmentPath',
       'examples/regis-index.d/images/ghcr.io_shop_storefront-web_2.3.0.json',
     );
+    expect(ctx.output).toHaveBeenCalledWith(
+      'slug',
+      'ghcr.io_shop_storefront-web_2.3.0',
+    );
   });
 
   it('includes the owner for third-party and writes it', async () => {
