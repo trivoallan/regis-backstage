@@ -4,6 +4,7 @@ import type {
 } from '@backstage/backend-plugin-api';
 import { InputError } from '@backstage/errors';
 import {
+  PlaybooksResponse,
   PortfolioTrend,
   ReportSchemaError,
   UnsupportedSchemaVersionError,
@@ -98,6 +99,13 @@ export async function createRouter(
       bands,
       buckets,
     };
+    res.json(body);
+  });
+
+  router.get('/playbooks', async (req, res) => {
+    await httpAuth.credentials(req); // require an authenticated principal
+    await portfolioTrend.ensureFresh(30_000);
+    const body: PlaybooksResponse = { playbooks: portfolioTrend.playbookLadders() };
     res.json(body);
   });
 

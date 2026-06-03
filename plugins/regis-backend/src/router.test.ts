@@ -133,4 +133,30 @@ describe('regis-backend routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.days).toBe(365);
   });
+
+  it('GET /portfolio/trend passes ?playbook= into filters and echoes it back', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [bareEntity] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/trend?days=7&playbook=p1')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.filters).toEqual({ playbook: 'p1' });
+    expect(res.body.facets).toHaveProperty('playbooks');
+    expect(res.body.buckets).toHaveLength(7);
+  });
+
+  it('GET /playbooks returns 200 with resolved ladders list', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [bareEntity] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/playbooks')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('playbooks');
+    expect(Array.isArray(res.body.playbooks)).toBe(true);
+  });
+
 });
