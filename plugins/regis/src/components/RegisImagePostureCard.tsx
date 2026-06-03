@@ -8,7 +8,9 @@ import {
   type TableColumn,
 } from '@backstage/core-components';
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
+import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef, type ReportSummary } from '../api/RegisApi';
+import { tierColor, unionLadder } from './format';
 
 function distribution(rows: ReportSummary[], order: string[]): string {
   const counts = new Map<string, number>();
@@ -24,19 +26,39 @@ function distribution(rows: ReportSummary[], order: string[]): string {
     .join(' · ');
 }
 
-const columns: TableColumn<ReportSummary>[] = [
-  {
-    title: 'Image',
-    field: 'entityRef',
-    render: row => (
-      <EntityRefLink entityRef={row.entityRef}>
-        {row.imageRef ?? row.entityRef}
-      </EntityRefLink>
-    ),
-  },
-  { title: 'Tier', field: 'tier' },
-  { title: 'Score', field: 'score', type: 'numeric' },
-];
+function makeColumns(ladder: TrendBand[]): TableColumn<ReportSummary>[] {
+  return [
+    {
+      title: 'Image',
+      field: 'entityRef',
+      render: row => (
+        <EntityRefLink entityRef={row.entityRef}>
+          {row.imageRef ?? row.entityRef}
+        </EntityRefLink>
+      ),
+    },
+    {
+      title: 'Tier',
+      field: 'tier',
+      render: row => (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span
+            data-testid="tier-swatch"
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 2,
+              display: 'inline-block',
+              backgroundColor: tierColor(row.tier, ladder),
+            }}
+          />
+          {row.tier ?? '—'}
+        </span>
+      ),
+    },
+    { title: 'Score', field: 'score', type: 'numeric' },
+  ];
+}
 
 /** Posture summary of a given set of image entityRefs (shared by the service and playbook cards). */
 export function RegisImagePostureCard(props: {
@@ -66,10 +88,8 @@ export function RegisImagePostureCard(props: {
   }
 
   const [reports, playbooksResp] = value ?? [undefined, undefined];
-  const order: string[] = [];
-  for (const pb of playbooksResp?.playbooks ?? []) {
-    for (const t of pb.tiers) if (!order.includes(t.key)) order.push(t.key);
-  }
+  const ladder = unionLadder(playbooksResp?.playbooks);
+  const order = ladder.map(b => b.key);
 
   const wanted = new Set(imageRefs);
   const rows = (reports ?? []).filter(r => wanted.has(r.entityRef));
@@ -84,7 +104,7 @@ export function RegisImagePostureCard(props: {
       subheader={`${rows.length} images · ${distribution(rows, order)}`}
     >
       <Table
-        columns={columns}
+        columns={makeColumns(ladder)}
         data={rows}
         options={{
           search: false,

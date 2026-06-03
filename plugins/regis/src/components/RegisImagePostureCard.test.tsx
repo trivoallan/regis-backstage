@@ -129,6 +129,24 @@ describe('RegisImagePostureCard distribution order', () => {
     expect(await screen.findByText(/1 Gold · 1 Bronze/)).toBeInTheDocument();
   });
 
+  it('colors the Tier cell swatch with the published ladder color', async () => {
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'default',
+          tiers: [
+            { key: 'Gold', label: 'Gold', color: '#d4af37' },
+            { key: 'Bronze', label: 'Bronze', color: '#cd7f32' },
+          ],
+        },
+      ],
+    });
+    renderCard(['resource:default/a'], getPlaybooks);
+    const cell = await screen.findByText('Gold');
+    const swatch = cell.querySelector('[data-testid="tier-swatch"]');
+    expect(swatch).toHaveStyle({ backgroundColor: '#d4af37' });
+  });
+
   it('falls back to alphabetical order when no playbooks are returned', async () => {
     const getPlaybooks = async () => ({ playbooks: [] });
     renderCard(

@@ -7,7 +7,23 @@ import {
 import { regisApiRef, type ReportSummary } from '../api/RegisApi';
 import { RegisCatalogPage } from './RegisCatalogPage';
 
-const renderPage = (listReports: () => Promise<ReportSummary[]>) =>
+const defaultLadder = async () => ({
+  playbooks: [
+    {
+      id: 'default',
+      tiers: [
+        { key: 'Gold', label: 'Gold', color: '#d4af37' },
+        { key: 'Silver', label: 'Silver', color: '#9ca3af' },
+        { key: 'Bronze', label: 'Bronze', color: '#cd7f32' },
+      ],
+    },
+  ],
+});
+
+const renderPage = (
+  listReports: () => Promise<ReportSummary[]>,
+  getPlaybooks: () => Promise<any> = defaultLadder,
+) =>
   renderInTestApp(
     <TestApiProvider
       apis={[
@@ -15,7 +31,14 @@ const renderPage = (listReports: () => Promise<ReportSummary[]>) =>
           regisApiRef,
           {
             listReports,
+            getPlaybooks,
             getReport: async () => {
+              throw new Error('not used');
+            },
+            getHistory: async () => {
+              throw new Error('not used');
+            },
+            getPortfolioTrend: async () => {
               throw new Error('not used');
             },
           },
@@ -57,5 +80,14 @@ describe('RegisCatalogPage', () => {
     expect(screen.getByText('resource')).toBeInTheDocument(); // Kind column
     expect(screen.getByText('security')).toBeInTheDocument(); // failing tag (score < 100)
     expect(screen.queryByText('hygiene')).not.toBeInTheDocument(); // passing tag hidden
+  });
+
+  it('colors the Tier cell swatch with the published ladder color', async () => {
+    await renderPage(async () => [
+      { entityRef: 'resource:default/a', status: 'ok', imageRef: 'r/a:1', tier: 'Gold', score: 100 },
+    ]);
+    const cell = await screen.findByText('Gold');
+    const swatch = cell.querySelector('[data-testid="tier-swatch"]');
+    expect(swatch).toHaveStyle({ backgroundColor: '#d4af37' });
   });
 });
