@@ -35,3 +35,21 @@ export interface ReportHistory {
   imageRef: string;
   snapshots: ReportSnapshot[];
 }
+
+/** One daily bucket of the portfolio's posture distribution. */
+export interface TrendBucket {
+  date: string; // ISO date (YYYY-MM-DD)
+  gold: number;
+  silver: number;
+  bronze: number;
+  none: number; // images whose as-of snapshot has no/unknown tier
+  total: number; // gold + silver + bronze + none
+  avgScore: number; // mean score across images with a numeric score (0 if none)
+}
+
+/** Portfolio posture over time, as served by `GET /portfolio/trend`. */
+export interface PortfolioTrend {
+  generatedAt: string; // ISO datetime
+  days: number;
+  buckets: TrendBucket[];
+}
