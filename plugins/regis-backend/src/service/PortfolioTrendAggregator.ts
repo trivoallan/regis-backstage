@@ -58,9 +58,32 @@ export class PortfolioTrendAggregator {
     await this.inFlight;
   }
 
-  /** Compute the trend for the cached snapshots. `today` = ISO date. */
-  trend(days: number, today: string): TrendBucket[] {
-    return aggregateTrend(this.snapshots, { days, today });
+  /** Compute the trend for the cached snapshots, optionally filtered (AND across set fields). */
+  trend(
+    days: number,
+    today: string,
+    filters: { system?: string; owner?: string } = {},
+  ): TrendBucket[] {
+    const filtered = this.snapshots.filter(
+      s =>
+        (filters.system === undefined || s.system === filters.system) &&
+        (filters.owner === undefined || s.owner === filters.owner),
+    );
+    return aggregateTrend(filtered, { days, today });
+  }
+
+  /** Distinct, sorted, non-empty system/owner values across the full cached set. */
+  facets(): { systems: string[]; owners: string[] } {
+    const systems = new Set<string>();
+    const owners = new Set<string>();
+    for (const s of this.snapshots) {
+      if (s.system) systems.add(s.system);
+      if (s.owner) owners.add(s.owner);
+    }
+    return {
+      systems: [...systems].sort(),
+      owners: [...owners].sort(),
+    };
   }
 
   /**

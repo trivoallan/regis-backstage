@@ -35,6 +35,30 @@ describe('PortfolioTrendAggregator', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
+  it('filters by system/owner and exposes sorted facets', async () => {
+    const store = new InMemoryReportHistoryStore();
+    await store.append([
+      { imageRef: 'a:1', snapshotDate: '2026-05-01', tier: 'Gold', score: 100, owner: 'group:default/team-x', system: 'shop', recordedAt: '2026-05-01T00:00:00.000Z' },
+      { imageRef: 'b:1', snapshotDate: '2026-05-01', tier: 'Bronze', score: 60, owner: 'group:default/team-y', system: 'billing', recordedAt: '2026-05-01T00:00:00.000Z' },
+    ]);
+    const agg = new PortfolioTrendAggregator({ store, logger: mockServices.logger.mock() });
+    await agg.refresh();
+
+    expect(agg.facets()).toEqual({
+      systems: ['billing', 'shop'],
+      owners: ['group:default/team-x', 'group:default/team-y'],
+    });
+
+    const shopOnly = agg.trend(1, '2026-06-03', { system: 'shop' });
+    expect(shopOnly[0]).toMatchObject({ gold: 1, bronze: 0, total: 1 });
+
+    const both = agg.trend(1, '2026-06-03', { system: 'shop', owner: 'group:default/team-y' });
+    expect(both[0].total).toBe(0); // shop AND team-y matches nothing
+
+    const all = agg.trend(1, '2026-06-03');
+    expect(all[0].total).toBe(2);
+  });
+
   it('warns when the snapshot volume exceeds the in-memory threshold', async () => {
     const store = new InMemoryReportHistoryStore();
     await store.append([
