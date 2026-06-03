@@ -17,8 +17,21 @@ import { NotificationsSidebarItem } from '@backstage/plugin-notifications';
 export const SidebarContent = NavContentBlueprint.make({
   params: {
     component: ({ navItems }) => {
+      // The standalone catalog-graph page renders an empty canvas until a root
+      // entity is selected. Default the sidebar entry to the `shop` System so
+      // the link lands on a populated graph instead of a blank page.
+      const CATALOG_GRAPH_DEFAULT_ROOT =
+        '/catalog-graph?rootEntityRefs[]=system:default/shop';
       const nav = navItems.withComponent(item => (
-        <SidebarItem icon={() => item.icon} to={item.href} text={item.title} />
+        <SidebarItem
+          icon={() => item.icon}
+          to={
+            item.href === '/catalog-graph'
+              ? CATALOG_GRAPH_DEFAULT_ROOT
+              : item.href
+          }
+          text={item.title}
+        />
       ));
 
       // Skipped items
