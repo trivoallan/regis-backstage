@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backstage-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/.bin/backstage-cli", "repo", "start"],
+      "port": 3000
+    },
+    {
+      "name": "regis-reports",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8080", "--directory", "examples"],
+      "port": 8080
+    }
+  ]
+}
