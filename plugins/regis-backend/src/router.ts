@@ -20,6 +20,7 @@ import {
   NoImageRefError,
   ReportHistoryService,
 } from './service/ReportHistoryService';
+import type { PortfolioTrendAggregator } from './service/PortfolioTrendAggregator';
 
 export interface RouterOptions {
   logger: LoggerService;
@@ -27,12 +28,14 @@ export interface RouterOptions {
   reportService: ReportService;
   aggregator: CatalogAggregator;
   historyService: ReportHistoryService;
+  portfolioTrend: PortfolioTrendAggregator;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { httpAuth, reportService, aggregator, historyService } = options;
+  const { httpAuth, reportService, aggregator, historyService, portfolioTrend } =
+    options;
   const router = Router();
   router.use(express.json());
 
@@ -64,6 +67,19 @@ export async function createRouter(
     const credentials = await httpAuth.credentials(req);
     const history = await historyService.getHistory(entityRef, credentials);
     res.json(history);
+  });
+
+  router.get('/portfolio/trend', async (req, res) => {
+    await httpAuth.credentials(req); // require an authenticated principal
+    const raw = Number(req.query.days);
+    const days = Number.isFinite(raw) ? Math.min(365, Math.max(1, Math.trunc(raw))) : 90;
+    await portfolioTrend.ensureFresh(30_000);
+    const today = new Date().toISOString().slice(0, 10);
+    res.json({
+      generatedAt: new Date().toISOString(),
+      days,
+      buckets: portfolioTrend.trend(days, today),
+    });
   });
 
   // Error -> HTTP mapping. EntityNotFound/NoReport/NoImageRef=404; version/schema=422

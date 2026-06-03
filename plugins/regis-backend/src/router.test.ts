@@ -89,4 +89,35 @@ describe('regis-backend routes', () => {
       .set('Authorization', mockCredentials.user.header());
     expect(res.status).toBe(404);
   });
+
+  it('GET /portfolio/trend returns a bounded daily series', async () => {
+    const { server } = await startTestBackend({
+      features: [
+        regisPlugin,
+        catalogServiceMock.factory({ entities: [bareEntity] }),
+      ],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/trend?days=7')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.days).toBe(7);
+    expect(Array.isArray(res.body.buckets)).toBe(true);
+    expect(res.body.buckets).toHaveLength(7);
+    expect(typeof res.body.generatedAt).toBe('string');
+  });
+
+  it('GET /portfolio/trend clamps days out of range', async () => {
+    const { server } = await startTestBackend({
+      features: [
+        regisPlugin,
+        catalogServiceMock.factory({ entities: [bareEntity] }),
+      ],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/trend?days=9999')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.days).toBe(365);
+  });
 });
