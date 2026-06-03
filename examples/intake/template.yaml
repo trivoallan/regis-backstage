@@ -78,6 +78,7 @@ spec:
         targetRepo:
           title: Index repository
           type: string
+          default: github.com?owner=trivoallan&repo=regis-backstage-demo
           ui:field: RepoUrlPicker
           ui:options:
             allowedHosts:
@@ -93,8 +94,8 @@ spec:
         owner: ${{ parameters.owner }}
         system: ${{ parameters.system }}
         playbook: ${{ parameters.playbook }}
-        reportBaseUrl: http://localhost:8080/reports
-        indexDirPath: examples/regis-index.d
+        reportBaseUrl: https://raw.githubusercontent.com/trivoallan/regis-backstage-demo/main/reports
+        indexDirPath: regis-index.d
 
     - id: publish
       name: Open intake PR
