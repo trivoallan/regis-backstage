@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { useApi } from '@backstage/core-plugin-api';
@@ -58,6 +58,11 @@ export function RegisExplorerPage() {
     (next: ExploreState) => setParams(paramsFromState(next)),
     [setParams],
   );
+
+  // Close the quick-look when the scope changes — the selected image may fall
+  // out of the new result set.
+  const paramsKey = params.toString();
+  useEffect(() => setSelected(null), [paramsKey]);
 
   const { value, loading, error } = useAsync(
     () =>
