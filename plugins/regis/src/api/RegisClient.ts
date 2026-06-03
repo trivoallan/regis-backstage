@@ -1,5 +1,12 @@
 import type { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
-import type { PortfolioTrend, RegisApi, ReportEnvelope, ReportHistory, ReportSummary } from './RegisApi';
+import type {
+  PlaybooksResponse,
+  PortfolioTrend,
+  RegisApi,
+  ReportEnvelope,
+  ReportHistory,
+  ReportSummary,
+} from './RegisApi';
 
 export class RegisClient implements RegisApi {
   private readonly discoveryApi: DiscoveryApi;
@@ -45,11 +52,16 @@ export class RegisClient implements RegisApi {
 
   async getPortfolioTrend(
     days: number,
-    filters: { system?: string; owner?: string } = {},
+    filters: { system?: string; owner?: string; playbook?: string } = {},
   ): Promise<PortfolioTrend> {
     const params = new URLSearchParams({ days: String(days) });
     if (filters.system) params.set('system', filters.system);
     if (filters.owner) params.set('owner', filters.owner);
+    if (filters.playbook) params.set('playbook', filters.playbook);
     return this.getJson<PortfolioTrend>(`/portfolio/trend?${params.toString()}`);
+  }
+
+  async getPlaybooks(): Promise<PlaybooksResponse> {
+    return this.getJson<PlaybooksResponse>('/playbooks');
   }
 }
