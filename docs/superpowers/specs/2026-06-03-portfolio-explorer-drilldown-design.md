@@ -147,18 +147,20 @@ trends page today.
     (`useSearchParams`: `groupBy`, `system`, `owner`, `playbook`, `tier`), calls
     `explore(...)` via `useAsync` (keyed by URL state), composes rail + body.
     Mounted at `/`.
-  - `FacetRail.tsx` — group-by selector, removable active-filter chips, add-facet
-    from `response.facets`. Presentational + `onChange` callbacks that mutate the
-    URL.
+  - `FacetRail.tsx` — group-by selector (MUI `Select`), removable active-filter
+    chips (MUI `Chip` with `onDelete`), add-facet from `response.facets`.
+    Presentational + `onChange` callbacks that mutate the URL.
   - `Breakdown.tsx` — one row per `response.groups`: label, count, average score,
-    a tier-mix mini-bar colored via `unionLadder` + `tierColor`. Click →
-    `onDrill(groupBy, key)` (adds the facet to the URL).
-  - `ImageList.tsx` — table of `response.images` (Image, colored Tier, Score).
-    Row click → `onSelect(imageRef)` (opens the quick-look). Reuses the colored
-    Tier-column logic from the current `RegisCatalogPage`.
-  - `QuickLookPanel.tsx` — drawer; derives the entity ref via `slugForImageRef`,
-    shows tier/score + a mini-trajectory (`Sparkline`) loaded on open via
-    `getHistory`, plus an "Open full page" `EntityRefLink`.
+    a tier-mix mini-bar colored via `unionLadder` + `tierColor`. Rendered as a
+    Backstage `Table` (or a MUI `List` of `ListItemButton`s) so each row is a
+    real, keyboard-focusable control. Click → `onDrill(groupBy, key)` (adds the
+    facet to the URL).
+  - `ImageList.tsx` — Backstage `Table` of `response.images` (Image, colored
+    Tier, Score). Row click → `onSelect(imageRef)` (opens the quick-look). Reuses
+    the colored Tier-column logic from the current `RegisCatalogPage`.
+  - `QuickLookPanel.tsx` — MUI `Drawer`; derives the entity ref via
+    `slugForImageRef`, shows tier/score + a mini-trajectory (`Sparkline`) loaded
+    on open via `getHistory`, plus an "Open full page" `EntityRefLink`.
   - **Extracted shared units (DRY):** `Sparkline` (from `RegisTrajectoryCard`,
     reused by the quick-look and the trajectory card), `KpiStrip` (from
     `RegisPortfolioTrendsPage`), and `PortfolioStackedArea` (already standalone)
@@ -168,6 +170,41 @@ trends page today.
   `getHistory`). One source per render; the URL is the source of truth for state.
 - **Graceful degradation:** no history configured → empty sets → empty-state
   explorer.
+
+### Component design conventions (Backstage DLS)
+
+New UI follows the
+[Backstage component design guidelines](https://backstage.io/docs/dls/component-design-guidelines/),
+matching the rest of this plugin:
+
+- **Reuse first, build last.** Prefer Backstage core components
+  (`Page`, `Header`, `Content`, `InfoCard`, `Table`, `EntityRefLink`,
+  `Progress`, `ResponseErrorPanel`), then Material UI components; build a custom
+  component only when neither fits. Match catalog UX patterns so the explorer
+  feels native (the same `Page`/`Header`/`Content` shell and `Table` the catalog
+  page already uses).
+- **Layout via MUI primitives, not raw HTML+CSS.** Use `Grid`, `Box`, `Paper`,
+  `Card`, and `Drawer` for structure; never hand-roll flex `div`s with inline
+  style for layout. Space with `theme.spacing()`. The facet rail + body is a
+  responsive `Grid` (rail collapses behind a toggle / moves into a `Drawer` on
+  small breakpoints, since model C's rail is wide).
+- **Theme palette for chrome.** Structural colors (surfaces, text, borders,
+  dividers) come from the theme palette via `useTheme`/`makeStyles`, not
+  hardcoded hex. **Tier colors are a deliberate, documented exception:** they are
+  *data* from the playbook ladder (resolved by `unionLadder`/`tierColor`), so
+  they are applied as the only inline `backgroundColor` on the tier swatch/chip —
+  not chrome. This keeps the existing tier-color behavior while everything else
+  is theme-aware.
+- **Typography for text.** Use `<Typography>` (with the right `variant`), not
+  raw `<h*>`/`<span>` text, for theme-correct sizing, weight, and contrast.
+- **Accessibility & interaction.** Interactive drill targets (breakdown rows,
+  image rows, removable chips) are real buttons/links — keyboard-focusable, with
+  accessible names; the trend SVG keeps its `role="img"` + `aria-label`. Filter
+  chips use `Chip onDelete`; selecting a group/image updates the URL so Back/
+  Forward work.
+
+(The wireframe mockups in brainstorming used inline-styled `div`s purely to
+sketch layout — the implementation uses the components above.)
 
 ## Testing
 
@@ -184,6 +221,10 @@ Colocated, TDD, near-1:1.
   `QuickLookPanel` (derives entity ref, sparkline, link); `RegisExplorerPage`
   (URL state ↔ explore, empty state). Extracted `Sparkline`/`KpiStrip` keep
   coverage via their consumers.
+- **Accessibility:** assert drill targets render as focusable controls
+  (buttons/links with accessible names) and that removable filter chips expose a
+  delete affordance — so the DLS interaction guidance is verified, not just
+  stated in prose.
 
 ## Migration
 
