@@ -20,6 +20,8 @@ export function toSnapshots(index: ReportIndex, runDate: Date): ReportSnapshot[]
     playbook: e.playbook,
     reportUrl: e.reportUrl,
     recordedAt,
+    owner: e.owner,
+    system: e.system,
   }));
 }
 

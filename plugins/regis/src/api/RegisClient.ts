@@ -43,7 +43,13 @@ export class RegisClient implements RegisApi {
     );
   }
 
-  async getPortfolioTrend(days: number): Promise<PortfolioTrend> {
-    return this.getJson<PortfolioTrend>(`/portfolio/trend?days=${encodeURIComponent(days)}`);
+  async getPortfolioTrend(
+    days: number,
+    filters: { system?: string; owner?: string } = {},
+  ): Promise<PortfolioTrend> {
+    const params = new URLSearchParams({ days: String(days) });
+    if (filters.system) params.set('system', filters.system);
+    if (filters.owner) params.set('owner', filters.owner);
+    return this.getJson<PortfolioTrend>(`/portfolio/trend?${params.toString()}`);
   }
 }

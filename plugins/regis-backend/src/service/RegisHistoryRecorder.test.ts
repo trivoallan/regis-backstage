@@ -45,6 +45,23 @@ describe('toSnapshots', () => {
     expect(s.score).toBeUndefined();
   });
 
+  it('maps owner and system from the index entry', () => {
+    const index: ReportIndex = {
+      schemaVersion: 1,
+      images: [
+        {
+          imageRef: 'r/n:1',
+          reportUrl: 'https://x/r.json',
+          owner: 'group:default/team-x',
+          system: 'shop',
+        },
+      ],
+    };
+    const [s] = toSnapshots(index, RUN);
+    expect(s.owner).toBe('group:default/team-x');
+    expect(s.system).toBe('shop');
+  });
+
   it('passes null tier through as null', () => {
     const index: ReportIndex = {
       schemaVersion: 1,

@@ -42,4 +42,43 @@ describe('KnexReportHistoryStore', () => {
     expect(all).toHaveLength(2);
     expect(all.map(s => s.imageRef).sort()).toEqual(['a:1', 'b:1']);
   }, 60_000);
+
+  it('round-trips owner and system', async () => {
+    const knex = await databases.init('SQLITE_3');
+    const store = await KnexReportHistoryStore.create(knex);
+    await store.append([
+      snap({ imageRef: 'a:1', snapshotDate: '2026-05-01', owner: 'group:default/team-x', system: 'shop' }),
+    ]);
+    const [row] = await store.listSnapshots();
+    expect(row.owner).toBe('group:default/team-x');
+    expect(row.system).toBe('shop');
+  }, 60_000);
+
+  it('adds owner/system columns to a pre-existing table without them', async () => {
+    const knex = await databases.init('SQLITE_3');
+    // Simulate the merged #8 schema (no owner/system columns).
+    await knex.schema.createTable('regis_report_snapshots', t => {
+      t.text('image_ref').notNullable();
+      t.text('snapshot_date').notNullable();
+      t.text('digest').nullable();
+      t.text('tier').nullable();
+      t.integer('score').nullable();
+      t.text('playbook').nullable();
+      t.text('report_url').nullable();
+      t.text('recorded_at').notNullable();
+      t.primary(['image_ref', 'snapshot_date']);
+    });
+    expect(await knex.schema.hasColumn('regis_report_snapshots', 'owner')).toBe(false);
+
+    const store = await KnexReportHistoryStore.create(knex); // should migrate
+    expect(await knex.schema.hasColumn('regis_report_snapshots', 'owner')).toBe(true);
+    expect(await knex.schema.hasColumn('regis_report_snapshots', 'system')).toBe(true);
+
+    await store.append([snap({ imageRef: 'a:1', system: 'shop' })]);
+    expect((await store.listSnapshots())[0].system).toBe('shop');
+
+    // idempotent: a second create is a no-op
+    await KnexReportHistoryStore.create(knex);
+    expect(await knex.schema.hasColumn('regis_report_snapshots', 'system')).toBe(true);
+  }, 60_000);
 });
