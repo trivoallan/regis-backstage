@@ -41,7 +41,7 @@ function overrideFor(
   // A playbook-specific override wins over a global (playbook-less) one.
   const scoped = overrides.find(o => o.playbook === playbook && o.tier === tier);
   if (scoped) return scoped.color;
-  const global = overrides.find(o => o.playbook === undefined && o.tier === tier);
+  const global = overrides.find(o => !o.playbook && o.tier === tier);
   return global?.color;
 }
 
