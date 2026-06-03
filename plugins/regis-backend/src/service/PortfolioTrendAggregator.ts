@@ -99,7 +99,8 @@ export class PortfolioTrendAggregator {
     const filtered = this.snapshots.filter(
       s =>
         (filters.system === undefined || s.system === filters.system) &&
-        (filters.owner === undefined || s.owner === filters.owner),
+        (filters.owner === undefined || s.owner === filters.owner) &&
+        (filters.playbook === undefined || s.playbook === filters.playbook),
     );
     const ladders = this.resolve();
     const mode = filters.playbook

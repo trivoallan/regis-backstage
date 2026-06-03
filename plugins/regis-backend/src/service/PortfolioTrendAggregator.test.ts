@@ -161,6 +161,19 @@ describe('PortfolioTrendAggregator ladders/facets', () => {
     expect(res.buckets[0].counts).toMatchObject({ Silver: 1 });
   });
 
+  it('a playbook filter excludes snapshots from other playbooks (not just band labels)', async () => {
+    const agg = makeAggregator([
+      snap({ imageRef: 'a', snapshotDate: '2026-05-01', playbook: 'p1', tier: 'Gold', score: 90 }),
+      snap({ imageRef: 'b', snapshotDate: '2026-05-01', playbook: 'p2', tier: 'Gold', score: 50 }),
+    ]);
+    await agg.ensureFresh(1);
+    const res = agg.trend(1, '2026-06-03', { playbook: 'p1' });
+    // Only image a (p1) is counted; b (p2) is excluded from the trend entirely —
+    // total is 1 and the avg score is a's 90, not (90 + 50) / 2.
+    expect(res.buckets[0].total).toBe(1);
+    expect(res.buckets[0].avgScore).toBe(90);
+  });
+
   it('builds PlaybookLadder list from the resolved ladders', async () => {
     const agg = makeAggregator(
       [snap({ imageRef: 'a', playbook: 'p3', tier: 'Gold' })],
