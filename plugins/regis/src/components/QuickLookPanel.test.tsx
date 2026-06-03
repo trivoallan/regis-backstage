@@ -42,6 +42,9 @@ describe('QuickLookPanel', () => {
     await renderPanel();
     expect(screen.getByText(/Gold/)).toBeInTheDocument();
     expect(await screen.findByRole('img', { name: /score trajectory/i })).toBeInTheDocument();
-    expect(screen.getByText(/open full page/i)).toBeInTheDocument();
+    // The link targets the entity ref derived via slugForImageRef in the
+    // default namespace: resource:default/registry-1.docker.io_library_nginx_1.27
+    const link = screen.getByText(/open full page/i).closest('a');
+    expect(link?.getAttribute('href')).toContain('registry-1.docker.io_library_nginx_1.27');
   });
 });

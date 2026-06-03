@@ -10,6 +10,7 @@ import {
   EntityCardBlueprint,
   EntityContentBlueprint,
 } from '@backstage/plugin-catalog-react/alpha';
+import TimelineIcon from '@material-ui/icons/Timeline';
 import { isRegisAvailable } from '@regis/backstage-plugin-regis-common';
 import {
   isComponentWithImageDeps,
@@ -55,8 +56,11 @@ const reportTab = EntityContentBlueprint.make({
 });
 
 const explorerPage = PageBlueprint.make({
+  name: 'explorer',
   params: {
     path: '/',
+    title: 'Portfolio',
+    icon: <TimelineIcon />,
     routeRef: rootRouteRef,
     loader: () =>
       import('./components/RegisExplorerPage').then(m => <m.RegisExplorerPage />),

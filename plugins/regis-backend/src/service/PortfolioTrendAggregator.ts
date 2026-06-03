@@ -194,7 +194,9 @@ export class PortfolioTrendAggregator {
         case 'playbook':
           return s.playbook ?? 'unknown';
         default:
-          return s.tier ?? 'unknown';
+          // tier: use the same sentinel as the tier-mix map below ('untiered'),
+          // so a group keyed by tier agrees with its own mix bar and color.
+          return s.tier ?? 'untiered';
       }
     };
     const byGroup = new Map<string, ReportSnapshot[]>();
