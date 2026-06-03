@@ -6,7 +6,7 @@
  * Run:  node examples/regis-dataset.cjs
  * Emits (under examples/):
  *   reports/<key>.json     — one realistic report per image
- *   regis-index.json       — the published report index (provider source)
+ *   regis-index.d/         — the published report index as fragments (index.json + images/<slug>.json)
  *   regis-catalog.yaml     — System + services + image/playbook Resources
  *   org.yaml               — guests + the demo teams
  *   regis-history.json     — synthetic per-image snapshot history (history seed)
@@ -51,6 +51,7 @@ const PLAYBOOKS = [
 ];
 
 const d = h => h.repeat(32); // 64-hex digest helper
+const slugForImageRef = ref => ref.replace(/[^A-Za-z0-9._-]/g, '_');
 
 // --- the dataset: one entry per analyzed image ------------------------------
 const IMAGES = [
@@ -370,11 +371,25 @@ fs.mkdirSync(reportsDir, { recursive: true });
 for (const img of IMAGES) {
   fs.writeFileSync(path.join(reportsDir, `${img.key}.json`), `${JSON.stringify(buildReport(img), null, 2)}\n`);
 }
-fs.writeFileSync(path.join(root, 'regis-index.json'), `${JSON.stringify(buildIndex(), null, 2)}\n`);
+const index = buildIndex();
+const indexDir = path.join(root, 'regis-index.d');
+const imagesDir = path.join(indexDir, 'images');
+fs.rmSync(indexDir, { recursive: true, force: true });
+fs.mkdirSync(imagesDir, { recursive: true });
+fs.writeFileSync(
+  path.join(indexDir, 'index.json'),
+  `${JSON.stringify({ schemaVersion: index.schemaVersion, playbooks: index.playbooks }, null, 2)}\n`,
+);
+for (const entry of index.images) {
+  fs.writeFileSync(
+    path.join(imagesDir, `${slugForImageRef(entry.imageRef)}.json`),
+    `${JSON.stringify(entry, null, 2)}\n`,
+  );
+}
 fs.writeFileSync(path.join(root, 'regis-history.json'), `${JSON.stringify(buildHistory(), null, 2)}\n`);
 fs.writeFileSync(path.join(root, 'regis-catalog.yaml'), catalogYaml());
 fs.writeFileSync(path.join(root, 'org.yaml'), orgYaml());
 
 const reportCount = IMAGES.length;
 const entityCount = 1 + PLAYBOOKS.length + SERVICES.length + IMAGES.reduce((n, i) => n + 1 + (i.aliasTags?.length ?? 0), 0);
-console.log(`Wrote ${reportCount} reports, regis-index.json, regis-history.json, regis-catalog.yaml (${entityCount} entities), org.yaml (${TEAMS.length + 1} groups).`);
+console.log(`Wrote ${reportCount} reports, regis-index.d/, regis-history.json, regis-catalog.yaml (${entityCount} entities), org.yaml (${TEAMS.length + 1} groups).`);

@@ -11,10 +11,13 @@ export {
 } from './validate';
 export {
   validateReportIndex,
+  validateIndexImageEntry,
   IndexSchemaError,
+  IndexEntrySchemaError,
   UnsupportedIndexSchemaVersionError,
   SUPPORTED_INDEX_SCHEMA_VERSION,
 } from './report-index';
+export { slugForImageRef } from './slug';
 export type {
   ReportIndex,
   IndexImageEntry,

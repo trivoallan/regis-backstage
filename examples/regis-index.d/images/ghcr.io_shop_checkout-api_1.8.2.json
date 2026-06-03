@@ -1,0 +1,10 @@
+{
+  "imageRef": "ghcr.io/shop/checkout-api:1.8.2",
+  "digest": "sha256:c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+  "reportUrl": "http://localhost:8080/reports/checkout-api.json",
+  "tier": "Silver",
+  "score": 82,
+  "playbook": "default",
+  "owner": "group:default/team-payments",
+  "system": "shop"
+}

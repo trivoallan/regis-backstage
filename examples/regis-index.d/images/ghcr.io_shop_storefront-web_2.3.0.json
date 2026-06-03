@@ -1,0 +1,10 @@
+{
+  "imageRef": "ghcr.io/shop/storefront-web:2.3.0",
+  "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+  "reportUrl": "http://localhost:8080/reports/storefront-web.json",
+  "tier": "Gold",
+  "score": 100,
+  "playbook": "default",
+  "owner": "group:default/team-storefront",
+  "system": "shop"
+}

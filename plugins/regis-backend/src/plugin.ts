@@ -11,6 +11,7 @@ import { CatalogAggregator } from './service/CatalogAggregator';
 import { KnexReportHistoryStore } from './service/KnexReportHistoryStore';
 import { ReportHistoryService } from './service/ReportHistoryService';
 import { RegisHistoryRecorder } from './service/RegisHistoryRecorder';
+import { makeFragmentSource } from './provider/makeFragmentSource';
 import { seedHistory } from './service/seedHistory';
 import { PortfolioTrendAggregator } from './service/PortfolioTrendAggregator';
 
@@ -28,6 +29,7 @@ export const regisPlugin = createBackendPlugin({
         config: coreServices.rootConfig,
         catalog: catalogServiceRef,
         database: coreServices.database,
+        urlReader: coreServices.urlReader,
       },
       async init({
         logger,
@@ -38,6 +40,7 @@ export const regisPlugin = createBackendPlugin({
         config,
         catalog,
         database,
+        urlReader,
       }) {
         const ttlMs =
           (config.getOptionalNumber('regis.cacheTtlSeconds') ?? 1800) * 1000;
@@ -130,14 +133,14 @@ export const regisPlugin = createBackendPlugin({
         // Persistent report history: on each tick, fetch the published index and
         // record one snapshot per image. `scope: 'global'` because the DB is
         // shared across replicas, so only one replica should write per tick.
-        const indexUrl = config.getOptionalString('regis.catalog.indexUrl');
-        if (indexUrl) {
+        const indexDirUrl = config.getOptionalString('regis.catalog.indexDirUrl');
+        if (indexDirUrl) {
           const refreshMinutes =
             config.getOptionalNumber('regis.catalog.refreshMinutes') ?? 30;
           const recorder = new RegisHistoryRecorder({
-            source,
+            fragmentSource: makeFragmentSource(indexDirUrl, urlReader),
             store: historyStore,
-            indexUrl,
+            indexDirUrl,
             logger,
           });
           await scheduler.scheduleTask({

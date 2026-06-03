@@ -1,0 +1,10 @@
+{
+  "imageRef": "ghcr.io/shop/catalog-api:4.1.0",
+  "digest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+  "reportUrl": "http://localhost:8080/reports/catalog-api.json",
+  "tier": "Gold",
+  "score": 95,
+  "playbook": "default",
+  "owner": "group:default/team-search",
+  "system": "shop"
+}

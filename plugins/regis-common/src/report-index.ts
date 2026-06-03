@@ -61,6 +61,14 @@ export class IndexSchemaError extends Error {
   }
 }
 
+/** Thrown when a single image entry does not match the entry schema. */
+export class IndexEntrySchemaError extends Error {
+  constructor(public readonly errors: ErrorObject[]) {
+    super(`index image entry failed schema validation: ${ajvMessage(errors)}`);
+    this.name = 'IndexEntrySchemaError';
+  }
+}
+
 /** Thrown when an index `schemaVersion` is newer than this package supports. */
 export class UnsupportedIndexSchemaVersionError extends Error {
   constructor(public readonly schemaVersion: number) {
@@ -75,6 +83,10 @@ export class UnsupportedIndexSchemaVersionError extends Error {
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 const validateSchema = ajv.compile<ReportIndex>(schema as object);
+const validateEntrySchema = ajv.compile<IndexImageEntry>(
+  (schema as { properties: { images: { items: object } } }).properties.images
+    .items,
+);
 
 /** Validates raw JSON against the report-index contract. */
 export function validateReportIndex(input: unknown): ReportIndex {
@@ -86,4 +98,12 @@ export function validateReportIndex(input: unknown): ReportIndex {
     throw new IndexSchemaError(validateSchema.errors ?? []);
   }
   return input as ReportIndex;
+}
+
+/** Validates a single raw image entry against the index entry contract. */
+export function validateIndexImageEntry(input: unknown): IndexImageEntry {
+  if (!validateEntrySchema(input)) {
+    throw new IndexEntrySchemaError(validateEntrySchema.errors ?? []);
+  }
+  return input as IndexImageEntry;
 }

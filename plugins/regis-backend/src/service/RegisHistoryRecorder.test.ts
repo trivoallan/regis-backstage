@@ -73,20 +73,26 @@ describe('toSnapshots', () => {
 });
 
 describe('RegisHistoryRecorder.record', () => {
-  it('fetches the index and appends snapshots to the store', async () => {
+  it('lists the index fragments and appends snapshots to the store', async () => {
     const store = new InMemoryReportHistoryStore();
-    const source = {
-      fetch: jest.fn().mockResolvedValue({
-        schemaVersion: 1,
-        images: [
-          { imageRef: 'r/n:1', reportUrl: 'https://x/r.json', score: 80, snapshotDate: '2026-05-09' },
-        ],
-      }),
+    const fragmentSource = {
+      list: jest.fn().mockResolvedValue([
+        { path: 'index.json', content: { schemaVersion: 1, playbooks: [] } },
+        {
+          path: 'images/n.json',
+          content: {
+            imageRef: 'r/n:1',
+            reportUrl: 'https://x/r.json',
+            score: 80,
+            snapshotDate: '2026-05-09',
+          },
+        },
+      ]),
     };
     const recorder = new RegisHistoryRecorder({
-      source: source as any,
+      fragmentSource: fragmentSource as any,
       store,
-      indexUrl: 'https://x/index.json',
+      indexDirUrl: 'file:///tmp/regis-index.d',
       logger: mockServices.logger.mock(),
       now: () => RUN,
     });

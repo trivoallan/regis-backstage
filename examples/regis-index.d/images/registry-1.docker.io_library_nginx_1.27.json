@@ -1,0 +1,10 @@
+{
+  "imageRef": "registry-1.docker.io/library/nginx:1.27",
+  "digest": "sha256:f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6",
+  "reportUrl": "http://localhost:8080/reports/nginx.json",
+  "tier": "Gold",
+  "score": 100,
+  "playbook": "default",
+  "owner": "group:default/team-platform",
+  "system": "shop"
+}
