@@ -62,4 +62,12 @@ export class PortfolioTrendAggregator {
   trend(days: number, today: string): TrendBucket[] {
     return aggregateTrend(this.snapshots, { days, today });
   }
+
+  /**
+   * ISO timestamp of the last successful refresh — the true "data as of" time
+   * (the served buckets come from the cache, not the request wall-clock).
+   */
+  lastRefreshIso(): string {
+    return new Date(this.lastRunAt).toISOString();
+  }
 }

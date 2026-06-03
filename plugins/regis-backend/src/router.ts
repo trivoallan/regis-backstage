@@ -75,10 +75,10 @@ export async function createRouter(
     const raw = Number(req.query.days);
     const days = Number.isFinite(raw) ? Math.min(365, Math.max(1, Math.trunc(raw))) : 90;
     await portfolioTrend.ensureFresh(30_000);
-    const now = new Date();
-    const today = now.toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
     const body: PortfolioTrend = {
-      generatedAt: now.toISOString(),
+      // The true freshness of the served buckets (from the cache), not request time.
+      generatedAt: portfolioTrend.lastRefreshIso(),
       days,
       buckets: portfolioTrend.trend(days, today),
     };
