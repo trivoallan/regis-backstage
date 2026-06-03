@@ -208,6 +208,8 @@ function buildHistory() {
         tier: tierFor(score),
         score,
         playbook: img.playbook,
+        owner: `group:default/${img.owner}`,
+        system: img.system,
         reportUrl: `${REPORT_BASE}/${img.key}.json`,
         recordedAt: `${date}T08:00:00.000Z`,
       });
