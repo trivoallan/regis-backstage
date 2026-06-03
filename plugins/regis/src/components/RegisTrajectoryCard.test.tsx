@@ -13,7 +13,10 @@ const image: Entity = {
   spec: { type: 'container-image' },
 };
 
-const renderCard = (getHistory: () => Promise<ReportHistory>) =>
+const renderCard = (
+  getHistory: () => Promise<ReportHistory>,
+  getPlaybooks: () => Promise<any> = async () => ({ playbooks: [] }),
+) =>
   renderInTestApp(
     <TestApiProvider
       apis={[
@@ -21,10 +24,14 @@ const renderCard = (getHistory: () => Promise<ReportHistory>) =>
           regisApiRef,
           {
             getHistory,
+            getPlaybooks,
             getReport: async () => {
               throw new Error('not used');
             },
             listReports: async () => [],
+            getPortfolioTrend: async () => {
+              throw new Error('not used');
+            },
           },
         ],
       ]}
@@ -48,6 +55,39 @@ describe('RegisTrajectoryCard', () => {
     expect(await screen.findByText('Trajectory')).toBeInTheDocument();
     expect(await screen.findByLabelText('score trajectory')).toBeInTheDocument();
     expect(screen.getByText(/latest Gold/)).toBeInTheDocument();
+  });
+
+  it('colors sparkline dots by the resolved playbook ladder', async () => {
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'pci-dss',
+          tiers: [
+            { key: 'Platinum', label: 'Platinum', color: '#7e57c2' },
+            { key: 'Certified', label: 'Certified', color: '#26a69a' },
+            { key: 'Provisional', label: 'Provisional', color: '#ef6c00' },
+          ],
+        },
+      ],
+    });
+    await renderCard(
+      async () => ({
+        imageRef: 'r/pg:1',
+        snapshots: [
+          { imageRef: 'r/pg:1', snapshotDate: '2026-05-01', score: 62, tier: 'Provisional', playbook: 'pci-dss', recordedAt: '2026-05-01T00:00:00.000Z' },
+          { imageRef: 'r/pg:1', snapshotDate: '2026-06-01', score: 78, tier: 'Certified', playbook: 'pci-dss', recordedAt: '2026-06-01T00:00:00.000Z' },
+        ],
+      }),
+      getPlaybooks,
+    );
+    await screen.findByLabelText('score trajectory');
+    const fills = Array.from(
+      document.querySelectorAll('svg[aria-label="score trajectory"] circle'),
+    ).map(c => c.getAttribute('fill'));
+    // Real published colors, not the old hardcoded gold/silver/bronze map (which
+    // rendered these pci-dss tiers grey).
+    expect(fills).toContain('#26a69a'); // Certified
+    expect(fills).toContain('#ef6c00'); // Provisional
   });
 
   it('shows an empty state when there is no history', async () => {
