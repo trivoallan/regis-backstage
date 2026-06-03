@@ -6,13 +6,14 @@ import {
   EntityProvider,
   EntityProviderConnection,
 } from '@backstage/plugin-catalog-node';
-import { ReportSource } from '../service/ReportSource';
-import { fetchIndex } from '../service/fetchIndex';
+import type { IndexFragmentSource } from './IndexFragmentSource';
+import { assembleIndex } from './assembleIndex';
 import { buildEntities, BuildOpts } from './buildEntities';
 
 export interface RegisEntityProviderOptions {
-  indexUrl: string;
-  source: ReportSource;
+  /** URL of the index *directory* (a repo tree URL, or a local file:// dir). */
+  indexDirUrl: string;
+  fragmentSource: IndexFragmentSource;
   taskRunner: SchedulerServiceTaskRunner;
   logger: LoggerService;
   defaultOwner: string;
@@ -21,8 +22,9 @@ export interface RegisEntityProviderOptions {
 
 /**
  * Mints `Resource` entities (container-image + regis-playbook) from a published
- * Regis report index. Owns the entities it provides (full mutation): images that
- * leave the index are removed from the catalog.
+ * Regis report index, now stored as a directory of fragments. Owns the entities
+ * it provides (full mutation): images whose fragment leaves the index directory
+ * are removed from the catalog.
  */
 export class RegisEntityProvider implements EntityProvider {
   private connection?: EntityProviderConnection;
@@ -47,19 +49,24 @@ export class RegisEntityProvider implements EntityProvider {
     if (!this.connection) {
       throw new Error('RegisEntityProvider is not connected');
     }
-    const { indexUrl, source, logger, defaultOwner, namespace } = this.options;
+    const { indexDirUrl, fragmentSource, logger, defaultOwner, namespace } =
+      this.options;
 
-    const index = await fetchIndex(source, indexUrl);
+    const fragments = await fragmentSource.list(indexDirUrl);
+    const index = assembleIndex(fragments, logger);
 
-    const opts: BuildOpts = { indexUrl, defaultOwner, namespace };
+    // buildEntities uses opts.indexUrl only to derive the location key.
+    const opts: BuildOpts = { indexUrl: indexDirUrl, defaultOwner, namespace };
     const entities = buildEntities(index, opts);
-    const locationKey = `regis-provider:${indexUrl}`;
+    const locationKey = `regis-provider:${indexDirUrl}`;
 
     await this.connection.applyMutation({
       type: 'full',
       entities: entities.map(entity => ({ entity, locationKey })),
     });
 
-    logger.info(`regis: provided ${entities.length} entities from ${indexUrl}`);
+    logger.info(
+      `regis: provided ${entities.length} entities from ${indexDirUrl}`,
+    );
   }
 }

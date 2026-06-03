@@ -2,36 +2,41 @@ import { mockServices } from '@backstage/backend-test-utils';
 import type { EntityProviderConnection } from '@backstage/plugin-catalog-node';
 import type { SchedulerServiceTaskRunner } from '@backstage/backend-plugin-api';
 import { RegisEntityProvider } from './RegisEntityProvider';
+import type { IndexFragment } from './IndexFragmentSource';
 
-const validIndex = {
-  schemaVersion: 1,
-  playbooks: [{ id: 'default', title: 'Default', version: '1.0.0' }],
-  images: [
-    {
-      imageRef: 'registry-1.docker.io/library/nginx:1.27',
-      digest: 'sha256:aaa',
-      reportUrl: 'https://h/a.json',
-      tier: 'Gold',
-      score: 100,
-      playbook: 'default',
-    },
-  ],
+const baseFragment: IndexFragment = {
+  path: 'index.json',
+  content: {
+    schemaVersion: 1,
+    playbooks: [{ id: 'default', title: 'Default', version: '1.0.0' }],
+  },
 };
 
-function makeProvider(fetchResult: unknown) {
+const imageFragment: IndexFragment = {
+  path: 'images/nginx.json',
+  content: {
+    imageRef: 'registry-1.docker.io/library/nginx:1.27',
+    digest: 'sha256:aaa',
+    reportUrl: 'https://h/a.json',
+    tier: 'Gold',
+    score: 100,
+    playbook: 'default',
+  },
+};
+
+function makeProvider(fragments: IndexFragment[]) {
   const connection = {
     applyMutation: jest.fn().mockResolvedValue(undefined),
     refresh: jest.fn().mockResolvedValue(undefined),
   };
-  // A task runner that runs the scheduled task immediately when connect() schedules it.
   const taskRunner: SchedulerServiceTaskRunner = {
     run: async task => {
       await task.fn(new AbortController().signal);
     },
   };
   const provider = new RegisEntityProvider({
-    indexUrl: 'https://h/index.json',
-    source: { fetch: jest.fn().mockResolvedValue(fetchResult) },
+    indexDirUrl: 'file:///tmp/regis-index.d',
+    fragmentSource: { list: jest.fn().mockResolvedValue(fragments) },
     taskRunner,
     logger: mockServices.logger.mock(),
     defaultOwner: 'group:default/guests',
@@ -42,12 +47,12 @@ function makeProvider(fetchResult: unknown) {
 
 describe('RegisEntityProvider', () => {
   it('has a stable provider name', () => {
-    const { provider } = makeProvider(validIndex);
+    const { provider } = makeProvider([baseFragment, imageFragment]);
     expect(provider.getProviderName()).toBe('regis-entity-provider');
   });
 
   it('applies a full mutation of built entities on connect/run', async () => {
-    const { provider, connection } = makeProvider(validIndex);
+    const { provider, connection } = makeProvider([baseFragment, imageFragment]);
     await provider.connect(connection as unknown as EntityProviderConnection);
 
     expect(connection.applyMutation).toHaveBeenCalledTimes(1);
@@ -55,25 +60,24 @@ describe('RegisEntityProvider', () => {
     expect(arg.type).toBe('full');
     expect(arg.entities).toHaveLength(2); // 1 playbook + 1 image
     expect(arg.entities[0].locationKey).toBe(
-      'regis-provider:https://h/index.json',
+      'regis-provider:file:///tmp/regis-index.d',
     );
     const names = arg.entities.map((e: any) => e.entity.metadata.name);
     expect(names).toEqual(['default', 'library-nginx-1.27']);
   });
 
-  it('throws a validation error for an unsupported index version', async () => {
-    const { provider, connection } = makeProvider({
-      schemaVersion: 999,
-      images: [],
-    });
-    await expect(
-      provider.connect(connection as unknown as EntityProviderConnection),
-    ).rejects.toThrow(/schemaVersion 999/);
-    expect(connection.applyMutation).not.toHaveBeenCalled();
+  it('removes entities when a fragment disappears (full mutation)', async () => {
+    const { provider, connection } = makeProvider([baseFragment]); // no images
+    await provider.connect(connection as unknown as EntityProviderConnection);
+    const arg = connection.applyMutation.mock.calls[0][0] as any;
+    expect(arg.type).toBe('full');
+    expect(arg.entities.map((e: any) => e.entity.metadata.name)).toEqual([
+      'default',
+    ]);
   });
 
   it('throws if run() is called before connect()', async () => {
-    const { provider } = makeProvider(validIndex);
+    const { provider } = makeProvider([baseFragment, imageFragment]);
     await expect(provider.run()).rejects.toThrow(/not connected/);
   });
 });
