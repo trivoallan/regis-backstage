@@ -1,0 +1,10 @@
+{
+  "imageRef": "ghcr.io/shop/search:8.12.0",
+  "digest": "sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+  "reportUrl": "http://localhost:8080/reports/search.json",
+  "tier": "Bronze",
+  "score": 64,
+  "playbook": "default",
+  "owner": "group:default/team-search",
+  "system": "shop"
+}

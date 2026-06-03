@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "playbooks": [
+    {
+      "id": "default",
+      "title": "Regis Default Playbook",
+      "version": "1.0.0",
+      "owner": "team-platform"
+    },
+    {
+      "id": "pci-dss",
+      "title": "PCI-DSS Hardened Playbook",
+      "version": "2.1.0",
+      "owner": "team-payments"
+    }
+  ]
+}

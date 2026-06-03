@@ -163,9 +163,12 @@ regis:
   # Phase 2 entity provider. Leave indexUrl unset to disable entity minting
   # (the Phase 1 report viewer still works via the regis.io/report-url annotation).
   catalog:
-    # URL of a published Regis report index (see examples/regis-index.json for the shape).
-    # For the bundled demo dataset, serve it locally: npx http-server examples -p 8080
-    # indexUrl: http://localhost:8080/regis-index.json
+    # URL of the published Regis report index *directory* (fragments: index.json
+    # + images/<slug>.json — see examples/regis-index.d for the shape).
+    # For the bundled demo dataset, read it from disk:
+    # indexDirUrl: file://${PWD}/examples/regis-index.d
+    # For a real deployment, point at a repo tree URL (GitHub integration):
+    # indexDirUrl: https://github.com/your-org/regis-index/tree/main/regis-index.d
     # Dev only: seed the persistent report-history store from a served JSON
     # snapshot array, so the Trajectory card has data without waiting for the
     # scheduler to accumulate it. Idempotent.

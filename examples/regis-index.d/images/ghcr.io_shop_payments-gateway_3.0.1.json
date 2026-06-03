@@ -1,0 +1,10 @@
+{
+  "imageRef": "ghcr.io/shop/payments-gateway:3.0.1",
+  "digest": "sha256:d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4",
+  "reportUrl": "http://localhost:8080/reports/payments-gateway.json",
+  "tier": "Silver",
+  "score": 78,
+  "playbook": "pci-dss",
+  "owner": "group:default/team-payments",
+  "system": "shop"
+}
