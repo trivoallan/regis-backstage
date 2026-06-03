@@ -155,8 +155,10 @@ describe('regis-backend routes', () => {
       .get('/api/regis/playbooks')
       .set('Authorization', mockCredentials.user.header());
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('playbooks');
-    expect(Array.isArray(res.body.playbooks)).toBe(true);
+    // Empty history store → empty ladder list; this pins the response contract
+    // (always a `{ playbooks: [...] }` envelope). The PlaybookLadder shape itself
+    // is covered by PortfolioTrendAggregator.test.ts ('builds PlaybookLadder list').
+    expect(res.body).toEqual({ playbooks: [] });
   });
 
 });
