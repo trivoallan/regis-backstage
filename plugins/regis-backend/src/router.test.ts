@@ -116,7 +116,7 @@ describe('regis-backend routes', () => {
       .set('Authorization', mockCredentials.user.header());
     expect(res.status).toBe(200);
     expect(res.body.filters).toEqual({ system: 'shop' });
-    expect(res.body.facets).toEqual({ systems: [], owners: [] }); // empty store
+    expect(res.body.facets).toEqual({ systems: [], owners: [], playbooks: [] }); // empty store
     expect(res.body.buckets).toHaveLength(7);
   });
 

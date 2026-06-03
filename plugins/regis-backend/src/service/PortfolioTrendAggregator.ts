@@ -1,9 +1,15 @@
 import type { LoggerService } from '@backstage/backend-plugin-api';
 import type {
+  IndexPlaybookEntry,
+  PlaybookLadder,
   ReportSnapshot,
-  TrendBucket,
 } from '@regis/backstage-plugin-regis-common';
-import { aggregateTrend } from './aggregateTrend';
+import { aggregateTrend, type TrendResult } from './aggregateTrend';
+import {
+  resolveLadders,
+  type LadderMap,
+  type TierColorOverride,
+} from './LadderResolver';
 import type { ReportHistoryStore } from './ReportHistoryStore';
 
 export interface PortfolioTrendAggregatorDeps {
@@ -12,6 +18,10 @@ export interface PortfolioTrendAggregatorDeps {
   /** Log a warning past this many loaded rows (scaling signal). Default 500_000. */
   rowWarnThreshold?: number;
   now?: () => number;
+  /** Loads index playbook metadata (with tier ladders). Best-effort; absent → discovery only. */
+  loadPlaybooks?: () => Promise<IndexPlaybookEntry[]>;
+  /** Config-supplied color overrides. */
+  tierOverrides?: TierColorOverride[];
 }
 
 /**
@@ -27,14 +37,25 @@ export class PortfolioTrendAggregator {
   private inFlight: Promise<void> | null = null;
   private readonly now: () => number;
   private readonly rowWarnThreshold: number;
+  private playbooks: IndexPlaybookEntry[] = [];
+  private readonly overrides: TierColorOverride[];
 
   constructor(private readonly deps: PortfolioTrendAggregatorDeps) {
     this.now = deps.now ?? (() => Date.now());
     this.rowWarnThreshold = deps.rowWarnThreshold ?? 500_000;
+    this.overrides = deps.tierOverrides ?? [];
   }
 
   async refresh(): Promise<void> {
     this.snapshots = await this.deps.store.listSnapshots();
+    if (this.deps.loadPlaybooks) {
+      try {
+        this.playbooks = await this.deps.loadPlaybooks();
+      } catch (error) {
+        this.deps.logger.warn(`regis: failed to load playbook ladders: ${error}`);
+        // Keep the previous playbooks; discovery fallback still applies.
+      }
+    }
     this.lastRunAt = this.now();
     if (this.snapshots.length > this.rowWarnThreshold) {
       this.deps.logger.warn(
@@ -58,32 +79,61 @@ export class PortfolioTrendAggregator {
     await this.inFlight;
   }
 
+  private resolve(): LadderMap {
+    return resolveLadders({
+      playbooks: this.playbooks,
+      snapshots: this.snapshots,
+      overrides: this.overrides,
+    });
+  }
+
   /** Compute the trend for the cached snapshots, optionally filtered (AND across set fields). */
   trend(
     days: number,
     today: string,
-    filters: { system?: string; owner?: string } = {},
-  ): TrendBucket[] {
+    filters: { system?: string; owner?: string; playbook?: string } = {},
+  ): TrendResult {
     const filtered = this.snapshots.filter(
       s =>
         (filters.system === undefined || s.system === filters.system) &&
         (filters.owner === undefined || s.owner === filters.owner),
     );
-    return aggregateTrend(filtered, { days, today });
+    const ladders = this.resolve();
+    const mode = filters.playbook
+      ? ({ kind: 'playbook', playbook: filters.playbook } as const)
+      : ({ kind: 'rank' } as const);
+    return aggregateTrend(filtered, { days, today, ladders, mode });
   }
 
-  /** Distinct, sorted, non-empty system/owner values across the full cached set. */
-  facets(): { systems: string[]; owners: string[] } {
+  /** Distinct, sorted, non-empty system/owner/playbook values across the full cached set. */
+  facets(): { systems: string[]; owners: string[]; playbooks: string[] } {
     const systems = new Set<string>();
     const owners = new Set<string>();
+    const playbooks = new Set<string>();
     for (const s of this.snapshots) {
       if (s.system) systems.add(s.system);
       if (s.owner) owners.add(s.owner);
+      if (s.playbook) playbooks.add(s.playbook);
     }
     return {
       systems: [...systems].sort(),
       owners: [...owners].sort(),
+      playbooks: [...playbooks].sort(),
     };
+  }
+
+  /** Resolved ladders as `PlaybookLadder[]` for `GET /playbooks`. */
+  playbookLadders(): PlaybookLadder[] {
+    const titleById = new Map(this.playbooks.map(p => [p.id, p.title]));
+    const out: PlaybookLadder[] = [];
+    for (const [id, ladder] of this.resolve()) {
+      out.push({
+        id,
+        title: titleById.get(id),
+        tiers: ladder.map(t => ({ key: t.name, label: t.name, color: t.color })),
+      });
+    }
+    return out.sort((a, b) => a.id.localeCompare(b.id));
   }
 
   /**
