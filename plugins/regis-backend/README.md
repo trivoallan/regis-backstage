@@ -25,7 +25,8 @@ The provider owns these entities (full mutation): images dropped from the index 
 ```yaml
 regis:
   catalog:
-    indexUrl: https://your-host/regis/index.json # required to enable; unset = disabled
+    # required to enable; unset = disabled. A directory URL (repo tree or file://).
+    indexDirUrl: https://github.com/your-org/regis-index/tree/main/regis-index.d
     defaultOwner: group:default/guests           # fallback owner for minted Resources
     namespace: default
     refreshMinutes: 30

@@ -63,4 +63,4 @@ To populate the **Trajectory** card with history, also set
 entities (e.g. `nginx:latest`, which shares a digest with `nginx:1.27`) are tracked
 as separate image refs, so their Trajectory card stays empty under seed-only data —
 browse `nginx:1.27` to see the seeded trajectory. (Alias refs do populate over time
-once `regis.catalog.indexUrl` is set and the recorder runs.)
+once `regis.catalog.indexDirUrl` is set and the recorder runs.)

@@ -166,7 +166,7 @@ mcpActions:
 regis:
   # TTL (seconds) for the on-demand report cache used by the report API.
   cacheTtlSeconds: 1800
-  # Phase 2 entity provider. Leave indexUrl unset to disable entity minting
+  # Phase 2 entity provider. Leave indexDirUrl unset to disable entity minting
   # (the Phase 1 report viewer still works via the regis.io/report-url annotation).
   catalog:
     # URL of the published Regis report index *directory* (fragments: index.json
