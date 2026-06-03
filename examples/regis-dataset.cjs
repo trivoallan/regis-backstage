@@ -23,7 +23,17 @@ const SNAPSHOT = '2026-06-01';
 
 // History trajectory: three monthly snapshots ending at each image's current score.
 const HISTORY_DATES = ['2026-04-01', '2026-05-01', SNAPSHOT];
-const tierFor = s => (s >= 90 ? 'Gold' : s >= 70 ? 'Silver' : 'Bronze');
+// Map a score to a tier NAME within the image's own playbook ladder, so the
+// synthetic history stays coherent with each playbook's vocabulary (a pci-dss
+// image gets Platinum/Certified/Provisional, not Gold/Silver/Bronze). Names are
+// derived from PLAYBOOKS (defined below) to avoid drift; tierFor is only invoked
+// from buildHistory() at the end, after PLAYBOOKS is initialised.
+const tierFor = (s, playbook) => {
+  const pb = PLAYBOOKS.find(p => p.id === playbook) ?? PLAYBOOKS[0];
+  const names = pb.tiers.map(t => t.name);
+  const idx = s >= 90 ? 0 : s >= 70 ? 1 : 2;
+  return names[Math.min(idx, names.length - 1)];
+};
 
 // Per-image score path; the last element is always the image's current score.
 function scorePath(img) {
@@ -226,7 +236,7 @@ function buildHistory() {
         imageRef: imageRefOf(img),
         snapshotDate: date,
         digest: img.digest,
-        tier: tierFor(score),
+        tier: tierFor(score, img.playbook),
         score,
         playbook: img.playbook,
         owner: `group:default/${img.owner}`,
