@@ -169,7 +169,7 @@ regis:
     # Dev only: seed the persistent report-history store from a served JSON
     # snapshot array, so the Trajectory card has data without waiting for the
     # scheduler to accumulate it. Idempotent.
-    # historySeedUrl: http://localhost:8080/regis-history.json
+    historySeedUrl: http://localhost:8080/regis-history.json
     # Owner assigned to minted Resources that don't carry their own owner.
     defaultOwner: group:default/guests
     # Namespace for minted entities.
