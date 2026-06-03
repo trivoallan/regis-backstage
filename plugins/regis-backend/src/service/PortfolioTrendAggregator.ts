@@ -45,6 +45,9 @@ export class PortfolioTrendAggregator {
   }
 
   async ensureFresh(maxAgeMs: number): Promise<void> {
+    // Unlike CatalogAggregator, lastRunAt===0 (empty result) counts as stale only on the
+    // very first run; once we have run at least once, an empty snapshot list is legitimately
+    // fresh — portfolio history starts empty and is not an error condition.
     const isFresh = this.lastRunAt !== 0 && this.now() - this.lastRunAt < maxAgeMs;
     if (isFresh) return;
     if (!this.inFlight) {

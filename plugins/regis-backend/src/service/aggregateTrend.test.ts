@@ -50,6 +50,20 @@ describe('aggregateTrend', () => {
     expect(out[1]).toMatchObject({ silver: 1, total: 1, avgScore: 80 });
   });
 
+  it('moves an image to none bucket and score=0 when tier is lost in-window', () => {
+    const out = aggregateTrend(
+      [snap({ snapshotDate: '2026-05-01', tier: 'Gold', score: 100 }),
+       snap({ snapshotDate: '2026-06-02', tier: null, score: undefined })],
+      { days: 3, today: '2026-06-03' },
+    );
+    // 2026-06-01: pre-window snapshot still active → gold bucket
+    expect(out[0]).toMatchObject({ date: '2026-06-01', gold: 1, none: 0, avgScore: 100 });
+    // 2026-06-02: in-window snapshot removes tier → none bucket, score excluded
+    expect(out[1]).toMatchObject({ date: '2026-06-02', gold: 0, none: 1, total: 1, avgScore: 0 });
+    // 2026-06-03: still in none bucket
+    expect(out[2]).toMatchObject({ date: '2026-06-03', gold: 0, none: 1, total: 1, avgScore: 0 });
+  });
+
   it('puts null/unknown tiers in the none bucket and excludes them from avgScore', () => {
     const out = aggregateTrend(
       [

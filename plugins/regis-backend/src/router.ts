@@ -4,6 +4,7 @@ import type {
 } from '@backstage/backend-plugin-api';
 import { InputError } from '@backstage/errors';
 import {
+  PortfolioTrend,
   ReportSchemaError,
   UnsupportedSchemaVersionError,
 } from '@regis/backstage-plugin-regis-common';
@@ -74,12 +75,14 @@ export async function createRouter(
     const raw = Number(req.query.days);
     const days = Number.isFinite(raw) ? Math.min(365, Math.max(1, Math.trunc(raw))) : 90;
     await portfolioTrend.ensureFresh(30_000);
-    const today = new Date().toISOString().slice(0, 10);
-    res.json({
-      generatedAt: new Date().toISOString(),
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const body: PortfolioTrend = {
+      generatedAt: now.toISOString(),
       days,
       buckets: portfolioTrend.trend(days, today),
-    });
+    };
+    res.json(body);
   });
 
   // Error -> HTTP mapping. EntityNotFound/NoReport/NoImageRef=404; version/schema=422
