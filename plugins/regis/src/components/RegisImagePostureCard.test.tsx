@@ -104,6 +104,31 @@ describe('RegisImagePostureCard distribution order', () => {
     ).toBeInTheDocument();
   });
 
+  it('orders by the union of multiple playbook ladders', async () => {
+    // Neither ladder alone contains both Gold and Bronze; only the merged union
+    // [Gold, Silver, Bronze] ranks Gold before Bronze. Alphabetical would invert it.
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'a',
+          tiers: [
+            { key: 'Gold', label: 'Gold', color: '#g' },
+            { key: 'Silver', label: 'Silver', color: '#s' },
+          ],
+        },
+        {
+          id: 'b',
+          tiers: [
+            { key: 'Silver', label: 'Silver', color: '#s' },
+            { key: 'Bronze', label: 'Bronze', color: '#b' },
+          ],
+        },
+      ],
+    });
+    renderCard(['resource:default/a', 'resource:default/b'], getPlaybooks);
+    expect(await screen.findByText(/1 Gold · 1 Bronze/)).toBeInTheDocument();
+  });
+
   it('falls back to alphabetical order when no playbooks are returned', async () => {
     const getPlaybooks = async () => ({ playbooks: [] });
     renderCard(
