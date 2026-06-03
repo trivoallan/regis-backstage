@@ -107,6 +107,19 @@ describe('regis-backend routes', () => {
     expect(typeof res.body.generatedAt).toBe('string');
   });
 
+  it('GET /portfolio/trend returns filters echo and facets', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [bareEntity] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/trend?days=7&system=shop')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.filters).toEqual({ system: 'shop' });
+    expect(res.body.facets).toEqual({ systems: [], owners: [] }); // empty store
+    expect(res.body.buckets).toHaveLength(7);
+  });
+
   it('GET /portfolio/trend clamps days out of range', async () => {
     const { server } = await startTestBackend({
       features: [

@@ -74,13 +74,22 @@ export async function createRouter(
     await httpAuth.credentials(req); // require an authenticated principal
     const raw = Number(req.query.days);
     const days = Number.isFinite(raw) ? Math.min(365, Math.max(1, Math.trunc(raw))) : 90;
+    const system =
+      typeof req.query.system === 'string' && req.query.system ? req.query.system : undefined;
+    const owner =
+      typeof req.query.owner === 'string' && req.query.owner ? req.query.owner : undefined;
+    const filters: { system?: string; owner?: string } = {};
+    if (system) filters.system = system;
+    if (owner) filters.owner = owner;
     await portfolioTrend.ensureFresh(30_000);
     const today = new Date().toISOString().slice(0, 10);
     const body: PortfolioTrend = {
       // The true freshness of the served buckets (from the cache), not request time.
       generatedAt: portfolioTrend.lastRefreshIso(),
       days,
-      buckets: portfolioTrend.trend(days, today),
+      filters,
+      facets: portfolioTrend.facets(),
+      buckets: portfolioTrend.trend(days, today, filters),
     };
     res.json(body);
   });
