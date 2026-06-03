@@ -46,8 +46,28 @@ const RULES = [
 ];
 
 const PLAYBOOKS = [
-  { id: 'default', title: 'Regis Default Playbook', version: '1.0.0', owner: 'team-platform' },
-  { id: 'pci-dss', title: 'PCI-DSS Hardened Playbook', version: '2.1.0', owner: 'team-payments' },
+  {
+    id: 'default',
+    title: 'Regis Default Playbook',
+    version: '1.0.0',
+    owner: 'team-platform',
+    tiers: [
+      { name: 'Gold', color: '#d4af37' },
+      { name: 'Silver', color: '#9ca3af' },
+      { name: 'Bronze', color: '#cd7f32' },
+    ],
+  },
+  {
+    id: 'pci-dss',
+    title: 'PCI-DSS Hardened Playbook',
+    version: '2.1.0',
+    owner: 'team-payments',
+    tiers: [
+      { name: 'Platinum', color: '#7e57c2' },
+      { name: 'Certified', color: '#26a69a' },
+      { name: 'Provisional', color: '#ef6c00' },
+    ],
+  },
 ];
 
 const d = h => h.repeat(32); // 64-hex digest helper
@@ -79,7 +99,7 @@ const IMAGES = [
   {
     key: 'payments-gateway', registry: 'ghcr.io', repository: 'shop/payments-gateway', tag: '3.0.1',
     digest: `sha256:${d('d4')}`, owner: 'team-payments', system: 'shop', playbook: 'pci-dss',
-    tier: 'Silver', score: 78, fail: ['image-signed', 'pinned-base-image'],
+    tier: 'Certified', score: 78, fail: ['image-signed', 'pinned-base-image'],
     cve: { vulnerability_count: 11, critical_count: 0, high_count: 0, medium_count: 3, low_count: 8, negligible_count: 0, unknown_count: 0, fixed_count: 5 },
     platforms: [{ architecture: 'amd64', os: 'linux' }],
   },

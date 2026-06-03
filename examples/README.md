@@ -9,14 +9,15 @@ e-commerce platform (`System: shop`).
 | --- | --- |
 | `org.yaml` | `guests` + four teams (`team-storefront`, `team-search`, `team-payments`, `team-platform`). |
 | `regis-catalog.yaml` | The `shop` System, 5 services, 7 `container-image` Resources (incl. a shared `nginx` with a linked alias), and 2 `regis-playbook` Resources. |
-| `reports/*.json` | One realistic `report.json` per image — varied tiers (Gold/Silver/Bronze), scores, rules grouped by tag (security / supply-chain / hygiene / observability), and CVE counts. |
+| `reports/*.json` | One realistic `report.json` per image — varied tiers (Gold/Silver/Bronze for the default playbook; Platinum/Certified/Provisional for pci-dss), scores, rules grouped by tag (security / supply-chain / hygiene / observability), and CVE counts. |
 | `regis-index.d/` | The published **report index** as fragments (index.json + one images/<slug>.json per image), consumed by the Phase 2 entity provider. |
 | `regis-history.json` | Synthetic per-image score/tier **history** (3 monthly snapshots each); fed to the backend via `regis.catalog.historySeedUrl` to populate the **Trajectory** card. |
 | `regis-dataset.cjs` | Generator — the single source of truth. Edit this, then run `node examples/regis-dataset.cjs`, not the generated files. |
 | `regis-demo.yaml` | A standalone Phase 1 example: a `Component` carrying `regis.io/report-url` directly. |
 
 The dataset is intentionally varied: `payments-gateway` is assessed against the
-stricter `pci-dss` playbook; `search` is Bronze (high CVEs, runs as root,
+stricter `pci-dss` playbook (which uses a distinct tier ladder: Platinum/Certified/Provisional
+instead of Gold/Silver/Bronze); `search` is Bronze (high CVEs, runs as root,
 unsigned); `nginx:1.27` is shared by two services and aliased to `nginx:latest`
 (same digest → cross-linked via `regis.io/image-aliases`).
 
