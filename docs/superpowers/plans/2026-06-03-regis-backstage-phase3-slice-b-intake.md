@@ -1949,3 +1949,34 @@ git commit -m "chore: lint + typecheck fixes for Slice B intake"
 - Task 11 notes the fallback if `@backstage/plugin-scaffolder-node/alpha` does not expose `scaffolderActionsExtensionPoint` (import from the package root instead).
 - Task 9 notes copying `regis-backend/tsconfig.json` verbatim if it differs from the shown skeleton.
 - Task 12 notes the repo's actual typecheck command (`yarn tsc` vs `yarn build:backend`).
+
+---
+
+## Execution addenda (deviations from the plan, 2026-06-03)
+
+Discovered during subagent-driven execution and resolved in extra commits:
+
+- **`RegisHistoryRecorder` was a second consumer of the deleted `fetchIndex`** (the plan
+  only accounted for the provider). Migrated it to the fragment model
+  (`fragmentSource` + `indexDirUrl` + `assembleIndex`) and rewired `plugin.ts`. A shared
+  helper **`makeFragmentSource(indexDirUrl, urlReader)`** was extracted (used by both
+  `module.ts` and `plugin.ts`) — Task 7's module now uses it instead of inline
+  scheme-selection. Commit `7b9a29f`.
+- **The demo dataset generator `examples/regis-dataset.cjs`** (the documented source of
+  truth) still emitted the flat `regis-index.json`. Migrated it to emit the fragment
+  directory; regeneration is byte-identical to the hand-written Task 8 data. READMEs
+  updated. Commit `00804b0`.
+- **Branch-safe intake branch name:** the template's `branchName` used `parameters.imageRef`
+  (contains `/` and `:`, illegal in git branches). The action now also outputs `slug`, and
+  the template uses `steps['add-entry'].output.slug`. Commit `f187111`.
+- **Plugin config files:** the repo uses a single root `tsconfig.json` (globbing
+  `plugins/*/src`), so the per-plugin `tsconfig.json` from Task 9 was removed (`5dc1812`);
+  a `.eslintrc.js` (mirroring sibling plugins) was added so `backstage-cli package lint`
+  uses the TypeScript parser (`79088e6`).
+- **Version-range / API adaptations:** `@regis/...` backend dep pinned `workspace:^`
+  (repo convention); `scaffolderActionsExtensionPoint` imported from the
+  `@backstage/plugin-scaffolder-node` package root (not `/alpha`) in v0.13.3;
+  `mockCredentials.user()` (not `mockServices.credentials.user()`) in test-utils.
+
+**Final verification:** regis-common 36 tests, regis-backend 92, regis-scaffolder-backend 3
+— all green; lint clean on all three packages; repo-wide `tsc --noEmit` clean.
