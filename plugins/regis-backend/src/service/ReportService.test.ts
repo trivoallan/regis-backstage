@@ -1,6 +1,10 @@
 import { mockServices, mockCredentials } from '@backstage/backend-test-utils';
 import { UnsupportedSchemaVersionError } from '@regis/backstage-plugin-regis-common';
-import { ReportService, NoReportError } from './ReportService';
+import {
+  ReportService,
+  NoReportError,
+  EntityNotFoundError,
+} from './ReportService';
 import { InMemoryTtlStore } from './ReportStore';
 import type { ReportSource } from './ReportSource';
 
@@ -59,12 +63,21 @@ describe('ReportService.getReport', () => {
     expect(source.fetch).toHaveBeenCalledTimes(1); // served from cache
   });
 
-  it('throws NoReportError when the annotation is absent', async () => {
+  it('throws NoReportError when the entity exists but the annotation is absent', async () => {
     const source = { fetch: jest.fn() };
     const svc = makeService({ entity: entityWith(undefined), source });
     await expect(
       svc.getReport('component:default/svc', credentials),
     ).rejects.toThrow(NoReportError);
+    expect(source.fetch).not.toHaveBeenCalled();
+  });
+
+  it('throws EntityNotFoundError when the entity does not exist', async () => {
+    const source = { fetch: jest.fn() };
+    const svc = makeService({ entity: undefined, source });
+    await expect(
+      svc.getReport('component:default/svc', credentials),
+    ).rejects.toThrow(EntityNotFoundError);
     expect(source.fetch).not.toHaveBeenCalled();
   });
 
