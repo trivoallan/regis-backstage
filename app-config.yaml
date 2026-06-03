@@ -6,10 +6,11 @@ app:
   packages: all
 
   extensions:
-    # Configure the catalog index page to be the root page, this is normally mounted on /catalog
+    # The Regis portfolio explorer is the app home (mounted at `/` by the regis
+    # plugin), so the Backstage catalog index stays at its default `/catalog`.
     - page:catalog:
         config:
-          path: /
+          path: /catalog
 
 organization:
   name: My Company
