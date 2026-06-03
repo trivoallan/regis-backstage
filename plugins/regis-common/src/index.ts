@@ -48,6 +48,9 @@ export type {
   ReportSummary,
   ReportSnapshot,
   ReportHistory,
+  TrendBand,
   TrendBucket,
   PortfolioTrend,
+  PlaybookLadder,
+  PlaybooksResponse,
 } from './report-api';
