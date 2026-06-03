@@ -6,6 +6,8 @@ export interface ReportHistoryStore {
   append(snapshots: ReportSnapshot[]): Promise<void>;
   /** All snapshots for an image, ordered by snapshotDate ascending. */
   getByImageRef(imageRef: string): Promise<ReportSnapshot[]>;
+  /** All snapshots across all images (data access for aggregation). */
+  listSnapshots(): Promise<ReportSnapshot[]>;
 }
 
 /** In-memory impl for tests. */
@@ -26,5 +28,9 @@ export class InMemoryReportHistoryStore implements ReportHistoryStore {
       .filter(s => s.imageRef === imageRef)
       .sort((a, b) => a.snapshotDate.localeCompare(b.snapshotDate))
       .map(s => ({ ...s, tier: s.tier ?? undefined }));
+  }
+
+  async listSnapshots(): Promise<ReportSnapshot[]> {
+    return [...this.rows.values()].map(s => ({ ...s, tier: s.tier ?? undefined }));
   }
 }
