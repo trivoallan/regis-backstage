@@ -11,6 +11,14 @@ import type { ReportSource } from './ReportSource';
 import type { ReportStore } from './ReportStore';
 import type { ReportEnvelope } from './types';
 
+/** Thrown when the referenced entity does not exist in the catalog. */
+export class EntityNotFoundError extends Error {
+  constructor(entityRef: string) {
+    super(`entity not found: ${entityRef}`);
+    this.name = 'EntityNotFoundError';
+  }
+}
+
 /** Thrown when an entity has no `regis.io/report-url` annotation. */
 export class NoReportError extends Error {
   constructor(entityRef: string) {
@@ -44,7 +52,8 @@ export class ReportService {
     const entity = await this.deps.catalog.getEntityByRef(entityRef, {
       credentials,
     });
-    const url = entity && getRegisReportUrl(entity);
+    if (!entity) throw new EntityNotFoundError(entityRef);
+    const url = getRegisReportUrl(entity);
     if (!url) throw new NoReportError(entityRef);
 
     const raw = await this.deps.source.fetch(url);
