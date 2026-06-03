@@ -53,4 +53,8 @@ export type {
   PortfolioTrend,
   PlaybookLadder,
   PlaybooksResponse,
+  ExploreGroupBy,
+  ExploreGroup,
+  ExploreImage,
+  ExploreResponse,
 } from './report-api';
