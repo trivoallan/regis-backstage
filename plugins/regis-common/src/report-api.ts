@@ -17,3 +17,21 @@ export interface ReportSummary {
   byTag?: Record<string, number>;
   error?: string;
 }
+
+/** A single point-in-time posture snapshot for an image (history series row). */
+export interface ReportSnapshot {
+  imageRef: string;
+  snapshotDate: string; // ISO date
+  digest?: string;
+  tier?: string | null;
+  score?: number;
+  playbook?: string;
+  reportUrl?: string;
+  recordedAt: string; // ISO datetime
+}
+
+/** An image's full snapshot history, as served by `GET /report/history`. */
+export interface ReportHistory {
+  imageRef: string;
+  snapshots: ReportSnapshot[];
+}

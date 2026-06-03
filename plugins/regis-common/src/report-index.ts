@@ -36,6 +36,8 @@ export interface IndexImageEntry {
   owner?: string;
   /** Backstage system name. */
   system?: string;
+  /** ISO date of the report snapshot (report-true dating for history). */
+  snapshotDate?: string;
 }
 
 /** The published report index. */

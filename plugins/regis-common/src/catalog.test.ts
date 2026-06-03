@@ -13,6 +13,7 @@ import {
   REGIS_LABEL_SCORE_BAND,
   REGIS_ANNOTATION_ALIAS_OF,
   REGIS_RELATION_ALIAS_OF,
+  getRegisImageRef,
   scoreBand,
 } from './catalog';
 
@@ -52,5 +53,30 @@ describe('scoreBand', () => {
   it('clamps out-of-range scores', () => {
     expect(scoreBand(-5)).toBe('0-49');
     expect(scoreBand(150)).toBe('90-100');
+  });
+});
+
+describe('getRegisImageRef', () => {
+  it('returns the image-ref annotation when present', () => {
+    const entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: {
+        name: 'library-nginx-1.27',
+        annotations: { 'regis.io/image-ref': 'registry-1.docker.io/library/nginx:1.27' },
+      },
+      spec: { type: 'container-image' },
+    } as any;
+    expect(getRegisImageRef(entity)).toBe('registry-1.docker.io/library/nginx:1.27');
+  });
+
+  it('returns undefined when the annotation is absent', () => {
+    const entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: { name: 'x' },
+      spec: { type: 'container-image' },
+    } as any;
+    expect(getRegisImageRef(entity)).toBeUndefined();
   });
 });

@@ -1,6 +1,9 @@
 import type { ReportEnvelope } from './types';
 
-/** Caches report envelopes by key (entityRef). Phase 2 adds a Knex impl. */
+/**
+ * Caches report envelopes by key (entityRef) — an ephemeral read cache.
+ * Durable report *history* is a separate concern: see ReportHistoryStore.
+ */
 export interface ReportStore {
   get(key: string): ReportEnvelope | undefined;
   set(key: string, value: ReportEnvelope): void;

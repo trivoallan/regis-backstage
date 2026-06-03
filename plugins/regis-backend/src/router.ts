@@ -16,18 +16,23 @@ import {
   ReportService,
 } from './service/ReportService';
 import type { CatalogAggregator } from './service/CatalogAggregator';
+import {
+  NoImageRefError,
+  ReportHistoryService,
+} from './service/ReportHistoryService';
 
 export interface RouterOptions {
   logger: LoggerService;
   httpAuth: HttpAuthService;
   reportService: ReportService;
   aggregator: CatalogAggregator;
+  historyService: ReportHistoryService;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { httpAuth, reportService, aggregator } = options;
+  const { httpAuth, reportService, aggregator, historyService } = options;
   const router = Router();
   router.use(express.json());
 
@@ -51,7 +56,17 @@ export async function createRouter(
     res.json(aggregator.getSnapshot());
   });
 
-  // Error -> HTTP mapping. EntityNotFound/NoReport=404; version/schema=422
+  router.get('/report/history', async (req, res) => {
+    const entityRef = req.query.entityRef;
+    if (typeof entityRef !== 'string' || !entityRef) {
+      throw new InputError('query parameter "entityRef" is required');
+    }
+    const credentials = await httpAuth.credentials(req);
+    const history = await historyService.getHistory(entityRef, credentials);
+    res.json(history);
+  });
+
+  // Error -> HTTP mapping. EntityNotFound/NoReport/NoImageRef=404; version/schema=422
   // (distinct kinds); fetch=502; everything else falls through to the default
   // error handler.
   router.use(
@@ -62,6 +77,8 @@ export async function createRouter(
       next: express.NextFunction,
     ) => {
       if (err instanceof EntityNotFoundError || err instanceof NoReportError) {
+        res.status(404).json({ error: err.message });
+      } else if (err instanceof NoImageRefError) {
         res.status(404).json({ error: err.message });
       } else if (err instanceof UnsupportedSchemaVersionError) {
         res

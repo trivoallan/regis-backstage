@@ -6,8 +6,8 @@ import {
   EntityProvider,
   EntityProviderConnection,
 } from '@backstage/plugin-catalog-node';
-import { validateReportIndex } from '@regis/backstage-plugin-regis-common';
 import { ReportSource } from '../service/ReportSource';
+import { fetchIndex } from '../service/fetchIndex';
 import { buildEntities, BuildOpts } from './buildEntities';
 
 export interface RegisEntityProviderOptions {
@@ -49,8 +49,7 @@ export class RegisEntityProvider implements EntityProvider {
     }
     const { indexUrl, source, logger, defaultOwner, namespace } = this.options;
 
-    const raw = await source.fetch(indexUrl);
-    const index = validateReportIndex(raw);
+    const index = await fetchIndex(source, indexUrl);
 
     const opts: BuildOpts = { indexUrl, defaultOwner, namespace };
     const entities = buildEntities(index, opts);
