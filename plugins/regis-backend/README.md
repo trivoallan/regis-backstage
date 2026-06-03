@@ -38,5 +38,5 @@ import { catalogModuleRegisEntityProvider } from '@regis/backstage-plugin-regis-
 backend.add(catalogModuleRegisEntityProvider);
 ```
 
-See `examples/regis-index.json` for the index shape. The model is specified in
+See `examples/regis-index.d/` for the index shape (fragments: index.json + images/<slug>.json). The model is specified in
 `docs/superpowers/specs/2026-06-01-regis-backstage-entity-model-design.md`.

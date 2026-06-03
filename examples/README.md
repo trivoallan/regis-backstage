@@ -10,7 +10,7 @@ e-commerce platform (`System: shop`).
 | `org.yaml` | `guests` + four teams (`team-storefront`, `team-search`, `team-payments`, `team-platform`). |
 | `regis-catalog.yaml` | The `shop` System, 5 services, 7 `container-image` Resources (incl. a shared `nginx` with a linked alias), and 2 `regis-playbook` Resources. |
 | `reports/*.json` | One realistic `report.json` per image — varied tiers (Gold/Silver/Bronze), scores, rules grouped by tag (security / supply-chain / hygiene / observability), and CVE counts. |
-| `regis-index.json` | The published **report index** consumed by the Phase 2 entity provider (same data, provider-shaped). |
+| `regis-index.d/` | The published **report index** as fragments (index.json + one images/<slug>.json per image), consumed by the Phase 2 entity provider. |
 | `regis-history.json` | Synthetic per-image score/tier **history** (3 monthly snapshots each); fed to the backend via `regis.catalog.historySeedUrl` to populate the **Trajectory** card. |
 | `regis-dataset.cjs` | Generator — the single source of truth. Edit this, then run `node examples/regis-dataset.cjs`, not the generated files. |
 | `regis-demo.yaml` | A standalone Phase 1 example: a `Component` carrying `regis.io/report-url` directly. |
@@ -30,7 +30,7 @@ npx http-server examples -p 8080
 ```
 
 Report URLs then resolve at `http://localhost:8080/reports/<name>.json` (already
-wired into `regis-catalog.yaml` and `regis-index.json`).
+wired into `regis-catalog.yaml` and `regis-index.d`).
 
 Then start the app (from the repo root):
 
@@ -51,7 +51,7 @@ What to look at:
   sparkline over time — `search` visibly declines Gold → Silver → Bronze.
 
 To also exercise the **entity provider** (Phase 2), set
-`regis.catalog.indexUrl: http://localhost:8080/regis-index.json` in `app-config.yaml`
+`regis.catalog.indexDirUrl: file://$PWD/examples/regis-index.d` in `app-config.yaml`
 (commented out by default) — it mints the same entities from the index instead of
 the static `regis-catalog.yaml`.
 
