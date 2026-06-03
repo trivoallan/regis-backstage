@@ -29,6 +29,11 @@ describe('tierColor', () => {
     expect(tierColor('Platinum', ladder)).toBe('#7e57c2');
   });
 
+  it('matches a ladder entry by label when key differs', () => {
+    const aliased: TrendBand[] = [{ key: 'tier-1', label: 'Gold', color: '#d4af37' }];
+    expect(tierColor('Gold', aliased)).toBe('#d4af37');
+  });
+
   it('falls back to a stable non-grey color for an unknown tier with no ladder', () => {
     const a = tierColor('Mystery');
     const b = tierColor('Mystery');
