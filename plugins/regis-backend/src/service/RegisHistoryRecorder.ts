@@ -3,8 +3,8 @@ import type {
   ReportIndex,
   ReportSnapshot,
 } from '@regis/backstage-plugin-regis-common';
-import { fetchIndex } from './fetchIndex';
-import type { ReportSource } from './ReportSource';
+import { assembleIndex } from '../provider/assembleIndex';
+import type { IndexFragmentSource } from '../provider/IndexFragmentSource';
 import type { ReportHistoryStore } from './ReportHistoryStore';
 
 /** Pure: map a validated index to snapshot rows for a given run time. */
@@ -26,9 +26,9 @@ export function toSnapshots(index: ReportIndex, runDate: Date): ReportSnapshot[]
 }
 
 export interface RegisHistoryRecorderDeps {
-  source: ReportSource;
+  fragmentSource: IndexFragmentSource;
   store: ReportHistoryStore;
-  indexUrl: string;
+  indexDirUrl: string;
   logger: LoggerService;
   now?: () => Date;
 }
@@ -42,7 +42,8 @@ export class RegisHistoryRecorder {
   }
 
   async record(): Promise<void> {
-    const index = await fetchIndex(this.deps.source, this.deps.indexUrl);
+    const fragments = await this.deps.fragmentSource.list(this.deps.indexDirUrl);
+    const index = assembleIndex(fragments, this.deps.logger);
     const snapshots = toSnapshots(index, this.now());
     await this.deps.store.append(snapshots);
     this.deps.logger.info(
