@@ -72,4 +72,16 @@ describe('RegisClient', () => {
       'http://localhost:7007/api/regis/portfolio/trend?days=90',
     );
   });
+
+  it('GETs /portfolio/trend with system/owner filters when provided', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ generatedAt: 'x', days: 90, filters: {}, facets: { systems: [], owners: [] }, buckets: [] }),
+    });
+    const client = clientWith(fetchImpl);
+    await client.getPortfolioTrend(90, { system: 'shop', owner: 'group:default/team-x' });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://localhost:7007/api/regis/portfolio/trend?days=90&system=shop&owner=group%3Adefault%2Fteam-x',
+    );
+  });
 });

@@ -12,7 +12,10 @@ export interface RegisApi {
   getReport(entityRef: string): Promise<ReportEnvelope>;
   listReports(): Promise<ReportSummary[]>;
   getHistory(entityRef: string): Promise<ReportHistory>;
-  getPortfolioTrend(days: number): Promise<PortfolioTrend>;
+  getPortfolioTrend(
+    days: number,
+    filters?: { system?: string; owner?: string },
+  ): Promise<PortfolioTrend>;
 }
 
 export const regisApiRef = createApiRef<RegisApi>({
