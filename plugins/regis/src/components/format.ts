@@ -1,4 +1,7 @@
-import type { TrendBand } from '@regis/backstage-plugin-regis-common';
+import type {
+  PlaybookLadder,
+  TrendBand,
+} from '@regis/backstage-plugin-regis-common';
 
 export type ScoreStatus = 'ok' | 'warning' | 'error';
 
@@ -25,6 +28,27 @@ export function tierColor(
   const fromLadder = ladder?.find(b => b.key === tier || b.label === tier);
   if (fromLadder) return fromLadder.color;
   return PALETTE[hashIndex(tier)];
+}
+
+/**
+ * Flattens every playbook's ladder into a single lookup list for per-image tier
+ * coloring. Per-image surfaces (a scorecard, a catalog row, a trajectory dot)
+ * know a tier *name* but not always which playbook produced it, so we match by
+ * name across all published ladders. Tier names are expected to be distinct
+ * across playbooks; on a collision the first ladder wins (stable, good enough
+ * for a badge color). Pass the result as the `ladder` argument to `tierColor`.
+ */
+export function unionLadder(playbooks?: PlaybookLadder[]): TrendBand[] {
+  const out: TrendBand[] = [];
+  const seen = new Set<string>();
+  for (const pb of playbooks ?? []) {
+    for (const t of pb.tiers) {
+      if (seen.has(t.key)) continue;
+      seen.add(t.key);
+      out.push(t);
+    }
+  }
+  return out;
 }
 
 /** Bucket a 0-100 score for status styling. Missing score becomes warning. */

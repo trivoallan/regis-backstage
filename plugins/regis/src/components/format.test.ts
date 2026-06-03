@@ -1,5 +1,8 @@
-import { tierColor, scoreStatus } from './format';
-import type { TrendBand } from '@regis/backstage-plugin-regis-common';
+import { tierColor, scoreStatus, unionLadder } from './format';
+import type {
+  PlaybookLadder,
+  TrendBand,
+} from '@regis/backstage-plugin-regis-common';
 
 describe('formatting helpers', () => {
   it('maps tiers to colors', () => {
@@ -44,5 +47,41 @@ describe('tierColor', () => {
   it('falls back to neutral grey for a missing tier', () => {
     expect(tierColor(null)).toBe('#9ca3af');
     expect(tierColor(undefined)).toBe('#9ca3af');
+  });
+});
+
+describe('unionLadder', () => {
+  const playbooks: PlaybookLadder[] = [
+    {
+      id: 'default',
+      tiers: [
+        { key: 'Gold', label: 'Gold', color: '#d4af37' },
+        { key: 'Bronze', label: 'Bronze', color: '#cd7f32' },
+      ],
+    },
+    {
+      id: 'pci-dss',
+      tiers: [
+        { key: 'Platinum', label: 'Platinum', color: '#7e57c2' },
+        { key: 'Gold', label: 'Gold', color: '#ffffff' }, // duplicate key, second wins NOT
+      ],
+    },
+  ];
+
+  it('flattens all ladders into one list, first occurrence of a key wins', () => {
+    const u = unionLadder(playbooks);
+    expect(u.map(b => b.key)).toEqual(['Gold', 'Bronze', 'Platinum']);
+    expect(u.find(b => b.key === 'Gold')?.color).toBe('#d4af37');
+  });
+
+  it('returns an empty list for undefined or empty input', () => {
+    expect(unionLadder()).toEqual([]);
+    expect(unionLadder([])).toEqual([]);
+  });
+
+  it('feeds tierColor so a tier resolves to its published color regardless of playbook', () => {
+    const u = unionLadder(playbooks);
+    expect(tierColor('Platinum', u)).toBe('#7e57c2');
+    expect(tierColor('Bronze', u)).toBe('#cd7f32');
   });
 });
