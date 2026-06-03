@@ -98,6 +98,48 @@ function makeAggregator(
   });
 }
 
+describe('PortfolioTrendAggregator.explore', () => {
+  const snaps = [
+    snap({ imageRef: 'a', snapshotDate: '2026-05-01', system: 'shop', owner: 'o1', playbook: 'default', tier: 'Gold', score: 100 }),
+    snap({ imageRef: 'a', snapshotDate: '2026-06-01', system: 'shop', owner: 'o1', playbook: 'default', tier: 'Silver', score: 80 }), // latest for a
+    snap({ imageRef: 'b', snapshotDate: '2026-06-01', system: 'shop', owner: 'o2', playbook: 'default', tier: 'Silver', score: 70 }),
+    snap({ imageRef: 'c', snapshotDate: '2026-06-01', system: 'bank', owner: 'o2', playbook: 'pci-dss', tier: 'Certified', score: 78 }),
+  ];
+
+  it('uses the latest snapshot per image and groups the scoped set', async () => {
+    const agg = makeAggregator(snaps);
+    await agg.ensureFresh(1);
+    const out = agg.explore({ days: 1, today: '2026-06-03', filters: { system: 'shop' }, groupBy: 'owner' });
+    // image a's latest (Silver/80) wins over its earlier Gold/100; c excluded (bank)
+    expect(out.images.map(i => [i.imageRef, i.tier]).sort()).toEqual([['a', 'Silver'], ['b', 'Silver']]);
+    expect(out.groups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'o1', count: 1, avgScore: 80, tiers: { Silver: 1 } }),
+        expect.objectContaining({ key: 'o2', count: 1, avgScore: 70, tiers: { Silver: 1 } }),
+      ]),
+    );
+  });
+
+  it('scopes facets to the current filter set', async () => {
+    const agg = makeAggregator(snaps);
+    await agg.ensureFresh(1);
+    const out = agg.explore({ days: 1, today: '2026-06-03', filters: { system: 'shop' }, groupBy: 'owner' });
+    expect(out.facets.systems).toEqual(['shop']);
+    expect(out.facets.owners).toEqual(['o1', 'o2']);
+    expect(out.facets.tiers).toEqual(['Silver']);
+  });
+
+  it('tier filters images/groups but not the trend; trend is the scoped TrendResult', async () => {
+    const agg = makeAggregator(snaps);
+    await agg.ensureFresh(1);
+    const out = agg.explore({ days: 1, today: '2026-06-03', filters: { system: 'shop', tier: 'Silver' }, groupBy: 'tier' });
+    expect(out.images).toHaveLength(2); // both shop images are Silver at latest
+    expect(out.groups).toEqual([expect.objectContaining({ key: 'Silver', count: 2 })]);
+    expect(out.trend.buckets).toHaveLength(1); // a TrendResult shape, days=1
+    expect(Array.isArray(out.trend.bands)).toBe(true);
+  });
+});
+
 describe('PortfolioTrendAggregator ladders/facets', () => {
   it('exposes playbooks in facets', async () => {
     const agg = makeAggregator([
