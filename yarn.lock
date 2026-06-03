@@ -9051,7 +9051,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@regis/backstage-plugin-regis-scaffolder-backend@workspace:plugins/regis-scaffolder-backend":
+"@regis/backstage-plugin-regis-scaffolder-backend@workspace:^, @regis/backstage-plugin-regis-scaffolder-backend@workspace:plugins/regis-scaffolder-backend":
   version: 0.0.0-use.local
   resolution: "@regis/backstage-plugin-regis-scaffolder-backend@workspace:plugins/regis-scaffolder-backend"
   dependencies:
@@ -13837,6 +13837,7 @@ __metadata:
     "@backstage/plugin-signals-backend": "npm:^0.3.15"
     "@backstage/plugin-techdocs-backend": "npm:^2.2.0"
     "@regis/backstage-plugin-regis-backend": "workspace:^"
+    "@regis/backstage-plugin-regis-scaffolder-backend": "workspace:^"
     app: "link:../app"
     better-sqlite3: "npm:^12.0.0"
     node-gyp: "npm:^10.0.0"

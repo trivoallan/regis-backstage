@@ -20,6 +20,8 @@ backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
 backend.add(
   import('@backstage/plugin-scaffolder-backend-module-notifications'),
 );
+// Regis intake scaffolder action (regis:index:add-entry)
+backend.add(import('@regis/backstage-plugin-regis-scaffolder-backend'));
 
 // techdocs plugin
 backend.add(import('@backstage/plugin-techdocs-backend'));
