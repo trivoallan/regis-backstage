@@ -50,6 +50,50 @@ describe('validateReportIndex', () => {
   });
 });
 
+describe('report index tiers', () => {
+  it('accepts an index whose playbooks carry an ordered tiers list', () => {
+    const idx = validateReportIndex({
+      schemaVersion: 1,
+      playbooks: [
+        {
+          id: 'default',
+          title: 'Default',
+          tiers: [
+            { name: 'Gold', color: '#d4af37' },
+            { name: 'Silver' },
+            { name: 'Bronze' },
+          ],
+        },
+      ],
+      images: [{ imageRef: 'r/n:1', reportUrl: 'https://x/r.json' }],
+    });
+    expect(idx.playbooks?.[0].tiers?.map(t => t.name)).toEqual([
+      'Gold',
+      'Silver',
+      'Bronze',
+    ]);
+  });
+
+  it('still accepts a v1 index whose playbooks omit tiers (backward compatible)', () => {
+    const idx = validateReportIndex({
+      schemaVersion: 1,
+      playbooks: [{ id: 'default', title: 'Default' }],
+      images: [{ imageRef: 'r/n:1', reportUrl: 'https://x/r.json' }],
+    });
+    expect(idx.playbooks?.[0].tiers).toBeUndefined();
+  });
+
+  it('rejects a tier entry missing its name', () => {
+    expect(() =>
+      validateReportIndex({
+        schemaVersion: 1,
+        playbooks: [{ id: 'default', tiers: [{ color: '#fff' }] }],
+        images: [{ imageRef: 'r/n:1', reportUrl: 'https://x/r.json' }],
+      }),
+    ).toThrow();
+  });
+});
+
 describe('validateIndexImageEntry', () => {
   it('accepts a minimal valid entry (imageRef + reportUrl) and returns it typed', () => {
     const entry = validateIndexImageEntry({
