@@ -127,6 +127,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Regis intake template (Request image onboarding)
+    - type: file
+      target: ../../examples/intake/template.yaml
+      rules:
+        - allow: [Template]
+
     # Local example organizational data
     - type: file
       target: ../../examples/org.yaml

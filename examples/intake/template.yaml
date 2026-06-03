@@ -1,0 +1,125 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: regis-image-onboarding
+  title: Request image onboarding
+  description: >-
+    Add a container image to the Regis portfolio. Opens a PR adding a single
+    index fragment; CI scans the image and the policy gate decides admission.
+spec:
+  owner: group:default/team-platform
+  type: service
+
+  parameters:
+    - title: Image
+      required:
+        - imageRef
+        - type
+      properties:
+        imageRef:
+          title: Image reference
+          type: string
+          description: Full canonical image reference, e.g. ghcr.io/shop/web:2.3.0
+          ui:autofocus: true
+        type:
+          title: Source
+          type: string
+          enum:
+            - first-party
+            - third-party
+          enumNames:
+            - 'First-party (our own image)'
+            - 'Third-party (supply-chain admission)'
+          default: first-party
+        system:
+          title: System
+          type: string
+          description: Backstage system this image belongs to (optional).
+        playbook:
+          title: Playbook
+          type: string
+          description: Playbook id to assess against (optional).
+      dependencies:
+        type:
+          oneOf:
+            - properties:
+                type:
+                  enum:
+                    - first-party
+                owner:
+                  title: Owner
+                  type: string
+                  description: Owner entity ref (optional for first-party).
+                  ui:field: OwnerPicker
+                  ui:options:
+                    catalogFilter:
+                      kind: Group
+            - properties:
+                type:
+                  enum:
+                    - third-party
+                owner:
+                  title: Owner / sponsor
+                  type: string
+                  description: >-
+                    Required — third-party images must have an owning team that
+                    sponsors their admission.
+                  ui:field: OwnerPicker
+                  ui:options:
+                    catalogFilter:
+                      kind: Group
+              required:
+                - owner
+
+    - title: Index repository
+      required:
+        - targetRepo
+      properties:
+        targetRepo:
+          title: Index repository
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: add-entry
+      name: Build index fragment
+      action: regis:index:add-entry
+      input:
+        imageRef: ${{ parameters.imageRef }}
+        type: ${{ parameters.type }}
+        owner: ${{ parameters.owner }}
+        system: ${{ parameters.system }}
+        playbook: ${{ parameters.playbook }}
+        reportBaseUrl: http://localhost:8080/reports
+        indexDirPath: examples/regis-index.d
+
+    - id: publish
+      name: Open intake PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.targetRepo }}
+        branchName: regis-intake-${{ parameters.imageRef }}
+        title: 'Onboard ${{ parameters.imageRef }} to the Regis portfolio'
+        description: >-
+          Intake request for `${{ parameters.imageRef }}`
+          (${{ parameters.type }}). Adds one index fragment;
+          CI scans and the policy gate decides admission.
+
+    - id: notify
+      name: Notify requester
+      action: notification:send
+      input:
+        recipients: entity
+        entityRefs:
+          - user:default/guest
+        title: 'Intake PR opened'
+        info: 'A PR to onboard ${{ parameters.imageRef }} has been opened.'
+        severity: 'normal'
+
+  output:
+    links:
+      - title: Intake PR
+        url: ${{ steps['publish'].output.remoteUrl }}
