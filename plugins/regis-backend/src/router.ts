@@ -4,6 +4,8 @@ import type {
 } from '@backstage/backend-plugin-api';
 import { InputError } from '@backstage/errors';
 import {
+  ExploreResponse,
+  ExploreGroupBy,
   PlaybooksResponse,
   PortfolioTrend,
   ReportSchemaError,
@@ -106,6 +108,32 @@ export async function createRouter(
     await httpAuth.credentials(req); // require an authenticated principal
     await portfolioTrend.ensureFresh(30_000);
     const body: PlaybooksResponse = { playbooks: portfolioTrend.playbookLadders() };
+    res.json(body);
+  });
+
+  router.get('/portfolio/explore', async (req, res) => {
+    await httpAuth.credentials(req); // require an authenticated principal
+    const raw = Number(req.query.days);
+    const days = Number.isFinite(raw) ? Math.min(365, Math.max(1, Math.trunc(raw))) : 90;
+    const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
+    const filters: { system?: string; owner?: string; playbook?: string; tier?: string } = {};
+    const system = str(req.query.system);
+    const owner = str(req.query.owner);
+    const playbook = str(req.query.playbook);
+    const tier = str(req.query.tier);
+    if (system) filters.system = system;
+    if (owner) filters.owner = owner;
+    if (playbook) filters.playbook = playbook;
+    if (tier) filters.tier = tier;
+    const allowed: ExploreGroupBy[] = ['system', 'owner', 'playbook', 'tier'];
+    const gb = str(req.query.groupBy) as ExploreGroupBy | undefined;
+    const groupBy: ExploreGroupBy = gb && allowed.includes(gb) ? gb : 'system';
+    await portfolioTrend.ensureFresh(30_000);
+    const today = new Date().toISOString().slice(0, 10);
+    const { trend, groups, images, facets } = portfolioTrend.explore({
+      days, today, filters, groupBy,
+    });
+    const body: ExploreResponse = { filters, groupBy, trend, groups, images, facets };
     res.json(body);
   });
 

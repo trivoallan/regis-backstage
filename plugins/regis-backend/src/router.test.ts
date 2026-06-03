@@ -161,4 +161,31 @@ describe('regis-backend routes', () => {
     expect(res.body).toEqual({ playbooks: [] });
   });
 
+  it('GET /portfolio/explore returns the explorer payload with the requested groupBy', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [bareEntity] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/explore?groupBy=owner&system=shop')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.groupBy).toBe('owner');
+    expect(res.body.filters).toEqual({ system: 'shop' });
+    expect(res.body).toHaveProperty('groups');
+    expect(res.body).toHaveProperty('images');
+    expect(res.body).toHaveProperty('facets');
+    expect(res.body.trend).toHaveProperty('bands');
+  });
+
+  it('defaults groupBy to system when missing/invalid', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [bareEntity] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/portfolio/explore?groupBy=bogus')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(200);
+    expect(res.body.groupBy).toBe('system');
+  });
+
 });
