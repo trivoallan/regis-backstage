@@ -10,6 +10,7 @@ import {
   EntityCardBlueprint,
   EntityContentBlueprint,
 } from '@backstage/plugin-catalog-react/alpha';
+import TimelineIcon from '@material-ui/icons/Timeline';
 import { isRegisAvailable } from '@regis/backstage-plugin-regis-common';
 import {
   isComponentWithImageDeps,
@@ -18,7 +19,7 @@ import {
 } from './components/imageRelations';
 import { regisApiRef } from './api/RegisApi';
 import { RegisClient } from './api/RegisClient';
-import { rootRouteRef } from './routes';
+import { rootRouteRef, portfolioRouteRef } from './routes';
 
 const regisApi = ApiBlueprint.make({
   params: define =>
@@ -60,6 +61,20 @@ const catalogPage = PageBlueprint.make({
     routeRef: rootRouteRef,
     loader: () =>
       import('./components/RegisCatalogPage').then(m => <m.RegisCatalogPage />),
+  },
+});
+
+const portfolioTrendsPage = PageBlueprint.make({
+  name: 'portfolio-trends',
+  params: {
+    path: '/regis-portfolio',
+    title: 'Portfolio Trends',
+    icon: <TimelineIcon />,
+    routeRef: portfolioRouteRef,
+    loader: () =>
+      import('./components/RegisPortfolioTrendsPage').then(m => (
+        <m.RegisPortfolioTrendsPage />
+      )),
   },
 });
 
@@ -112,6 +127,7 @@ export const regisPlugin = createFrontendPlugin({
     scorecardCard,
     reportTab,
     catalogPage,
+    portfolioTrendsPage,
     serviceImagesCard,
     playbookImagesCard,
     aliasesCard,
