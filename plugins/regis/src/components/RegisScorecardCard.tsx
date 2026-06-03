@@ -9,7 +9,7 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { Chip, Typography } from '@material-ui/core';
 import { regisApiRef } from '../api/RegisApi';
-import { tierColor } from './format';
+import { tierColor, unionLadder } from './format';
 
 /** Compact Overview card: tier badge + score + pass/fail counts. */
 export function RegisScorecardCard() {
@@ -17,12 +17,17 @@ export function RegisScorecardCard() {
   const { entity } = useEntity();
   const ref = stringifyEntityRef(entity);
 
-  const { value, loading, error } = useAsync(() => api.getReport(ref), [ref]);
+  const { value, loading, error } = useAsync(
+    () => Promise.all([api.getReport(ref), api.getPlaybooks()]),
+    [ref],
+  );
 
   if (loading) return <Progress />;
   if (error) return <ResponseErrorPanel error={error} />;
 
-  const report = value!.report;
+  const [envelope, playbooksResp] = value!;
+  const report = envelope.report;
+  const ladder = unionLadder(playbooksResp.playbooks);
   const score = report.rules_summary?.score;
   const total = report.rules_summary?.total?.length ?? 0;
   const passed = report.rules_summary?.passed?.length ?? 0;
@@ -32,7 +37,7 @@ export function RegisScorecardCard() {
       {report.tier && (
         <Chip
           label={report.tier}
-          style={{ backgroundColor: tierColor(report.tier), color: '#fff' }}
+          style={{ backgroundColor: tierColor(report.tier, ladder), color: '#fff' }}
         />
       )}
       {score !== undefined && (

@@ -28,7 +28,7 @@ const renderCard = (api: Partial<typeof regisApiRef.T>) =>
   );
 
 describe('RegisScorecardCard', () => {
-  it('shows tier and score', async () => {
+  it('shows tier and score, with the tier chip in the playbook ladder color', async () => {
     await renderCard({
       getReport: async () => ({
         report: {
@@ -38,9 +38,24 @@ describe('RegisScorecardCard', () => {
         } as any,
         meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
       }),
+      getPlaybooks: async () => ({
+        playbooks: [
+          {
+            id: 'default',
+            tiers: [
+              { key: 'Gold', label: 'Gold', color: '#d4af37' },
+              { key: 'Silver', label: 'Silver', color: '#9ca3af' },
+              { key: 'Bronze', label: 'Bronze', color: '#cd7f32' },
+            ],
+          },
+        ],
+      }),
     });
-    expect(await screen.findByText('Gold')).toBeInTheDocument();
+    const label = await screen.findByText('Gold');
     expect(await screen.findByText(/100/)).toBeInTheDocument();
+    // The chip uses the published ladder color, not a hash-palette fallback.
+    const chip = label.closest('.MuiChip-root') as HTMLElement;
+    expect(chip).toHaveStyle({ backgroundColor: '#d4af37' });
   });
 
   it('renders an error panel when the API fails', async () => {
@@ -48,6 +63,7 @@ describe('RegisScorecardCard', () => {
       getReport: async () => {
         throw new Error('boom');
       },
+      getPlaybooks: async () => ({ playbooks: [] }),
     });
     expect((await screen.findAllByText(/boom/)).length).toBeGreaterThan(0);
   });
