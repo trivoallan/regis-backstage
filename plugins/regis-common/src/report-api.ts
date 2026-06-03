@@ -28,6 +28,8 @@ export interface ReportSnapshot {
   playbook?: string;
   reportUrl?: string;
   recordedAt: string; // ISO datetime
+  owner?: string;
+  system?: string;
 }
 
 /** An image's full snapshot history, as served by `GET /report/history`. */
@@ -51,5 +53,7 @@ export interface TrendBucket {
 export interface PortfolioTrend {
   generatedAt: string; // ISO datetime
   days: number;
+  filters: { system?: string; owner?: string };
+  facets: { systems: string[]; owners: string[] };
   buckets: TrendBucket[];
 }
