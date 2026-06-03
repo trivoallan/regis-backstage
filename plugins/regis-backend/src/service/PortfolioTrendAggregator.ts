@@ -186,12 +186,16 @@ export class PortfolioTrendAggregator {
     }));
 
     const groupValue = (s: ReportSnapshot): string => {
-      const v =
-        groupBy === 'system' ? s.system
-          : groupBy === 'owner' ? s.owner
-            : groupBy === 'playbook' ? s.playbook
-              : s.tier ?? undefined;
-      return v ?? 'unknown';
+      switch (groupBy) {
+        case 'system':
+          return s.system ?? 'unknown';
+        case 'owner':
+          return s.owner ?? 'unknown';
+        case 'playbook':
+          return s.playbook ?? 'unknown';
+        default:
+          return s.tier ?? 'unknown';
+      }
     };
     const byGroup = new Map<string, ReportSnapshot[]>();
     for (const s of scoped) {

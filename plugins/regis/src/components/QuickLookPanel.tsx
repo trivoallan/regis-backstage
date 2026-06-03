@@ -33,6 +33,11 @@ export function QuickLookPanel({
   const entityRef = `resource:default/${slugForImageRef(imageRef)}`;
   const { value: history, loading } = useAsync(() => api.getHistory(entityRef), [entityRef]);
 
+  let trajectory: JSX.Element;
+  if (loading) trajectory = <Progress />;
+  else if (history) trajectory = <Sparkline history={history} ladder={ladder} />;
+  else trajectory = <Typography variant="body2">No history.</Typography>;
+
   return (
     <Drawer anchor="right" open onClose={onClose} variant="temporary">
       <Box width={320} p={2} display="flex" flexDirection="column" gridGap={12} role="region" aria-label="image quick look">
@@ -44,7 +49,7 @@ export function QuickLookPanel({
           <Chip label={`${tier}${score !== undefined ? ` · ${score}` : ''}`} style={{ backgroundColor: tierColor(tier, ladder), color: '#fff', alignSelf: 'flex-start' }} />
         )}
         <Typography variant="overline" color="textSecondary">Trajectory</Typography>
-        {loading ? <Progress /> : history ? <Sparkline history={history} ladder={ladder} /> : <Typography variant="body2">No history.</Typography>}
+        {trajectory}
         <EntityRefLink entityRef={entityRef}>Open full page ↗</EntityRefLink>
       </Box>
     </Drawer>
