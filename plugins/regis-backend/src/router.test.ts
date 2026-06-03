@@ -79,4 +79,14 @@ describe('regis-backend routes', () => {
       .set('Authorization', mockCredentials.user.header());
     expect(res.status).toBe(404);
   });
+
+  it('GET /report 404s when the entity does not exist', async () => {
+    const { server } = await startTestBackend({
+      features: [regisPlugin, catalogServiceMock.factory({ entities: [] })],
+    });
+    const res = await request(server)
+      .get('/api/regis/report?entityRef=component:default/missing')
+      .set('Authorization', mockCredentials.user.header());
+    expect(res.status).toBe(404);
+  });
 });

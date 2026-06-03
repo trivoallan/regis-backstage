@@ -10,7 +10,11 @@ import {
 import express from 'express';
 import Router from 'express-promise-router';
 import { ReportFetchError } from './service/ReportSource';
-import { NoReportError, ReportService } from './service/ReportService';
+import {
+  EntityNotFoundError,
+  NoReportError,
+  ReportService,
+} from './service/ReportService';
 import type { CatalogAggregator } from './service/CatalogAggregator';
 import {
   NoImageRefError,
@@ -62,8 +66,9 @@ export async function createRouter(
     res.json(history);
   });
 
-  // Error -> HTTP mapping. NoReport/NoImageRef=404; version/schema=422 (distinct kinds);
-  // fetch=502; everything else falls through to the default error handler.
+  // Error -> HTTP mapping. EntityNotFound/NoReport/NoImageRef=404; version/schema=422
+  // (distinct kinds); fetch=502; everything else falls through to the default
+  // error handler.
   router.use(
     (
       err: unknown,
@@ -71,7 +76,7 @@ export async function createRouter(
       res: express.Response,
       next: express.NextFunction,
     ) => {
-      if (err instanceof NoReportError) {
+      if (err instanceof EntityNotFoundError || err instanceof NoReportError) {
         res.status(404).json({ error: err.message });
       } else if (err instanceof NoImageRefError) {
         res.status(404).json({ error: err.message });

@@ -4,6 +4,7 @@ import {
   getRegisImageRef,
   type ReportHistory,
 } from '@regis/backstage-plugin-regis-common';
+import { EntityNotFoundError } from './ReportService';
 import type { ReportHistoryStore } from './ReportHistoryStore';
 
 /** Thrown when an entity carries no `regis.io/image-ref` annotation. */
@@ -29,7 +30,8 @@ export class ReportHistoryService {
     const entity = await this.deps.catalog.getEntityByRef(entityRef, {
       credentials,
     });
-    const imageRef = entity && getRegisImageRef(entity);
+    if (!entity) throw new EntityNotFoundError(entityRef);
+    const imageRef = getRegisImageRef(entity);
     if (!imageRef) throw new NoImageRefError(entityRef);
     const snapshots = await this.deps.store.getByImageRef(imageRef);
     return { imageRef, snapshots };
