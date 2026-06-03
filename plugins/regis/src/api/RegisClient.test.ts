@@ -109,4 +109,19 @@ describe('RegisClient', () => {
       expect.stringContaining('playbook=p3'),
     );
   });
+
+  it('GETs /portfolio/explore with groupBy and filters', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ groupBy: 'owner', filters: {}, trend: { bands: [], buckets: [] }, groups: [], images: [], facets: {} }),
+    });
+    const client = clientWith(fetchImpl);
+    const out = await client.explore({ groupBy: 'owner', system: 'shop', tier: 'Gold' });
+    expect(out.groupBy).toBe('owner');
+    const url = fetchImpl.mock.calls[0][0] as string;
+    expect(url).toContain('/portfolio/explore?');
+    expect(url).toContain('groupBy=owner');
+    expect(url).toContain('system=shop');
+    expect(url).toContain('tier=Gold');
+  });
 });
