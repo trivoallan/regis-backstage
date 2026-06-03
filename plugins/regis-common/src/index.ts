@@ -22,6 +22,7 @@ export type {
   ReportIndex,
   IndexImageEntry,
   IndexPlaybookEntry,
+  IndexTierDef,
 } from './report-index';
 export {
   REGIS_RESOURCE_TYPE_IMAGE,
@@ -47,6 +48,9 @@ export type {
   ReportSummary,
   ReportSnapshot,
   ReportHistory,
+  TrendBand,
   TrendBucket,
   PortfolioTrend,
+  PlaybookLadder,
+  PlaybooksResponse,
 } from './report-api';

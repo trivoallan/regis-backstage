@@ -24,6 +24,9 @@ const api = {
   getReport: async () => {
     throw new Error('not used');
   },
+  getPlaybooks: async () => ({ playbooks: [] }),
+  getHistory: async () => { throw new Error('not used'); },
+  getPortfolioTrend: async () => { throw new Error('not used'); },
 };
 
 const renderWith = (entity: Entity, node: JSX.Element) =>
@@ -44,7 +47,7 @@ describe('RegisServiceImagesCard', () => {
     };
     renderWith(entity, <RegisServiceImagesCard />);
     expect(await screen.findByText('Images of this service')).toBeInTheDocument();
-    expect(screen.getByText('r/a:1')).toBeInTheDocument();
+    expect(await screen.findByText('r/a:1')).toBeInTheDocument();
   });
 });
 
@@ -61,6 +64,6 @@ describe('RegisPlaybookImagesCard', () => {
     };
     renderWith(entity, <RegisPlaybookImagesCard />);
     expect(await screen.findByText('Assessed images')).toBeInTheDocument();
-    expect(screen.getByText('r/a:1')).toBeInTheDocument();
+    expect(await screen.findByText('r/a:1')).toBeInTheDocument();
   });
 });

@@ -7,17 +7,18 @@ import {
 } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
+import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef, type ReportHistory } from '../api/RegisApi';
-
-const TIER_COLOR: Record<string, string> = {
-  gold: '#d4af37',
-  silver: '#9ca3af',
-  bronze: '#cd7f32',
-  none: '#9ca3af', // intentional: untiered snapshots use the same neutral weight as Silver
-};
+import { tierColor, unionLadder } from './format';
 
 /** Dependency-free SVG sparkline of score over time, dots coloured by tier. */
-function Sparkline({ history }: { history: ReportHistory }) {
+function Sparkline({
+  history,
+  ladder,
+}: {
+  history: ReportHistory;
+  ladder: TrendBand[];
+}) {
   const pts = history.snapshots.filter(
     (s): s is typeof s & { score: number } => typeof s.score === 'number',
   );
@@ -39,7 +40,7 @@ function Sparkline({ history }: { history: ReportHistory }) {
           cx={x(i)}
           cy={y(s.score)}
           r={3}
-          fill={TIER_COLOR[(s.tier ?? 'none').toLowerCase()] ?? 'currentColor'}
+          fill={tierColor(s.tier, ladder)}
         >
           <title>{`${s.snapshotDate}: ${s.score} (${s.tier ?? 'none'})`}</title>
         </circle>
@@ -54,7 +55,7 @@ export function RegisTrajectoryCard() {
   const api = useApi(regisApiRef);
   const entityRef = stringifyEntityRef(entity);
   const { value, loading, error } = useAsync(
-    () => api.getHistory(entityRef),
+    () => Promise.all([api.getHistory(entityRef), api.getPlaybooks()]),
     [entityRef],
   );
 
@@ -73,10 +74,12 @@ export function RegisTrajectoryCard() {
     );
   }
 
-  const snapshots = value?.snapshots ?? [];
-  if (!value || snapshots.length === 0) {
+  const [history, playbooksResp] = value ?? [undefined, undefined];
+  const snapshots = history?.snapshots ?? [];
+  if (!history || snapshots.length === 0) {
     return <InfoCard title="Trajectory">No history recorded yet.</InfoCard>;
   }
+  const ladder = unionLadder(playbooksResp?.playbooks);
 
   const latest = snapshots[snapshots.length - 1];
   return (
@@ -86,7 +89,7 @@ export function RegisTrajectoryCard() {
         latest.tier ?? 'none'
       } (${latest.score ?? '—'})`}
     >
-      <Sparkline history={value} />
+      <Sparkline history={history} ladder={ladder} />
     </InfoCard>
   );
 }

@@ -14,7 +14,7 @@ const summaries: ReportSummary[] = [
   { entityRef: 'resource:default/other', status: 'ok', tier: 'Gold', score: 100, imageRef: 'r/o:1' },
 ];
 
-const renderCard = (imageRefs: string[]) =>
+const renderCard = (imageRefs: string[], getPlaybooks?: () => Promise<any>) =>
   renderInTestApp(
     <TestApiProvider
       apis={[
@@ -25,6 +25,9 @@ const renderCard = (imageRefs: string[]) =>
             getReport: async () => {
               throw new Error('not used');
             },
+            getPlaybooks: getPlaybooks ?? (async () => ({ playbooks: [] })),
+            getHistory: async () => { throw new Error('not used'); },
+            getPortfolioTrend: async () => { throw new Error('not used'); },
           },
         ],
       ]}
@@ -51,6 +54,108 @@ describe('RegisImagePostureCard', () => {
     renderCard(['resource:default/missing']);
     expect(
       await screen.findByText(/No Regis-tracked images/),
+    ).toBeInTheDocument();
+  });
+});
+
+describe('RegisImagePostureCard distribution order', () => {
+  it('orders the distribution by the resolved ladder (best first)', async () => {
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'default',
+          tiers: [
+            { key: 'Gold', label: 'Gold', color: '#g' },
+            { key: 'Silver', label: 'Silver', color: '#s' },
+            { key: 'Bronze', label: 'Bronze', color: '#b' },
+          ],
+        },
+      ],
+    });
+    renderCard(
+      ['resource:default/a', 'resource:default/b'],
+      getPlaybooks,
+    );
+    expect(
+      await screen.findByText(/1 Gold · 1 Bronze/),
+    ).toBeInTheDocument();
+  });
+
+  it('respects a custom ladder where Bronze ranks above Gold', async () => {
+    // Ladder: Bronze > Gold (reversed from hardcoded order)
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'custom',
+          tiers: [
+            { key: 'Bronze', label: 'Bronze', color: '#b' },
+            { key: 'Gold', label: 'Gold', color: '#g' },
+          ],
+        },
+      ],
+    });
+    renderCard(
+      ['resource:default/a', 'resource:default/b'],
+      getPlaybooks,
+    );
+    // Bronze is rank 0 in this ladder, so it comes first
+    expect(
+      await screen.findByText(/1 Bronze · 1 Gold/),
+    ).toBeInTheDocument();
+  });
+
+  it('orders by the union of multiple playbook ladders', async () => {
+    // Neither ladder alone contains both Gold and Bronze; only the merged union
+    // [Gold, Silver, Bronze] ranks Gold before Bronze. Alphabetical would invert it.
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'a',
+          tiers: [
+            { key: 'Gold', label: 'Gold', color: '#g' },
+            { key: 'Silver', label: 'Silver', color: '#s' },
+          ],
+        },
+        {
+          id: 'b',
+          tiers: [
+            { key: 'Silver', label: 'Silver', color: '#s' },
+            { key: 'Bronze', label: 'Bronze', color: '#b' },
+          ],
+        },
+      ],
+    });
+    renderCard(['resource:default/a', 'resource:default/b'], getPlaybooks);
+    expect(await screen.findByText(/1 Gold · 1 Bronze/)).toBeInTheDocument();
+  });
+
+  it('colors the Tier cell swatch with the published ladder color', async () => {
+    const getPlaybooks = async () => ({
+      playbooks: [
+        {
+          id: 'default',
+          tiers: [
+            { key: 'Gold', label: 'Gold', color: '#d4af37' },
+            { key: 'Bronze', label: 'Bronze', color: '#cd7f32' },
+          ],
+        },
+      ],
+    });
+    renderCard(['resource:default/a'], getPlaybooks);
+    const cell = await screen.findByText('Gold');
+    const swatch = cell.querySelector('[data-testid="tier-swatch"]');
+    expect(swatch).toHaveStyle({ backgroundColor: '#d4af37' });
+  });
+
+  it('falls back to alphabetical order when no playbooks are returned', async () => {
+    const getPlaybooks = async () => ({ playbooks: [] });
+    renderCard(
+      ['resource:default/a', 'resource:default/b'],
+      getPlaybooks,
+    );
+    // Alphabetical: Bronze < Gold
+    expect(
+      await screen.findByText(/1 Bronze · 1 Gold/),
     ).toBeInTheDocument();
   });
 });

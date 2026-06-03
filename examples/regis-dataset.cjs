@@ -23,7 +23,17 @@ const SNAPSHOT = '2026-06-01';
 
 // History trajectory: three monthly snapshots ending at each image's current score.
 const HISTORY_DATES = ['2026-04-01', '2026-05-01', SNAPSHOT];
-const tierFor = s => (s >= 90 ? 'Gold' : s >= 70 ? 'Silver' : 'Bronze');
+// Map a score to a tier NAME within the image's own playbook ladder, so the
+// synthetic history stays coherent with each playbook's vocabulary (a pci-dss
+// image gets Platinum/Certified/Provisional, not Gold/Silver/Bronze). Names are
+// derived from PLAYBOOKS (defined below) to avoid drift; tierFor is only invoked
+// from buildHistory() at the end, after PLAYBOOKS is initialised.
+const tierFor = (s, playbook) => {
+  const pb = PLAYBOOKS.find(p => p.id === playbook) ?? PLAYBOOKS[0];
+  const names = pb.tiers.map(t => t.name);
+  const idx = s >= 90 ? 0 : s >= 70 ? 1 : 2;
+  return names[Math.min(idx, names.length - 1)];
+};
 
 // Per-image score path; the last element is always the image's current score.
 function scorePath(img) {
@@ -46,8 +56,28 @@ const RULES = [
 ];
 
 const PLAYBOOKS = [
-  { id: 'default', title: 'Regis Default Playbook', version: '1.0.0', owner: 'team-platform' },
-  { id: 'pci-dss', title: 'PCI-DSS Hardened Playbook', version: '2.1.0', owner: 'team-payments' },
+  {
+    id: 'default',
+    title: 'Regis Default Playbook',
+    version: '1.0.0',
+    owner: 'team-platform',
+    tiers: [
+      { name: 'Gold', color: '#d4af37' },
+      { name: 'Silver', color: '#9ca3af' },
+      { name: 'Bronze', color: '#cd7f32' },
+    ],
+  },
+  {
+    id: 'pci-dss',
+    title: 'PCI-DSS Hardened Playbook',
+    version: '2.1.0',
+    owner: 'team-payments',
+    tiers: [
+      { name: 'Platinum', color: '#7e57c2' },
+      { name: 'Certified', color: '#26a69a' },
+      { name: 'Provisional', color: '#ef6c00' },
+    ],
+  },
 ];
 
 const d = h => h.repeat(32); // 64-hex digest helper
@@ -79,7 +109,7 @@ const IMAGES = [
   {
     key: 'payments-gateway', registry: 'ghcr.io', repository: 'shop/payments-gateway', tag: '3.0.1',
     digest: `sha256:${d('d4')}`, owner: 'team-payments', system: 'shop', playbook: 'pci-dss',
-    tier: 'Silver', score: 78, fail: ['image-signed', 'pinned-base-image'],
+    tier: 'Certified', score: 78, fail: ['image-signed', 'pinned-base-image'],
     cve: { vulnerability_count: 11, critical_count: 0, high_count: 0, medium_count: 3, low_count: 8, negligible_count: 0, unknown_count: 0, fixed_count: 5 },
     platforms: [{ architecture: 'amd64', os: 'linux' }],
   },
@@ -206,7 +236,7 @@ function buildHistory() {
         imageRef: imageRefOf(img),
         snapshotDate: date,
         digest: img.digest,
-        tier: tierFor(score),
+        tier: tierFor(score, img.playbook),
         score,
         playbook: img.playbook,
         owner: `group:default/${img.owner}`,

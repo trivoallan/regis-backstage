@@ -12,6 +12,8 @@ import { KnexReportHistoryStore } from './service/KnexReportHistoryStore';
 import { ReportHistoryService } from './service/ReportHistoryService';
 import { RegisHistoryRecorder } from './service/RegisHistoryRecorder';
 import { makeFragmentSource } from './provider/makeFragmentSource';
+import { assembleIndex } from './provider/assembleIndex';
+import type { TierColorOverride } from './service/LadderResolver';
 import { seedHistory } from './service/seedHistory';
 import { PortfolioTrendAggregator } from './service/PortfolioTrendAggregator';
 
@@ -65,12 +67,31 @@ export const regisPlugin = createBackendPlugin({
           catalog,
           store: historyStore,
         });
+        const indexDirUrl = config.getOptionalString('regis.catalog.indexDirUrl');
+        const loadPlaybooks = indexDirUrl
+          ? async () => {
+              const fragments = await makeFragmentSource(
+                indexDirUrl,
+                urlReader,
+              ).list(indexDirUrl);
+              return assembleIndex(fragments, logger).playbooks ?? [];
+            }
+          : undefined;
+        const tierOverrides: TierColorOverride[] = (
+          config.getOptionalConfigArray('regis.tiers') ?? []
+        ).map(c => ({
+          playbook: c.getOptionalString('playbook'),
+          tier: c.getString('tier'),
+          color: c.getString('color'),
+        }));
         const portfolioTrend = new PortfolioTrendAggregator({
           store: historyStore,
           logger,
           rowWarnThreshold: config.getOptionalNumber(
             'regis.portfolio.inMemoryRowLimit',
           ),
+          loadPlaybooks,
+          tierOverrides,
         });
 
         const historySeedUrl = config.getOptionalString(
@@ -133,7 +154,6 @@ export const regisPlugin = createBackendPlugin({
         // Persistent report history: on each tick, fetch the published index and
         // record one snapshot per image. `scope: 'global'` because the DB is
         // shared across replicas, so only one replica should write per tick.
-        const indexDirUrl = config.getOptionalString('regis.catalog.indexDirUrl');
         if (indexDirUrl) {
           const refreshMinutes =
             config.getOptionalNumber('regis.catalog.refreshMinutes') ?? 30;

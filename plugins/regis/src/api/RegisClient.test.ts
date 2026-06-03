@@ -84,4 +84,29 @@ describe('RegisClient', () => {
       'http://localhost:7007/api/regis/portfolio/trend?days=90&system=shop&owner=group%3Adefault%2Fteam-x',
     );
   });
+
+  it('GETs /playbooks', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ playbooks: [{ id: 'p3', tiers: [] }] }),
+    });
+    const client = clientWith(fetchImpl);
+    const out = await client.getPlaybooks();
+    expect(out.playbooks[0].id).toBe('p3');
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://localhost:7007/api/regis/playbooks',
+    );
+  });
+
+  it('includes ?playbook= in the trend request when filtered', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ buckets: [], bands: [], facets: {} }),
+    });
+    const client = clientWith(fetchImpl);
+    await client.getPortfolioTrend(30, { playbook: 'p3' });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      expect.stringContaining('playbook=p3'),
+    );
+  });
 });

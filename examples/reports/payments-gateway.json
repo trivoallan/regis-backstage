@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "version": "0.34.0",
   "snapshot_date": "2026-06-01",
-  "tier": "Silver",
+  "tier": "Certified",
   "badges": [
     {
       "slug": "tier",
       "scope": "tier",
-      "value": "Silver",
-      "class": "warning",
-      "label": "Tier: Silver"
+      "value": "Certified",
+      "class": "error",
+      "label": "Tier: Certified"
     },
     {
       "slug": "security",

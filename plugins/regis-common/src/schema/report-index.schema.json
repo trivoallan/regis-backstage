@@ -16,7 +16,18 @@
           "id": { "type": "string", "minLength": 1 },
           "title": { "type": "string" },
           "version": { "type": "string" },
-          "owner": { "type": "string" }
+          "owner": { "type": "string" },
+          "tiers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "color": { "type": "string" }
+              }
+            }
+          }
         }
       }
     },

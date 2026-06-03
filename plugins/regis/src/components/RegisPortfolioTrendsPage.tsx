@@ -65,28 +65,31 @@ export function RegisPortfolioTrendsPage() {
   const api = useApi(regisApiRef);
   const [system, setSystem] = useState('');
   const [owner, setOwner] = useState('');
+  const [playbook, setPlaybook] = useState('');
   const { value, loading, error } = useAsync(
     () =>
       api.getPortfolioTrend(WINDOW_DAYS, {
         system: system || undefined,
         owner: owner || undefined,
+        playbook: playbook || undefined,
       }),
-    [system, owner],
+    [system, owner, playbook],
   );
 
-  const facets = value?.facets ?? { systems: [], owners: [] };
-  const filtered = Boolean(system || owner || value?.filters?.system || value?.filters?.owner);
+  const facets = value?.facets ?? { systems: [], owners: [], playbooks: [] };
+  const filtered = Boolean(
+    system || owner || playbook || value?.filters?.system || value?.filters?.owner || value?.filters?.playbook,
+  );
 
   const body = () => {
     if (loading) return <Progress />;
     if (error) return <ResponseErrorPanel error={error} />;
     const buckets = value?.buckets ?? [];
+    const bands = value?.bands ?? [];
     if (buckets.length === 0) {
       return (
         <Typography>
-          {filtered
-            ? 'No history for this filter.'
-            : 'No portfolio history recorded yet.'}
+          {filtered ? 'No history for this filter.' : 'No portfolio history recorded yet.'}
         </Typography>
       );
     }
@@ -94,16 +97,22 @@ export function RegisPortfolioTrendsPage() {
     const first = buckets[0];
     const last = buckets[buckets.length - 1];
     const daysLabel = value?.days !== undefined ? `${value.days}d` : '';
+    const at = (b: typeof first, key: string) => b.counts[key] ?? 0;
     return (
       <Grid container spacing={3}>
-        <Kpi label="Gold" value={String(last.gold)} sub={`${delta(last.gold, first.gold)} over ${daysLabel}`} />
-        <Kpi label="Silver" value={String(last.silver)} sub={`${delta(last.silver, first.silver)} over ${daysLabel}`} />
-        <Kpi label="Bronze" value={String(last.bronze)} sub={`${delta(last.bronze, first.bronze)} over ${daysLabel}`} />
+        {bands.map(band => (
+          <Kpi
+            key={band.key}
+            label={band.label}
+            value={String(at(last, band.key))}
+            sub={`${delta(at(last, band.key), at(first, band.key))} over ${daysLabel}`}
+          />
+        ))}
         <Kpi label="Avg score" value={String(last.avgScore)} sub={`${delta(last.avgScore, first.avgScore)} over ${daysLabel}`} />
         <Kpi label="Images" value={String(last.total)} sub={`${delta(last.total, first.total)} over ${daysLabel}`} />
         <Grid item xs={12}>
           <InfoCard title={`Posture over the last ${daysLabel}`}>
-            <PortfolioStackedArea buckets={buckets} />
+            <PortfolioStackedArea bands={bands} buckets={buckets} />
           </InfoCard>
         </Grid>
       </Grid>
@@ -120,6 +129,9 @@ export function RegisPortfolioTrendsPage() {
           </Grid>
           <Grid item xs={6} sm={3}>
             <FacetSelect label="Owner" value={owner} options={facets.owners} onChange={setOwner} />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <FacetSelect label="Playbook" value={playbook} options={facets.playbooks ?? []} onChange={setPlaybook} />
           </Grid>
         </Grid>
         {body()}

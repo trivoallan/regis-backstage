@@ -6,6 +6,14 @@ import schema from './schema/report-index.schema.json';
 /** Highest report-index `schemaVersion` this package understands. */
 export const SUPPORTED_INDEX_SCHEMA_VERSION = 1;
 
+/** One tier in a playbook's ladder, as published in the index. */
+export interface IndexTierDef {
+  /** Tier name, e.g. "Gold". */
+  name: string;
+  /** Optional display color (hex). */
+  color?: string;
+}
+
 /** A playbook entry in the published index (mirrors the regis v0.34.0 envelope metadata). */
 export interface IndexPlaybookEntry {
   /** Machine id — regis `metadata.name`. */
@@ -16,6 +24,8 @@ export interface IndexPlaybookEntry {
   version?: string;
   /** Backstage owner entity ref (regis has no owner concept). */
   owner?: string;
+  /** Ordered tier ladder, best→worst. Array order is the source of truth for rank. */
+  tiers?: IndexTierDef[];
 }
 
 /** An analyzed-image entry in the published index. */

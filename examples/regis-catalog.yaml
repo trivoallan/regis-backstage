@@ -188,7 +188,7 @@ metadata:
   title: 'payments-gateway:3.0.1'
   description: Container image ghcr.io/shop/payments-gateway:3.0.1
   labels:
-    regis.io/tier: silver
+    regis.io/tier: certified
     regis.io/score-band: '50-79'
   annotations:
     regis.io/report-url: http://localhost:8080/reports/payments-gateway.json

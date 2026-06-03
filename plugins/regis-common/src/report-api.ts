@@ -38,14 +38,22 @@ export interface ReportHistory {
   snapshots: ReportSnapshot[];
 }
 
+/** One band in a trend chart: a stacking layer with a stable key, label and color. */
+export interface TrendBand {
+  /** Stable id used as the key into `TrendBucket.counts`. */
+  key: string;
+  /** Human label for the legend/KPI card. */
+  label: string;
+  /** Display color (hex). */
+  color: string;
+}
+
 /** One daily bucket of the portfolio's posture distribution. */
 export interface TrendBucket {
   date: string; // ISO date (YYYY-MM-DD)
-  gold: number;
-  silver: number;
-  bronze: number;
-  none: number; // images whose as-of snapshot has no/unknown tier
-  total: number; // gold + silver + bronze + none
+  /** Image count per band key (e.g. { rank1: 12, rank2: 5, none: 1 } or { Gold: 9 }). */
+  counts: Record<string, number>;
+  total: number; // sum of all counts values
   avgScore: number; // mean score across images with a numeric score (0 if none)
 }
 
@@ -53,7 +61,22 @@ export interface TrendBucket {
 export interface PortfolioTrend {
   generatedAt: string; // ISO datetime
   days: number;
-  filters: { system?: string; owner?: string };
-  facets: { systems: string[]; owners: string[] };
+  filters: { system?: string; owner?: string; playbook?: string };
+  facets: { systems: string[]; owners: string[]; playbooks: string[] };
+  /** Stacking order = array order; the frontend renders entirely from this. */
+  bands: TrendBand[];
   buckets: TrendBucket[];
+}
+
+/** A playbook's resolved ladder, as served by `GET /playbooks`. */
+export interface PlaybookLadder {
+  id: string;
+  title?: string;
+  /** Ordered best→worst; reuses TrendBand (key === label === tier name). */
+  tiers: TrendBand[];
+}
+
+/** Response of `GET /playbooks`. */
+export interface PlaybooksResponse {
+  playbooks: PlaybookLadder[];
 }

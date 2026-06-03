@@ -1,6 +1,10 @@
 import { mockServices } from '@backstage/backend-test-utils';
 import { PortfolioTrendAggregator } from './PortfolioTrendAggregator';
 import { InMemoryReportHistoryStore } from './ReportHistoryStore';
+import type {
+  IndexPlaybookEntry,
+  ReportSnapshot,
+} from '@regis/backstage-plugin-regis-common';
 
 describe('PortfolioTrendAggregator', () => {
   it('refreshes from the store and computes a trend for the cached snapshots', async () => {
@@ -13,9 +17,9 @@ describe('PortfolioTrendAggregator', () => {
       logger: mockServices.logger.mock(),
     });
     await agg.refresh();
-    const buckets = agg.trend(2, '2026-06-03');
-    expect(buckets).toHaveLength(2);
-    expect(buckets[1]).toMatchObject({ gold: 1, total: 1, avgScore: 100 });
+    const result = agg.trend(2, '2026-06-03');
+    expect(result.buckets).toHaveLength(2);
+    expect(result.buckets[1]).toMatchObject({ total: 1, avgScore: 100 });
   });
 
   it('ensureFresh only reloads when stale', async () => {
@@ -47,16 +51,17 @@ describe('PortfolioTrendAggregator', () => {
     expect(agg.facets()).toEqual({
       systems: ['billing', 'shop'],
       owners: ['group:default/team-x', 'group:default/team-y'],
+      playbooks: [],
     });
 
     const shopOnly = agg.trend(1, '2026-06-03', { system: 'shop' });
-    expect(shopOnly[0]).toMatchObject({ gold: 1, bronze: 0, total: 1 });
+    expect(shopOnly.buckets[0]).toMatchObject({ total: 1 });
 
     const both = agg.trend(1, '2026-06-03', { system: 'shop', owner: 'group:default/team-y' });
-    expect(both[0].total).toBe(0); // shop AND team-y matches nothing
+    expect(both.buckets[0].total).toBe(0); // shop AND team-y matches nothing
 
     const all = agg.trend(1, '2026-06-03');
-    expect(all[0].total).toBe(2);
+    expect(all.buckets[0].total).toBe(2);
   });
 
   it('warns when the snapshot volume exceeds the in-memory threshold', async () => {
@@ -70,5 +75,58 @@ describe('PortfolioTrendAggregator', () => {
     const agg = new PortfolioTrendAggregator({ store, logger, rowWarnThreshold: 1 });
     await agg.refresh();
     expect(warn).toHaveBeenCalledWith(expect.stringMatching(/SQL|rollup|volume/i));
+  });
+});
+
+const snap = (over: Partial<ReportSnapshot>): ReportSnapshot => ({
+  imageRef: 'r/n:1',
+  snapshotDate: '2026-05-01',
+  recordedAt: '2026-05-01T00:00:00.000Z',
+  ...over,
+});
+
+function makeAggregator(
+  snapshots: ReportSnapshot[],
+  playbooks: IndexPlaybookEntry[] = [],
+) {
+  const store = { listSnapshots: async () => snapshots } as any;
+  const logger = { warn() {}, info() {}, error() {}, debug() {} } as any;
+  return new PortfolioTrendAggregator({
+    store,
+    logger,
+    loadPlaybooks: async () => playbooks,
+  });
+}
+
+describe('PortfolioTrendAggregator ladders/facets', () => {
+  it('exposes playbooks in facets', async () => {
+    const agg = makeAggregator([
+      snap({ imageRef: 'a', playbook: 'p3', tier: 'Gold', system: 's1', owner: 'o1' }),
+      snap({ imageRef: 'b', playbook: 'p5', tier: 'A', system: 's2', owner: 'o2' }),
+    ]);
+    await agg.ensureFresh(1);
+    expect(agg.facets().playbooks).toEqual(['p3', 'p5']);
+  });
+
+  it('returns named-tier bands when filtered to a playbook', async () => {
+    const agg = makeAggregator(
+      [snap({ imageRef: 'a', playbook: 'p3', tier: 'Silver', score: 80 })],
+      [{ id: 'p3', tiers: [{ name: 'Gold' }, { name: 'Silver' }, { name: 'Bronze' }] }],
+    );
+    await agg.ensureFresh(1);
+    const res = agg.trend(1, '2026-06-03', { playbook: 'p3' });
+    expect(res.bands.map(b => b.key)).toEqual(['Gold', 'Silver', 'Bronze', 'none']);
+    expect(res.buckets[0].counts).toMatchObject({ Silver: 1 });
+  });
+
+  it('builds PlaybookLadder list from the resolved ladders', async () => {
+    const agg = makeAggregator(
+      [snap({ imageRef: 'a', playbook: 'p3', tier: 'Gold' })],
+      [{ id: 'p3', title: 'Default', tiers: [{ name: 'Gold', color: '#g' }] }],
+    );
+    await agg.ensureFresh(1);
+    expect(agg.playbookLadders()).toEqual([
+      { id: 'p3', title: 'Default', tiers: [{ key: 'Gold', label: 'Gold', color: '#g' }] },
+    ]);
   });
 });
