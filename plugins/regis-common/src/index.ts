@@ -22,6 +22,7 @@ export type {
   ReportIndex,
   IndexImageEntry,
   IndexPlaybookEntry,
+  IndexTierDef,
 } from './report-index';
 export {
   REGIS_RESOURCE_TYPE_IMAGE,
