@@ -1,6 +1,8 @@
 import {
   validateReportIndex,
+  validateIndexImageEntry,
   IndexSchemaError,
+  IndexEntrySchemaError,
   UnsupportedIndexSchemaVersionError,
   SUPPORTED_INDEX_SCHEMA_VERSION,
 } from './report-index';
@@ -45,5 +47,50 @@ describe('validateReportIndex', () => {
       ],
     });
     expect(index.images[0].snapshotDate).toBe('2026-05-31');
+  });
+});
+
+describe('validateIndexImageEntry', () => {
+  it('accepts a minimal valid entry (imageRef + reportUrl) and returns it typed', () => {
+    const entry = validateIndexImageEntry({
+      imageRef: 'registry-1.docker.io/library/nginx:1.27',
+      reportUrl: 'https://example.test/reports/nginx.json',
+    });
+    expect(entry.imageRef).toBe('registry-1.docker.io/library/nginx:1.27');
+  });
+
+  it('accepts the optional fields (owner, system, playbook, tier, score)', () => {
+    const entry = validateIndexImageEntry({
+      imageRef: 'r/n:1',
+      reportUrl: 'https://x/r.json',
+      owner: 'group:default/team-platform',
+      system: 'shop',
+      playbook: 'default',
+      tier: 'Gold',
+      score: 100,
+    });
+    expect(entry.owner).toBe('group:default/team-platform');
+  });
+
+  it('rejects an entry missing reportUrl', () => {
+    expect(() =>
+      validateIndexImageEntry({ imageRef: 'r/n:1' }),
+    ).toThrow(IndexEntrySchemaError);
+  });
+
+  it('rejects an entry missing imageRef', () => {
+    expect(() =>
+      validateIndexImageEntry({ reportUrl: 'https://x/r.json' }),
+    ).toThrow(IndexEntrySchemaError);
+  });
+
+  it('rejects a wrong-typed score', () => {
+    expect(() =>
+      validateIndexImageEntry({
+        imageRef: 'r/n:1',
+        reportUrl: 'https://x/r.json',
+        score: 'high',
+      }),
+    ).toThrow(IndexEntrySchemaError);
   });
 });
