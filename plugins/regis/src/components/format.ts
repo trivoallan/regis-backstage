@@ -3,8 +3,6 @@ import type {
   TrendBand,
 } from '@regis/backstage-plugin-regis-common';
 
-export type ScoreStatus = 'ok' | 'warning' | 'error';
-
 // Deterministic palette mirroring the backend LadderResolver, so a tier with no
 // ladder color still renders a stable, non-grey hue.
 const PALETTE = ['#2e7d32', '#9e9d24', '#ef6c00', '#c62828', '#6a1b9a', '#00838f'];
@@ -51,10 +49,25 @@ export function unionLadder(playbooks?: PlaybookLadder[]): TrendBand[] {
   return out;
 }
 
-/** Bucket a 0-100 score for status styling. Missing score becomes warning. */
-export function scoreStatus(score: number | undefined): ScoreStatus {
-  if (score === undefined) return 'warning';
-  if (score >= 90) return 'ok';
-  if (score >= 60) return 'warning';
-  return 'error';
+/** Color for a 0-100 score bar, matching the badge semantic palette. */
+export function scoreBarColor(score: number): string {
+  if (score >= 90) return '#1e7d34';
+  if (score >= 60) return '#a86700';
+  return '#c0392b';
+}
+
+/** Color for a report badge `class`, matching the report's semantic palette. */
+export function badgeClassColor(
+  cls: 'success' | 'warning' | 'error' | 'information',
+): string {
+  switch (cls) {
+    case 'success':
+      return '#1e7d34';
+    case 'warning':
+      return '#a86700';
+    case 'error':
+      return '#c0392b';
+    default:
+      return '#1565c0';
+  }
 }

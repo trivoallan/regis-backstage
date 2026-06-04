@@ -1,4 +1,4 @@
-import { tierColor, scoreStatus, unionLadder } from './format';
+import { tierColor, unionLadder, badgeClassColor, scoreBarColor } from './format';
 import type {
   PlaybookLadder,
   TrendBand,
@@ -12,13 +12,6 @@ describe('formatting helpers', () => {
     expect(tierColor('Bronze')).toBe('#2e7d32');
     expect(tierColor(null)).toBe('#9ca3af');
     expect(tierColor(undefined)).toBe('#9ca3af');
-  });
-
-  it('maps scores to a status bucket', () => {
-    expect(scoreStatus(100)).toBe('ok');
-    expect(scoreStatus(80)).toBe('warning');
-    expect(scoreStatus(40)).toBe('error');
-    expect(scoreStatus(undefined)).toBe('warning');
   });
 });
 
@@ -83,5 +76,22 @@ describe('unionLadder', () => {
     const u = unionLadder(playbooks);
     expect(tierColor('Platinum', u)).toBe('#7e57c2');
     expect(tierColor('Bronze', u)).toBe('#cd7f32');
+  });
+});
+
+describe('scoreBarColor', () => {
+  it('maps score bands to the badge palette', () => {
+    expect(scoreBarColor(95)).toBe('#1e7d34');
+    expect(scoreBarColor(70)).toBe('#a86700');
+    expect(scoreBarColor(30)).toBe('#c0392b');
+  });
+});
+
+describe('badgeClassColor', () => {
+  it('maps each badge class to a color', () => {
+    expect(badgeClassColor('success')).toBe('#1e7d34');
+    expect(badgeClassColor('warning')).toBe('#a86700');
+    expect(badgeClassColor('error')).toBe('#c0392b');
+    expect(badgeClassColor('information')).toBe('#1565c0');
   });
 });
