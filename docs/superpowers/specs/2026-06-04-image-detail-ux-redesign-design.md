@@ -158,3 +158,24 @@ Follows the repo's near-1:1 colocated TDD convention:
   differentiator) — separate spec.
 - Score-threshold detection for a richer points-based gap — deliberately
   deferred; the rule-count framing is correct in all ladder shapes.
+
+## Correction (2026-06-04, post-implementation)
+
+The "path to the next tier" feature described above was **removed** after
+implementation because it rested on a false premise.
+
+- A rule's `level` is a **severity** (`critical` / `warning` / `high`, per the
+  [Regis rules docs](https://trivoallan.github.io/regis/docs/concepts/rules)),
+  **not** a tier. Deriving "what blocks the next tier" from `rule.level === <tier>`
+  is a category error; it only appeared to work because the demo dataset abuses
+  `level` to hold tier names (Gold/Silver/Bronze).
+- Tiers are decided by playbook **conditions (JSON Logic)**, which are not
+  carried in the per-image report, so a correct "next tier" gap is **not
+  derivable frontend-side**.
+
+Removed: `NextTierPath`, the scorecard next-tier hint/gauge ratio, and
+`posture.ts` `nextTier` / `blockingRules` / `tierProgress`. The scorecard gauge
+now fills to the 0–100 score. Actionability is carried by the **RuleTable**
+(failures-first), and its column is relabelled **Severity** (it shows
+`rule.level`). A correct tier-progression view would require evaluating playbook
+tier conditions server-side — tracked as a follow-up task.
