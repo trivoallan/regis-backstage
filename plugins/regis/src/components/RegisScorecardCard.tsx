@@ -19,7 +19,7 @@ function Gauge(props: { score: number; ratio: number; color: string }) {
   const offset = circ * (1 - Math.max(0, Math.min(1, props.ratio)));
   return (
     <Box position="relative" width={96} height={96} flex="none">
-      <svg viewBox="0 0 100 100" width={96} height={96}>
+      <svg viewBox="0 0 100 100" width={96} height={96} role="img" aria-label={`Posture score ${props.score} of 100`}>
         <circle cx="50" cy="50" r={r} fill="none" stroke="#eee" strokeWidth={9} />
         <circle
           cx="50"
@@ -83,7 +83,9 @@ export function RegisScorecardCard() {
           <Typography variant="body2" color="textSecondary" component="div">
             {next
               ? `${remaining} rules left for ${next}`
-              : 'Top tier — maintained'}
+              : report.tier
+                ? 'Top tier — maintained'
+                : 'No tier assigned yet'}
           </Typography>
           <Typography variant="body2" component="div">
             {counts.passed} passed · {counts.failed} failed · {counts.incomplete} incomplete
@@ -94,7 +96,7 @@ export function RegisScorecardCard() {
         <Box display="flex" flexWrap="wrap" gridGap={6} mb={1}>
           {report.badges!.map(b => (
             <Chip
-              key={b.scope}
+              key={b.slug ?? b.scope}
               size="small"
               label={`${b.scope}${b.value ? ` · ${b.value}` : ''}`}
               style={{ backgroundColor: badgeClassColor(b.class), color: '#fff' }}

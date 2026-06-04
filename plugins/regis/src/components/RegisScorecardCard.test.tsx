@@ -90,6 +90,23 @@ describe('RegisScorecardCard', () => {
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
   });
 
+  it('shows "No tier assigned yet" for an untiered image with no ladder', async () => {
+    await renderCard({
+      getReport: async () => ({
+        report: {
+          schemaVersion: 1,
+          tier: null,
+          rules: [],
+          rules_summary: { score: 0, by_tag: {} },
+        } as any,
+        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
+      }),
+      getPlaybooks: async () => ({ playbooks: [] }),
+    });
+    expect(await screen.findByText(/No tier assigned yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
+  });
+
   it('renders an error panel when the API fails', async () => {
     await renderCard({
       getReport: async () => {
