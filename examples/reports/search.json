@@ -3,6 +3,17 @@
   "version": "0.34.0",
   "snapshot_date": "2026-06-01",
   "tier": "Bronze",
+  "playbooks": [
+    {
+      "playbook_name": "default",
+      "playbook_version": "1.0.0",
+      "tier": "Bronze",
+      "score": 64,
+      "total_scorecards": 8,
+      "passed_scorecards": 5,
+      "pages": []
+    }
+  ],
   "badges": [
     {
       "slug": "tier",

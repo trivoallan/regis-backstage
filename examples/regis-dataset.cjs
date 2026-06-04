@@ -171,11 +171,27 @@ function buildReport(img) {
     by_tag[tag] = { rules: inTag, passed_rules: passedInTag, score: Math.round((passedInTag.length / inTag.length) * 100) };
   }
   const securityScore = by_tag.security ? by_tag.security.score : 100;
+  const passedCount = rules.filter(r => r.passed).length;
+  const pbVersion = (PLAYBOOKS.find(p => p.id === img.playbook) ?? {}).version;
   return {
     schemaVersion: 1,
     version: VERSION,
     snapshot_date: SNAPSHOT,
     tier: img.tier,
+    // Playbook attribution: PostureSummary reads playbooks[0].playbook_name.
+    // Minimal but schema-valid (playbook_name/score/total_scorecards/
+    // passed_scorecards/pages are all required).
+    playbooks: [
+      {
+        playbook_name: img.playbook,
+        playbook_version: pbVersion ?? null,
+        tier: img.tier,
+        score: img.score,
+        total_scorecards: rules.length,
+        passed_scorecards: passedCount,
+        pages: [],
+      },
+    ],
     badges: [
       { slug: 'tier', scope: 'tier', value: img.tier, class: badgeClass(img.tier), label: `Tier: ${img.tier}` },
       { slug: 'security', scope: 'security', value: grade(securityScore), class: securityScore >= 75 ? 'success' : securityScore >= 50 ? 'warning' : 'error', label: `Security: ${grade(securityScore)}` },

@@ -16,6 +16,7 @@ import { assembleIndex } from './provider/assembleIndex';
 import type { TierColorOverride } from './service/LadderResolver';
 import { seedHistory } from './service/seedHistory';
 import { PortfolioTrendAggregator } from './service/PortfolioTrendAggregator';
+import { readConfigPlaybooks } from './service/configPlaybooks';
 
 /** The Regis backend plugin (new backend system). */
 export const regisPlugin = createBackendPlugin({
@@ -68,15 +69,24 @@ export const regisPlugin = createBackendPlugin({
           store: historyStore,
         });
         const indexDirUrl = config.getOptionalString('regis.catalog.indexDirUrl');
-        const loadPlaybooks = indexDirUrl
-          ? async () => {
-              const fragments = await makeFragmentSource(
-                indexDirUrl,
-                urlReader,
-              ).list(indexDirUrl);
-              return assembleIndex(fragments, logger).playbooks ?? [];
-            }
-          : undefined;
+        // Authoritative tier ladders for the report viewer. The published index
+        // wins when wired; otherwise fall back to ladders declared in
+        // `regis.playbooks` config — the provider-free path for the
+        // static-catalog demo, which keeps `resolveLadders` off alphabetical
+        // discovery without minting (conflicting) catalog entities.
+        const configPlaybooks = readConfigPlaybooks(config);
+        let loadPlaybooks: (() => Promise<typeof configPlaybooks>) | undefined;
+        if (indexDirUrl) {
+          loadPlaybooks = async () => {
+            const fragments = await makeFragmentSource(
+              indexDirUrl,
+              urlReader,
+            ).list(indexDirUrl);
+            return assembleIndex(fragments, logger).playbooks ?? [];
+          };
+        } else if (configPlaybooks.length) {
+          loadPlaybooks = async () => configPlaybooks;
+        }
         const tierOverrides: TierColorOverride[] = (
           config.getOptionalConfigArray('regis.tiers') ?? []
         ).map(c => ({
