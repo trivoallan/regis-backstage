@@ -167,6 +167,29 @@ mcpActions:
 regis:
   # TTL (seconds) for the on-demand report cache used by the report API.
   cacheTtlSeconds: 1800
+  # Authoritative playbook tier ladders for the report viewer (rank + colors).
+  # Mirrors examples/regis-index.d/index.json — the published index is canonical
+  # when the entity provider is wired (regis.catalog.indexDirUrl). For the
+  # bundled static-catalog demo (regis-catalog.yaml), the index/provider stays
+  # off to avoid entity conflicts, so declare the ladders here instead. Array
+  # order of `tiers` is the rank (best→worst); prod configs override this list.
+  playbooks:
+    - id: default
+      title: Regis Default Playbook
+      version: '1.0.0'
+      owner: team-platform
+      tiers:
+        - { name: Gold, color: '#d4af37' }
+        - { name: Silver, color: '#9ca3af' }
+        - { name: Bronze, color: '#cd7f32' }
+    - id: pci-dss
+      title: PCI-DSS Hardened Playbook
+      version: '2.1.0'
+      owner: team-payments
+      tiers:
+        - { name: Platinum, color: '#7e57c2' }
+        - { name: Certified, color: '#26a69a' }
+        - { name: Provisional, color: '#ef6c00' }
   # Phase 2 entity provider. Leave indexDirUrl unset to disable entity minting
   # (the Phase 1 report viewer still works via the regis.io/report-url annotation).
   catalog:

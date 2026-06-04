@@ -53,3 +53,9 @@ catalog:
       target: ./examples/org.yaml
       rules:
         - allow: [User, Group]
+
+# Clear the demo playbook ladders from app-config.yaml (they describe the bundled
+# example dataset). In production, wire regis.catalog.indexDirUrl so ladders come
+# from the published report index instead.
+regis:
+  playbooks: []
