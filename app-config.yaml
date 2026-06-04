@@ -173,7 +173,7 @@ regis:
     # URL of the published Regis report index *directory* (fragments: index.json
     # + images/<slug>.json — see examples/regis-index.d for the shape).
     # For the bundled demo dataset, read it from disk:
-    indexDirUrl: file://${PWD}/examples/regis-index.d
+    # indexDirUrl: file://${PWD}/examples/regis-index.d
     # For a real deployment, point at a repo tree URL (GitHub integration):
     # indexDirUrl: https://github.com/your-org/regis-index/tree/main/regis-index.d
     # Dev only: seed the persistent report-history store from a served JSON
