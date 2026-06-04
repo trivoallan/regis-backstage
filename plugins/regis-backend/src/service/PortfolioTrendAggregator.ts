@@ -1,5 +1,8 @@
 import type { LoggerService } from '@backstage/backend-plugin-api';
 import type {
+  ExploreGroup,
+  ExploreGroupBy,
+  ExploreImage,
   IndexPlaybookEntry,
   PlaybookLadder,
   ReportSnapshot,
@@ -96,7 +99,8 @@ export class PortfolioTrendAggregator {
     const filtered = this.snapshots.filter(
       s =>
         (filters.system === undefined || s.system === filters.system) &&
-        (filters.owner === undefined || s.owner === filters.owner),
+        (filters.owner === undefined || s.owner === filters.owner) &&
+        (filters.playbook === undefined || s.playbook === filters.playbook),
     );
     const ladders = this.resolve();
     const mode = filters.playbook
@@ -134,6 +138,110 @@ export class PortfolioTrendAggregator {
       });
     }
     return out.sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  /** Latest snapshot per image (max snapshotDate wins). */
+  private latestByImage(): ReportSnapshot[] {
+    const latest = new Map<string, ReportSnapshot>();
+    for (const s of this.snapshots) {
+      const prev = latest.get(s.imageRef);
+      if (!prev || s.snapshotDate > prev.snapshotDate) latest.set(s.imageRef, s);
+    }
+    return [...latest.values()];
+  }
+
+  /**
+   * One-call data for an explorer level: scoped trend + per-group aggregates +
+   * scoped image list + scoped facets. `tier` filters images/groups only — a
+   * "filtered by current tier" time series is not meaningful — so the trend uses
+   * system/owner/playbook only.
+   */
+  explore(opts: {
+    days: number;
+    today: string;
+    filters: { system?: string; owner?: string; playbook?: string; tier?: string };
+    groupBy: ExploreGroupBy;
+  }): {
+    trend: TrendResult;
+    groups: ExploreGroup[];
+    images: ExploreImage[];
+    facets: { systems: string[]; owners: string[]; playbooks: string[]; tiers: string[] };
+  } {
+    const { days, today, filters, groupBy } = opts;
+    const inScope = (s: ReportSnapshot): boolean =>
+      (filters.system === undefined || s.system === filters.system) &&
+      (filters.owner === undefined || s.owner === filters.owner) &&
+      (filters.playbook === undefined || s.playbook === filters.playbook) &&
+      (filters.tier === undefined || (s.tier ?? undefined) === filters.tier);
+
+    const scoped = this.latestByImage().filter(inScope);
+
+    const images: ExploreImage[] = scoped.map(s => ({
+      imageRef: s.imageRef,
+      tier: s.tier,
+      score: s.score,
+      system: s.system,
+      owner: s.owner,
+      playbook: s.playbook,
+      digest: s.digest,
+    }));
+
+    const groupValue = (s: ReportSnapshot): string => {
+      switch (groupBy) {
+        case 'system':
+          return s.system ?? 'unknown';
+        case 'owner':
+          return s.owner ?? 'unknown';
+        case 'playbook':
+          return s.playbook ?? 'unknown';
+        default:
+          // tier: use the same sentinel as the tier-mix map below ('untiered'),
+          // so a group keyed by tier agrees with its own mix bar and color.
+          return s.tier ?? 'untiered';
+      }
+    };
+    const byGroup = new Map<string, ReportSnapshot[]>();
+    for (const s of scoped) {
+      const k = groupValue(s);
+      const arr = byGroup.get(k);
+      if (arr) arr.push(s);
+      else byGroup.set(k, [s]);
+    }
+    const groups: ExploreGroup[] = [...byGroup.entries()]
+      .map(([key, rows]) => {
+        const scored = rows.filter(r => typeof r.score === 'number');
+        const tiers: Record<string, number> = {};
+        for (const r of rows) {
+          const t = r.tier ?? 'untiered';
+          tiers[t] = (tiers[t] ?? 0) + 1;
+        }
+        return {
+          key,
+          count: rows.length,
+          avgScore: scored.length
+            ? Math.round(scored.reduce((a, r) => a + (r.score as number), 0) / scored.length)
+            : 0,
+          tiers,
+        };
+      })
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    const distinct = (vals: Array<string | undefined | null>): string[] =>
+      [...new Set(vals.filter((v): v is string => !!v))].sort();
+    const facets = {
+      systems: distinct(scoped.map(s => s.system)),
+      owners: distinct(scoped.map(s => s.owner)),
+      playbooks: distinct(scoped.map(s => s.playbook)),
+      tiers: distinct(scoped.map(s => s.tier ?? undefined)),
+    };
+
+    const trend = this.trend(days, today, {
+      system: filters.system,
+      owner: filters.owner,
+      playbook: filters.playbook,
+    });
+
+    return { trend, groups, images, facets };
   }
 
   /**

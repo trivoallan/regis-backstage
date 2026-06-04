@@ -1,5 +1,7 @@
 import type { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
 import type {
+  ExploreParams,
+  ExploreResponse,
   PlaybooksResponse,
   PortfolioTrend,
   RegisApi,
@@ -63,5 +65,15 @@ export class RegisClient implements RegisApi {
 
   async getPlaybooks(): Promise<PlaybooksResponse> {
     return this.getJson<PlaybooksResponse>('/playbooks');
+  }
+
+  async explore(params: ExploreParams): Promise<ExploreResponse> {
+    const p = new URLSearchParams({ groupBy: params.groupBy });
+    if (params.days) p.set('days', String(params.days));
+    if (params.system) p.set('system', params.system);
+    if (params.owner) p.set('owner', params.owner);
+    if (params.playbook) p.set('playbook', params.playbook);
+    if (params.tier) p.set('tier', params.tier);
+    return this.getJson<ExploreResponse>(`/portfolio/explore?${p.toString()}`);
   }
 }

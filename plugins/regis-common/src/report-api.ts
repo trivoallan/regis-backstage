@@ -80,3 +80,36 @@ export interface PlaybookLadder {
 export interface PlaybooksResponse {
   playbooks: PlaybookLadder[];
 }
+
+/** Group-by dimension for the explorer. */
+export type ExploreGroupBy = 'system' | 'owner' | 'playbook' | 'tier';
+
+/** One aggregated group in the explorer breakdown. */
+export interface ExploreGroup {
+  key: string;
+  count: number;
+  avgScore: number;
+  /** Tier name → image count, for the mix bar. */
+  tiers: Record<string, number>;
+}
+
+/** One image row (latest snapshot) in the scoped explorer list. */
+export interface ExploreImage {
+  imageRef: string;
+  tier?: string | null;
+  score?: number;
+  system?: string;
+  owner?: string;
+  playbook?: string;
+  digest?: string;
+}
+
+/** Response of `GET /portfolio/explore`. */
+export interface ExploreResponse {
+  filters: { system?: string; owner?: string; playbook?: string; tier?: string };
+  groupBy: ExploreGroupBy;
+  trend: { bands: TrendBand[]; buckets: TrendBucket[] };
+  groups: ExploreGroup[];
+  images: ExploreImage[];
+  facets: { systems: string[]; owners: string[]; playbooks: string[]; tiers: string[] };
+}

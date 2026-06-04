@@ -19,7 +19,7 @@ import {
 } from './components/imageRelations';
 import { regisApiRef } from './api/RegisApi';
 import { RegisClient } from './api/RegisClient';
-import { rootRouteRef, portfolioRouteRef } from './routes';
+import { rootRouteRef } from './routes';
 
 const regisApi = ApiBlueprint.make({
   params: define =>
@@ -55,26 +55,15 @@ const reportTab = EntityContentBlueprint.make({
   },
 });
 
-const catalogPage = PageBlueprint.make({
+const explorerPage = PageBlueprint.make({
+  name: 'explorer',
   params: {
-    path: '/regis',
+    path: '/',
+    title: 'Portfolio',
+    icon: <TimelineIcon />,
     routeRef: rootRouteRef,
     loader: () =>
-      import('./components/RegisCatalogPage').then(m => <m.RegisCatalogPage />),
-  },
-});
-
-const portfolioTrendsPage = PageBlueprint.make({
-  name: 'portfolio-trends',
-  params: {
-    path: '/regis-portfolio',
-    title: 'Portfolio Trends',
-    icon: <TimelineIcon />,
-    routeRef: portfolioRouteRef,
-    loader: () =>
-      import('./components/RegisPortfolioTrendsPage').then(m => (
-        <m.RegisPortfolioTrendsPage />
-      )),
+      import('./components/RegisExplorerPage').then(m => <m.RegisExplorerPage />),
   },
 });
 
@@ -126,8 +115,7 @@ export const regisPlugin = createFrontendPlugin({
     regisApi,
     scorecardCard,
     reportTab,
-    catalogPage,
-    portfolioTrendsPage,
+    explorerPage,
     serviceImagesCard,
     playbookImagesCard,
     aliasesCard,
