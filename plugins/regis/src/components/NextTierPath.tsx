@@ -1,12 +1,6 @@
 import type { TrendBand } from '@regis/backstage-plugin-regis-common';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  List,
-  ListItem,
-  ListItemText,
-} from '@material-ui/core';
+import { InfoCard, StatusError, StatusWarning } from '@backstage/core-components';
+import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { blockingRules, nextTier, type Rule } from './posture';
 
 /** Actionable "what blocks the next tier" checklist, or a top-tier state. */
@@ -20,31 +14,27 @@ export function NextTierPath(props: {
 
   const next = nextTier(ladder, tier);
   if (!next) {
-    return (
-      <Card>
-        <CardHeader title="Top tier — posture maintained" />
-      </Card>
-    );
+    return <InfoCard title="Top tier — posture maintained" />;
   }
 
   const blocking = blockingRules(rules, next);
   return (
-    <Card>
-      <CardHeader title={`Path to ${next}`} />
-      <CardContent>
-        <List dense>
-          {blocking.map(r => (
-            <ListItem key={r.slug}>
-              <ListItemText
-                primary={r.description}
-                secondary={
-                  r.status === 'incomplete' ? `To investigate — ${r.message}` : r.message
-                }
-              />
-            </ListItem>
-          ))}
-        </List>
-      </CardContent>
-    </Card>
+    <InfoCard title={`Path to ${next}`}>
+      <List dense>
+        {blocking.map(r => (
+          <ListItem key={r.slug}>
+            <ListItemIcon>
+              {r.status === 'incomplete' ? <StatusWarning /> : <StatusError />}
+            </ListItemIcon>
+            <ListItemText
+              primary={r.description}
+              secondary={
+                r.status === 'incomplete' ? `To investigate — ${r.message}` : r.message
+              }
+            />
+          </ListItem>
+        ))}
+      </List>
+    </InfoCard>
   );
 }

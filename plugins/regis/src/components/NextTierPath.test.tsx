@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderInTestApp } from '@backstage/frontend-test-utils';
 import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { NextTierPath } from './NextTierPath';
 import type { Rule } from './posture';
@@ -16,22 +17,23 @@ const rules: Rule[] = [
 ];
 
 describe('NextTierPath', () => {
-  it('lists blocking rules for the next tier with an investigate marker for incompletes', () => {
-    render(<NextTierPath rules={rules} tier="Silver" ladder={ladder} />);
-    expect(screen.getByText(/Path to Gold/i)).toBeInTheDocument();
+  it('lists blocking rules for the next tier with an investigate marker for incompletes', async () => {
+    await renderInTestApp(<NextTierPath rules={rules} tier="Silver" ladder={ladder} />);
+    expect(await screen.findByText(/Path to Gold/i)).toBeInTheDocument();
     expect(screen.getByText('Run as non-root')).toBeInTheDocument();
     expect(screen.getByText('Provenance verified')).toBeInTheDocument();
     expect(screen.getByText(/investigate/i)).toBeInTheDocument();
     expect(screen.queryByText('Passing gold rule')).not.toBeInTheDocument();
   });
 
-  it('shows the maintained state at the top tier', () => {
-    render(<NextTierPath rules={[]} tier="Gold" ladder={ladder} />);
-    expect(screen.getByText(/Top tier/i)).toBeInTheDocument();
+  it('shows the maintained state at the top tier', async () => {
+    await renderInTestApp(<NextTierPath rules={[]} tier="Gold" ladder={ladder} />);
+    expect(await screen.findByText(/Top tier/i)).toBeInTheDocument();
   });
 
-  it('renders nothing when the ladder is unknown', () => {
-    const { container } = render(<NextTierPath rules={rules} tier="Silver" ladder={[]} />);
-    expect(container).toBeEmptyDOMElement();
+  it('renders nothing when the ladder is unknown', async () => {
+    await renderInTestApp(<NextTierPath rules={rules} tier="Silver" ladder={[]} />);
+    expect(screen.queryByText(/Path to/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
   });
 });
