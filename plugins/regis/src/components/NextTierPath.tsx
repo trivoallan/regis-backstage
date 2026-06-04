@@ -1,6 +1,6 @@
 import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { InfoCard, StatusError, StatusWarning } from '@backstage/core-components';
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { blockingRules, nextTier, type Rule } from './posture';
 
 /** Actionable "what blocks the next tier" checklist, or a top-tier state. */
@@ -18,6 +18,15 @@ export function NextTierPath(props: {
   }
 
   const blocking = blockingRules(rules, next);
+  if (blocking.length === 0) {
+    return (
+      <InfoCard title={`Path to ${next}`}>
+        <Typography variant="body2">
+          All required rules satisfied — awaiting promotion.
+        </Typography>
+      </InfoCard>
+    );
+  }
   return (
     <InfoCard title={`Path to ${next}`}>
       <List dense>

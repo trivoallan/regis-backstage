@@ -34,6 +34,7 @@ describe('PostureSummary', () => {
     expect(screen.getByText('security')).toBeInTheDocument();
     expect(screen.getByText('65%')).toBeInTheDocument();
     expect(screen.getByText('hygiene')).toBeInTheDocument();
+    expect(screen.getByText(/scanned 2026-06-04/i)).toBeInTheDocument();
   });
 
   it('omits category bars when by_tag is absent', () => {

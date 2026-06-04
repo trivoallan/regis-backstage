@@ -59,6 +59,13 @@ export function scoreStatus(score: number | undefined): ScoreStatus {
   return 'error';
 }
 
+/** Color for a 0-100 score bar, matching the badge semantic palette. */
+export function scoreBarColor(score: number): string {
+  if (score >= 90) return '#1e7d34';
+  if (score >= 60) return '#a86700';
+  return '#c0392b';
+}
+
 /** Color for a report badge `class`, matching the report's semantic palette. */
 export function badgeClassColor(
   cls: 'success' | 'warning' | 'error' | 'information',

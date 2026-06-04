@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, type TableColumn, StatusError, StatusOK, StatusWarning } from '@backstage/core-components';
-import { FormControlLabel, Switch } from '@material-ui/core';
+import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core';
 import { categoryScores, sortRulesForTable, type Rule, type RulesSummary } from './posture';
 
 function StatusCell(props: { rule: Rule }) {
@@ -33,17 +33,19 @@ export function RuleTable(props: { rules: Rule[]; rulesSummary?: RulesSummary })
       options={{ paging: data.length > 15, pageSize: 15, padding: 'dense' }}
       components={{
         Toolbar: () => (
-          <FormControlLabel
-            style={{ margin: 8 }}
-            control={
-              <Switch
-                checked={showPassing}
-                onChange={e => setShowPassing(e.target.checked)}
-                inputProps={{ 'aria-label': 'show passing rules' }}
-              />
-            }
-            label="Show passing rules"
-          />
+          <Box display="flex" alignItems="center" justifyContent="space-between" px={2} py={1}>
+            <Typography variant="h6">Rules</Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showPassing}
+                  onChange={e => setShowPassing(e.target.checked)}
+                  inputProps={{ 'aria-label': 'show passing rules' }}
+                />
+              }
+              label="Show passing rules"
+            />
+          </Box>
         ),
       }}
     />

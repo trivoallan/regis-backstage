@@ -1,14 +1,8 @@
 import type { Report, TrendBand } from '@regis/backstage-plugin-regis-common';
 import { InfoCard } from '@backstage/core-components';
 import { Box, Chip, Typography } from '@material-ui/core';
-import { tierColor } from './format';
+import { scoreBarColor, tierColor } from './format';
 import { categoryScores } from './posture';
-
-function barColor(score: number): string {
-  if (score >= 90) return '#1e7d34';
-  if (score >= 60) return '#e6a700';
-  return '#c0392b';
-}
 
 /** Header card for the Regis tab: identity, tier, score, attribution, by-tag bars. */
 export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
@@ -17,6 +11,7 @@ export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
   const score = report.rules_summary?.score;
   const pb = report.playbooks?.[0];
   const tierNames = ladder.map(t => t.label).join(' → ');
+  const scanned = report.request.timestamp?.slice(0, 10);
 
   return (
     <InfoCard>
@@ -48,6 +43,7 @@ export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
           'Playbook unknown'
         )}
         {ladder.length > 0 ? ` · ladder: ${tierNames}` : ''}
+        {scanned ? ` · scanned ${scanned}` : ''}
       </Typography>
 
       {cats.length > 0 && (
@@ -70,7 +66,7 @@ export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
                   style={{
                     width: `${c.score}%`,
                     height: '100%',
-                    background: barColor(c.score),
+                    background: scoreBarColor(c.score),
                   }}
                 />
               </div>
