@@ -41,6 +41,9 @@ describe('nextTier', () => {
   it('returns null for an empty ladder', () => {
     expect(nextTier([], 'Silver')).toBeNull();
   });
+  it('aims for the lowest rung when tier is undefined', () => {
+    expect(nextTier(ladder, undefined)).toBe('Bronze');
+  });
 });
 
 describe('blockingRules', () => {
@@ -55,6 +58,9 @@ describe('blockingRules', () => {
   });
   it('returns nothing when there is no next tier', () => {
     expect(blockingRules([rule({ level: 'Gold' })], null)).toEqual([]);
+  });
+  it('returns [] for an empty rules array', () => {
+    expect(blockingRules([], 'Gold')).toEqual([]);
   });
 });
 
@@ -83,6 +89,9 @@ describe('countByStatus', () => {
     ];
     expect(countByStatus(rules)).toEqual({ passed: 2, failed: 1, incomplete: 1 });
   });
+  it('returns all zeros for an empty rules array', () => {
+    expect(countByStatus([])).toEqual({ passed: 0, failed: 0, incomplete: 0 });
+  });
 });
 
 describe('categoryScores', () => {
@@ -101,6 +110,15 @@ describe('categoryScores', () => {
   it('returns [] when by_tag is absent', () => {
     expect(categoryScores(undefined)).toEqual([]);
     expect(categoryScores({})).toEqual([]);
+  });
+  it('breaks score ties alphabetically by tag', () => {
+    const out = categoryScores({
+      by_tag: {
+        zeta: { rules: ['z'], passed_rules: [], score: 50 },
+        alpha: { rules: ['a'], passed_rules: [], score: 50 },
+      },
+    });
+    expect(out.map(c => c.tag)).toEqual(['alpha', 'zeta']);
   });
 });
 
@@ -122,5 +140,26 @@ describe('sortRulesForTable', () => {
       'fail-hyg',
       'pass-sec',
     ]);
+  });
+  it('places untagged rules last within their status group', () => {
+    const scores = categoryScores({
+      by_tag: { security: { rules: [], passed_rules: [], score: 40 } },
+    });
+    const rules = [
+      rule({ slug: 'fail-untagged', tags: undefined, status: 'failed' }),
+      rule({ slug: 'fail-tagged', tags: ['security'], status: 'failed' }),
+    ];
+    expect(sortRulesForTable(rules, scores).map(r => r.slug)).toEqual([
+      'fail-tagged',
+      'fail-untagged',
+    ]);
+  });
+
+  it('handles an empty scores array (all rules rank equally, order stable by status)', () => {
+    const rules = [
+      rule({ slug: 'pass', status: 'passed' }),
+      rule({ slug: 'fail', status: 'failed' }),
+    ];
+    expect(sortRulesForTable(rules, []).map(r => r.slug)).toEqual(['fail', 'pass']);
   });
 });
