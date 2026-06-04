@@ -12,15 +12,13 @@ export function NextTierPath(props: {
   const { rules, tier, ladder } = props;
   if (ladder.length === 0) return null;
 
+  // Purely actionable: render only when there are concrete rules to fix. We
+  // never assert a "top tier" state, because the per-image ladder ordering is
+  // not reliable here — reports carry no playbook and the resolved ladder may
+  // be a cross-playbook / discovery-ranked union. Failing rules are the only
+  // trustworthy signal, so the card appears iff there are blocking rules.
   const next = nextTier(ladder, tier);
-  if (!next) {
-    return <InfoCard title="Top tier — posture maintained" />;
-  }
-
-  // Purely actionable: with nothing left to fix there is no path to show. This
-  // also suppresses a bogus "Path to <lower tier>" when the resolved ladder is
-  // unreliably ordered (e.g. discovery-ranked) for an already-top image.
-  const blocking = blockingRules(rules, next);
+  const blocking = next ? blockingRules(rules, next) : [];
   if (blocking.length === 0) return null;
 
   return (

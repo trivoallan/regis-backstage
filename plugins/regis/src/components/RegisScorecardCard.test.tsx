@@ -73,7 +73,7 @@ describe('RegisScorecardCard', () => {
     expect(screen.getByText(/via base-image-policy/i)).toBeInTheDocument();
   });
 
-  it('shows the maintained state (no chase hint) when no rules remain for the next tier', async () => {
+  it('shows no chase hint and never asserts a top tier when no rules remain', async () => {
     await renderCard({
       getReport: async () => ({
         report: {
@@ -88,11 +88,13 @@ describe('RegisScorecardCard', () => {
       }),
       getPlaybooks: async () => playbooks,
     });
-    expect(await screen.findByText(/Top tier — maintained/i)).toBeInTheDocument();
+    // The tier chip and score still render, but no next-tier claim is made.
+    expect(await screen.findByText('Silver')).toBeInTheDocument();
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
   });
 
-  it('shows the top-tier state with no next-tier hint', async () => {
+  it('makes no next-tier claim for a top-of-ladder image', async () => {
     await renderCard({
       getReport: async () => ({
         report: {
@@ -105,7 +107,9 @@ describe('RegisScorecardCard', () => {
       }),
       getPlaybooks: async () => playbooks,
     });
-    expect(await screen.findByText(/Top tier/i)).toBeInTheDocument();
+    expect(await screen.findByText('100')).toBeInTheDocument();
+    expect(screen.getByText('Gold')).toBeInTheDocument();
+    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
   });
 

@@ -26,9 +26,10 @@ describe('NextTierPath', () => {
     expect(screen.queryByText('Passing gold rule')).not.toBeInTheDocument();
   });
 
-  it('shows the maintained state at the top tier', async () => {
+  it('renders nothing at the top of the ladder (never asserts a top-tier state)', async () => {
     await renderInTestApp(<NextTierPath rules={[]} tier="Gold" ladder={ladder} />);
-    expect(await screen.findByText(/Top tier/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Path to/i)).not.toBeInTheDocument();
   });
 
   it('renders nothing when no rules block the next tier (already at top / all passing)', async () => {

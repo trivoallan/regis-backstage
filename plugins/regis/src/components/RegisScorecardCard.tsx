@@ -54,13 +54,17 @@ export function RegisScorecardCard() {
   const ratio = progress.required > 0 ? progress.satisfied / progress.required : 1;
   const remaining = progress.required - progress.satisfied;
   const playbookName = report.playbooks?.[0]?.playbook_name;
-  let tierStatusText: string;
+  // Only the actionable "rules left" hint is trustworthy: the per-image ladder
+  // ordering is unreliable (reports carry no playbook), so we never assert a
+  // "top tier" state from it. Show the chase hint when there are blocking
+  // rules, the untiered notice when there is no tier, otherwise nothing.
+  let tierStatusText: string | null;
   if (next && remaining > 0) {
     tierStatusText = `${remaining} rules left for ${next}`;
-  } else if (report.tier) {
-    tierStatusText = 'Top tier — maintained';
-  } else {
+  } else if (!report.tier) {
     tierStatusText = 'No tier assigned yet';
+  } else {
+    tierStatusText = null;
   }
 
   return (
@@ -75,9 +79,11 @@ export function RegisScorecardCard() {
               style={{ backgroundColor: tierColor(report.tier, ladder), color: '#fff' }}
             />
           )}
-          <Typography variant="body2" color="textSecondary" component="div">
-            {tierStatusText}
-          </Typography>
+          {tierStatusText && (
+            <Typography variant="body2" color="textSecondary" component="div">
+              {tierStatusText}
+            </Typography>
+          )}
           <Typography variant="body2" component="div">
             {counts.passed} passed · {counts.failed} failed · {counts.incomplete} incomplete
           </Typography>
