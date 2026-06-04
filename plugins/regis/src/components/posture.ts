@@ -1,4 +1,4 @@
-import type { Report, TrendBand } from '@regis/backstage-plugin-regis-common';
+import type { Report } from '@regis/backstage-plugin-regis-common';
 
 export type Rule = NonNullable<Report['rules']>[number];
 export type RulesSummary = NonNullable<Report['rules_summary']>;
@@ -9,52 +9,10 @@ export interface CategoryScore {
   total: number;
   passed: number;
 }
-export interface TierProgress {
-  satisfied: number;
-  required: number;
-}
 export interface StatusCounts {
   passed: number;
   failed: number;
   incomplete: number;
-}
-
-/**
- * The tier one rung above `currentTier` in a best→worst ladder, or null when
- * already at the top, when the tier is unknown, or when the ladder is empty.
- * An untiered image (no current tier) aims for the lowest rung.
- */
-export function nextTier(
-  ladder: TrendBand[],
-  currentTier: string | null | undefined,
-): string | null {
-  if (ladder.length === 0) return null;
-  if (!currentTier) return ladder[ladder.length - 1].key;
-  const i = ladder.findIndex(
-    t => t.key === currentTier || t.label === currentTier,
-  );
-  if (i <= 0) return null;
-  return ladder[i - 1].key;
-}
-
-/** Failed/incomplete rules attached to the next tier — what blocks promotion. */
-export function blockingRules(
-  rules: Rule[],
-  nextTierName: string | null,
-): Rule[] {
-  if (!nextTierName) return [];
-  return rules.filter(r => r.status !== 'passed' && r.level === nextTierName);
-}
-
-/** Satisfied vs required rule counts for the next tier (drives the gauge). */
-export function tierProgress(
-  rules: Rule[],
-  nextTierName: string | null,
-): TierProgress {
-  if (!nextTierName) return { satisfied: 0, required: 0 };
-  const required = rules.filter(r => r.level === nextTierName);
-  const satisfied = required.filter(r => r.status === 'passed').length;
-  return { satisfied, required: required.length };
 }
 
 export function countByStatus(rules: Rule[]): StatusCounts {

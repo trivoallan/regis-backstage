@@ -5,7 +5,6 @@ import {
 } from '@backstage/core-components';
 import { Box } from '@material-ui/core';
 import { PostureSummary } from './PostureSummary';
-import { NextTierPath } from './NextTierPath';
 import { RuleTable } from './RuleTable';
 import { useReportAndLadder } from './useReportAndLadder';
 
@@ -23,7 +22,6 @@ export function RegisTabContent() {
     <Content>
       <Box display="flex" flexDirection="column" gridGap={16}>
         <PostureSummary report={report} ladder={ladder} />
-        <NextTierPath rules={rules} tier={report.tier} ladder={ladder} />
         <RuleTable rules={rules} rulesSummary={report.rules_summary} />
       </Box>
     </Content>

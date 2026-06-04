@@ -41,7 +41,7 @@ const renderCard = (api: Partial<typeof regisApiRef.T>) =>
   );
 
 describe('RegisScorecardCard', () => {
-  it('shows score, tier chip in ladder color, next-tier hint, badges, counts and playbook footnote', async () => {
+  it('shows score, tier chip in ladder color, badges, counts and playbook footnote', async () => {
     await renderCard({
       getReport: async () => ({
         report: {
@@ -53,9 +53,8 @@ describe('RegisScorecardCard', () => {
             { scope: 'hygiene', value: 'A', class: 'success' },
           ],
           rules: [
-            { slug: 'g1', description: 'd', level: 'Gold', passed: true, status: 'passed', message: '' },
-            { slug: 'g2', description: 'd', level: 'Gold', passed: false, status: 'failed', message: '' },
-            { slug: 'g3', description: 'd', level: 'Gold', passed: false, status: 'incomplete', message: '' },
+            { slug: 'g1', description: 'd', level: 'high', passed: true, status: 'passed', message: '' },
+            { slug: 'g2', description: 'd', level: 'critical', passed: false, status: 'failed', message: '' },
           ],
           rules_summary: { score: 73, by_tag: {} },
         } as any,
@@ -67,66 +66,12 @@ describe('RegisScorecardCard', () => {
     expect(await screen.findByText('73')).toBeInTheDocument();
     const chip = (await screen.findByText('Silver')).closest('.MuiChip-root') as HTMLElement;
     expect(chip).toHaveStyle({ backgroundColor: '#9ca3af' });
-    expect(await screen.findByText(/2 rules left for Gold/i)).toBeInTheDocument();
     expect(screen.getByText(/security/)).toBeInTheDocument();
     expect(screen.getByText(/hygiene/)).toBeInTheDocument();
+    expect(screen.getByText(/1 passed/)).toBeInTheDocument();
     expect(screen.getByText(/via base-image-policy/i)).toBeInTheDocument();
-  });
-
-  it('shows no chase hint and never asserts a top tier when no rules remain', async () => {
-    await renderCard({
-      getReport: async () => ({
-        report: {
-          schemaVersion: 1,
-          tier: 'Silver',
-          rules: [
-            { slug: 'g1', description: 'd', level: 'Gold', passed: true, status: 'passed', message: '' },
-          ],
-          rules_summary: { score: 100, by_tag: {} },
-        } as any,
-        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
-      }),
-      getPlaybooks: async () => playbooks,
-    });
-    // The tier chip and score still render, but no next-tier claim is made.
-    expect(await screen.findByText('Silver')).toBeInTheDocument();
+    // No next-tier claims are made any more.
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
-  });
-
-  it('makes no next-tier claim for a top-of-ladder image', async () => {
-    await renderCard({
-      getReport: async () => ({
-        report: {
-          schemaVersion: 1,
-          tier: 'Gold',
-          rules: [],
-          rules_summary: { score: 100, by_tag: {} },
-        } as any,
-        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
-      }),
-      getPlaybooks: async () => playbooks,
-    });
-    expect(await screen.findByText('100')).toBeInTheDocument();
-    expect(screen.getByText('Gold')).toBeInTheDocument();
-    expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
-  });
-
-  it('shows "No tier assigned yet" for an untiered image with no ladder', async () => {
-    await renderCard({
-      getReport: async () => ({
-        report: {
-          schemaVersion: 1,
-          tier: null,
-          rules: [],
-          rules_summary: { score: 0, by_tag: {} },
-        } as any,
-        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
-      }),
-      getPlaybooks: async () => ({ playbooks: [] }),
-    });
-    expect(await screen.findByText(/No tier assigned yet/i)).toBeInTheDocument();
     expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
   });
 

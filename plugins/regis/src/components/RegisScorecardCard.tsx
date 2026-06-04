@@ -5,17 +5,24 @@ import {
 } from '@backstage/core-components';
 import { Box, Chip, Typography } from '@material-ui/core';
 import { badgeClassColor, tierColor } from './format';
-import { countByStatus, nextTier, tierProgress } from './posture';
+import { countByStatus } from './posture';
 import { useReportAndLadder } from './useReportAndLadder';
 
-/** Compact circular score gauge filled to next-tier rule satisfaction. */
-function Gauge(props: { score: number; ratio: number; color: string }) {
+/** Compact circular gauge filled to the 0-100 posture score. */
+function Gauge(props: { score: number; color: string }) {
   const r = 42;
   const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - Math.max(0, Math.min(1, props.ratio)));
+  const ratio = Math.max(0, Math.min(1, props.score / 100));
+  const offset = circ * (1 - ratio);
   return (
     <Box position="relative" width={96} height={96} flex="none">
-      <svg viewBox="0 0 100 100" width={96} height={96} role="img" aria-label={`Posture score ${props.score} of 100`}>
+      <svg
+        viewBox="0 0 100 100"
+        width={96}
+        height={96}
+        role="img"
+        aria-label={`Posture score ${props.score} of 100`}
+      >
         <circle cx="50" cy="50" r={r} fill="none" stroke="#eee" strokeWidth={9} />
         <circle
           cx="50"
@@ -30,15 +37,25 @@ function Gauge(props: { score: number; ratio: number; color: string }) {
           transform="rotate(-90 50 50)"
         />
       </svg>
-      <Box position="absolute" top={0} left={0} right={0} bottom={0}
-        display="flex" alignItems="center" justifyContent="center">
-        <Typography variant="h5" component="span">{props.score}</Typography>
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="h5" component="span">
+          {props.score}
+        </Typography>
       </Box>
     </Box>
   );
 }
 
-/** Overview posture card: gauge + tier + next-tier hint + domain badges + counts. */
+/** Overview posture card: score gauge + tier + domain badges + counts. */
 export function RegisScorecardCard() {
   const { value, loading, error } = useReportAndLadder();
 
@@ -49,28 +66,12 @@ export function RegisScorecardCard() {
   const rules = report.rules ?? [];
   const score = report.rules_summary?.score ?? 0;
   const counts = countByStatus(rules);
-  const next = nextTier(ladder, report.tier);
-  const progress = tierProgress(rules, next);
-  const ratio = progress.required > 0 ? progress.satisfied / progress.required : 1;
-  const remaining = progress.required - progress.satisfied;
   const playbookName = report.playbooks?.[0]?.playbook_name;
-  // Only the actionable "rules left" hint is trustworthy: the per-image ladder
-  // ordering is unreliable (reports carry no playbook), so we never assert a
-  // "top tier" state from it. Show the chase hint when there are blocking
-  // rules, the untiered notice when there is no tier, otherwise nothing.
-  let tierStatusText: string | null;
-  if (next && remaining > 0) {
-    tierStatusText = `${remaining} rules left for ${next}`;
-  } else if (!report.tier) {
-    tierStatusText = 'No tier assigned yet';
-  } else {
-    tierStatusText = null;
-  }
 
   return (
     <InfoCard title="Regis posture">
       <Box display="flex" gridGap={18} alignItems="center" mb={1.5}>
-        <Gauge score={score} ratio={ratio} color={tierColor(report.tier, ladder)} />
+        <Gauge score={score} color={tierColor(report.tier, ladder)} />
         <Box>
           {report.tier && (
             <Chip
@@ -78,11 +79,6 @@ export function RegisScorecardCard() {
               label={report.tier}
               style={{ backgroundColor: tierColor(report.tier, ladder), color: '#fff' }}
             />
-          )}
-          {tierStatusText && (
-            <Typography variant="body2" color="textSecondary" component="div">
-              {tierStatusText}
-            </Typography>
           )}
           <Typography variant="body2" component="div">
             {counts.passed} passed · {counts.failed} failed · {counts.incomplete} incomplete

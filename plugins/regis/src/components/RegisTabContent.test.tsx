@@ -28,7 +28,7 @@ const renderTab = (api: Partial<typeof regisApiRef.T>) =>
   );
 
 describe('RegisTabContent', () => {
-  it('renders the summary, the next-tier path and the rule table', async () => {
+  it('renders the summary and the rule table', async () => {
     await renderTab({
       getReport: async () => ({
         report: {
@@ -54,7 +54,6 @@ describe('RegisTabContent', () => {
     });
 
     expect(await screen.findByText('library/nginx:1.25')).toBeInTheDocument();
-    expect(await screen.findByText(/Path to Gold/i)).toBeInTheDocument();
     expect((await screen.findAllByText('Run as non-root')).length).toBeGreaterThan(0);
   });
 

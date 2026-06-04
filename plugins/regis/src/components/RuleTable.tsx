@@ -14,7 +14,7 @@ const columns: TableColumn<Rule>[] = [
   { title: 'Status', field: 'status', width: '90px', render: r => <StatusCell rule={r} /> },
   { title: 'Rule', field: 'description' },
   { title: 'Category', field: 'tags', render: r => (r.tags ?? []).join(', ') },
-  { title: 'Priority', field: 'level', render: r => r.level ?? '—' },
+  { title: 'Severity', field: 'level', render: r => r.level ?? '—' },
   { title: 'Detail', field: 'message' },
 ];
 
