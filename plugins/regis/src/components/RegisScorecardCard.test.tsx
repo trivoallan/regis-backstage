@@ -73,6 +73,25 @@ describe('RegisScorecardCard', () => {
     expect(screen.getByText(/via base-image-policy/i)).toBeInTheDocument();
   });
 
+  it('shows the maintained state (no chase hint) when no rules remain for the next tier', async () => {
+    await renderCard({
+      getReport: async () => ({
+        report: {
+          schemaVersion: 1,
+          tier: 'Silver',
+          rules: [
+            { slug: 'g1', description: 'd', level: 'Gold', passed: true, status: 'passed', message: '' },
+          ],
+          rules_summary: { score: 100, by_tag: {} },
+        } as any,
+        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
+      }),
+      getPlaybooks: async () => playbooks,
+    });
+    expect(await screen.findByText(/Top tier — maintained/i)).toBeInTheDocument();
+    expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
+  });
+
   it('shows the top-tier state with no next-tier hint', async () => {
     await renderCard({
       getReport: async () => ({

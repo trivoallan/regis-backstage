@@ -55,7 +55,7 @@ export function RegisScorecardCard() {
   const remaining = progress.required - progress.satisfied;
   const playbookName = report.playbooks?.[0]?.playbook_name;
   let tierStatusText: string;
-  if (next) {
+  if (next && remaining > 0) {
     tierStatusText = `${remaining} rules left for ${next}`;
   } else if (report.tier) {
     tierStatusText = 'Top tier — maintained';
