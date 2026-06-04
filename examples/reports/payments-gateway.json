@@ -3,6 +3,17 @@
   "version": "0.34.0",
   "snapshot_date": "2026-06-01",
   "tier": "Certified",
+  "playbooks": [
+    {
+      "playbook_name": "pci-dss",
+      "playbook_version": "2.1.0",
+      "tier": "Certified",
+      "score": 78,
+      "total_scorecards": 8,
+      "passed_scorecards": 6,
+      "pages": []
+    }
+  ],
   "badges": [
     {
       "slug": "tier",
