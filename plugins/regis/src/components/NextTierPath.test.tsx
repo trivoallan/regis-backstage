@@ -31,12 +31,13 @@ describe('NextTierPath', () => {
     expect(await screen.findByText(/Top tier/i)).toBeInTheDocument();
   });
 
-  it('shows an awaiting-promotion message when no rules block the next tier', async () => {
+  it('renders nothing when no rules block the next tier (already at top / all passing)', async () => {
     const allPass: Rule[] = [
       { slug: 'g', description: 'gold rule', level: 'Gold', passed: true, status: 'passed', message: '' },
     ];
     await renderInTestApp(<NextTierPath rules={allPass} tier="Silver" ladder={ladder} />);
-    expect(await screen.findByText(/awaiting promotion/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Path to/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/awaiting promotion/i)).not.toBeInTheDocument();
   });
 
   it('renders nothing when the ladder is unknown', async () => {
