@@ -67,6 +67,14 @@ export function RegisScorecardCard() {
   const ratio = progress.required > 0 ? progress.satisfied / progress.required : 1;
   const remaining = progress.required - progress.satisfied;
   const playbookName = report.playbooks?.[0]?.playbook_name;
+  let tierStatusText: string;
+  if (next) {
+    tierStatusText = `${remaining} rules left for ${next}`;
+  } else if (report.tier) {
+    tierStatusText = 'Top tier — maintained';
+  } else {
+    tierStatusText = 'No tier assigned yet';
+  }
 
   return (
     <InfoCard title="Regis posture">
@@ -81,11 +89,7 @@ export function RegisScorecardCard() {
             />
           )}
           <Typography variant="body2" color="textSecondary" component="div">
-            {next
-              ? `${remaining} rules left for ${next}`
-              : report.tier
-                ? 'Top tier — maintained'
-                : 'No tier assigned yet'}
+            {tierStatusText}
           </Typography>
           <Typography variant="body2" component="div">
             {counts.passed} passed · {counts.failed} failed · {counts.incomplete} incomplete
