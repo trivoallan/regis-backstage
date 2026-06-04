@@ -58,3 +58,19 @@ export function scoreStatus(score: number | undefined): ScoreStatus {
   if (score >= 60) return 'warning';
   return 'error';
 }
+
+/** Color for a report badge `class`, matching the report's semantic palette. */
+export function badgeClassColor(
+  cls: 'success' | 'warning' | 'error' | 'information',
+): string {
+  switch (cls) {
+    case 'success':
+      return '#1e7d34';
+    case 'warning':
+      return '#a86700';
+    case 'error':
+      return '#c0392b';
+    default:
+      return '#1565c0';
+  }
+}

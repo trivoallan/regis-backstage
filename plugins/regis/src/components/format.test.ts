@@ -1,4 +1,4 @@
-import { tierColor, scoreStatus, unionLadder } from './format';
+import { tierColor, scoreStatus, unionLadder, badgeClassColor } from './format';
 import type {
   PlaybookLadder,
   TrendBand,
@@ -83,5 +83,14 @@ describe('unionLadder', () => {
     const u = unionLadder(playbooks);
     expect(tierColor('Platinum', u)).toBe('#7e57c2');
     expect(tierColor('Bronze', u)).toBe('#cd7f32');
+  });
+});
+
+describe('badgeClassColor', () => {
+  it('maps each badge class to a color', () => {
+    expect(badgeClassColor('success')).toBe('#1e7d34');
+    expect(badgeClassColor('warning')).toBe('#a86700');
+    expect(badgeClassColor('error')).toBe('#c0392b');
+    expect(badgeClassColor('information')).toBe('#1565c0');
   });
 });
