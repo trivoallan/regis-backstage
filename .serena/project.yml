@@ -57,7 +57,12 @@ ls_specific_settings: {}
 # list of additional paths to ignore in this project.
 # Same syntax as gitignore, so you can use * and **.
 # Note: global ignored_paths from serena_config.yml are also applied additively.
-ignored_paths: []
+# .claude/worktrees holds full repo copies (~3.4 GB, 400+ duplicate .ts files) ignored
+# only via .git/info/exclude, which Serena's ignore_all_files_in_gitignore does NOT honor.
+# Excluding it here keeps the TypeScript language server from indexing those copies
+# (faster symbol search, lower memory, no duplicate find_symbol results).
+ignored_paths:
+- ".claude/"
 
 # whether the project is in read-only mode
 # If set to true, all editing tools will be disabled and attempts to use them will result in an error
