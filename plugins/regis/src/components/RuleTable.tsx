@@ -30,7 +30,7 @@ export function RuleTable(props: { rules: Rule[]; rulesSummary?: RulesSummary })
       title="Rules"
       columns={columns}
       data={data}
-      options={{ search: true, paging: data.length > 15, pageSize: 15, padding: 'dense' }}
+      options={{ paging: data.length > 15, pageSize: 15, padding: 'dense' }}
       components={{
         Toolbar: () => (
           <FormControlLabel
