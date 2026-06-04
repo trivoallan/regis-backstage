@@ -1,4 +1,4 @@
-import { tierColor, scoreStatus, unionLadder, badgeClassColor, scoreBarColor } from './format';
+import { tierColor, unionLadder, badgeClassColor, scoreBarColor } from './format';
 import type {
   PlaybookLadder,
   TrendBand,
@@ -12,13 +12,6 @@ describe('formatting helpers', () => {
     expect(tierColor('Bronze')).toBe('#2e7d32');
     expect(tierColor(null)).toBe('#9ca3af');
     expect(tierColor(undefined)).toBe('#9ca3af');
-  });
-
-  it('maps scores to a status bucket', () => {
-    expect(scoreStatus(100)).toBe('ok');
-    expect(scoreStatus(80)).toBe('warning');
-    expect(scoreStatus(40)).toBe('error');
-    expect(scoreStatus(undefined)).toBe('warning');
   });
 });
 

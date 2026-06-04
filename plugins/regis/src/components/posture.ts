@@ -105,3 +105,13 @@ export function sortRulesForTable(
     (a, b) => statusRank(a) - statusRank(b) || catRank(a) - catRank(b),
   );
 }
+
+export type ScoreStatus = 'ok' | 'warning' | 'error';
+
+/** Bucket a 0-100 score for status styling. Missing score becomes warning. */
+export function scoreStatus(score: number | undefined): ScoreStatus {
+  if (score === undefined) return 'warning';
+  if (score >= 90) return 'ok';
+  if (score >= 60) return 'warning';
+  return 'error';
+}

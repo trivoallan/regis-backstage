@@ -6,6 +6,7 @@ import {
   countByStatus,
   categoryScores,
   sortRulesForTable,
+  scoreStatus,
   type Rule,
 } from './posture';
 
@@ -161,5 +162,14 @@ describe('sortRulesForTable', () => {
       rule({ slug: 'fail', status: 'failed' }),
     ];
     expect(sortRulesForTable(rules, []).map(r => r.slug)).toEqual(['fail', 'pass']);
+  });
+});
+
+describe('scoreStatus', () => {
+  it('buckets scores and defaults missing to warning', () => {
+    expect(scoreStatus(100)).toBe('ok');
+    expect(scoreStatus(80)).toBe('warning');
+    expect(scoreStatus(40)).toBe('error');
+    expect(scoreStatus(undefined)).toBe('warning');
   });
 });

@@ -1,16 +1,12 @@
-import useAsync from 'react-use/lib/useAsync';
-import { useApi } from '@backstage/core-plugin-api';
 import {
   InfoCard,
   Progress,
   ResponseErrorPanel,
 } from '@backstage/core-components';
-import { useEntity } from '@backstage/plugin-catalog-react';
-import { stringifyEntityRef } from '@backstage/catalog-model';
 import { Box, Chip, Typography } from '@material-ui/core';
-import { regisApiRef } from '../api/RegisApi';
-import { badgeClassColor, tierColor, unionLadder } from './format';
+import { badgeClassColor, tierColor } from './format';
 import { countByStatus, nextTier, tierProgress } from './posture';
+import { useReportAndLadder } from './useReportAndLadder';
 
 /** Compact circular score gauge filled to next-tier rule satisfaction. */
 function Gauge(props: { score: number; ratio: number; color: string }) {
@@ -44,21 +40,12 @@ function Gauge(props: { score: number; ratio: number; color: string }) {
 
 /** Overview posture card: gauge + tier + next-tier hint + domain badges + counts. */
 export function RegisScorecardCard() {
-  const api = useApi(regisApiRef);
-  const { entity } = useEntity();
-  const ref = stringifyEntityRef(entity);
-
-  const { value, loading, error } = useAsync(
-    () => Promise.all([api.getReport(ref), api.getPlaybooks()]),
-    [ref],
-  );
+  const { value, loading, error } = useReportAndLadder();
 
   if (loading) return <Progress />;
   if (error) return <ResponseErrorPanel error={error} />;
 
-  const [envelope, playbooksResp] = value!;
-  const report = envelope.report;
-  const ladder = unionLadder(playbooksResp.playbooks);
+  const { report, ladder } = value!;
   const rules = report.rules ?? [];
   const score = report.rules_summary?.score ?? 0;
   const counts = countByStatus(rules);
