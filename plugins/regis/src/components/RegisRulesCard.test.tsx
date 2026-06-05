@@ -60,6 +60,24 @@ describe('RegisRulesCard', () => {
     );
   });
 
+  it('omits the View in explorer link when the report names no playbook', async () => {
+    await renderCard({
+      getReport: async () => ({
+        report: {
+          schemaVersion: 1,
+          tier: 'Silver',
+          playbooks: undefined,
+          rules: [],
+          rules_summary: { score: 100, by_tag: {} },
+        } as any,
+        meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
+      }),
+      getPlaybooks: async () => ({ playbooks: [] }),
+    });
+
+    expect(screen.queryByText('View in explorer')).not.toBeInTheDocument();
+  });
+
   it('renders an error panel when the API fails', async () => {
     await renderCard({
       getReport: async () => {
