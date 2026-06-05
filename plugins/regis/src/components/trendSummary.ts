@@ -1,8 +1,6 @@
 import type { TrendBand, TrendBucket } from '@regis/backstage-plugin-regis-common';
 import type { MixEntry } from './rollup';
 
-export type { MixEntry };
-
 export interface PortfolioHealthSummary {
   mix: MixEntry[];
   worst: { label: string; count: number } | null;

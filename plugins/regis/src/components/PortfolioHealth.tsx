@@ -1,6 +1,7 @@
 import { InfoCard } from '@backstage/core-components';
 import { Box, Typography } from '@material-ui/core';
 import type { TrendBand, TrendBucket } from '@regis/backstage-plugin-regis-common';
+import { WORST_TIER_COLOR } from './format';
 import { formatDelta, summarizeTrend } from './trendSummary';
 
 function Kpi(props: { label: string; value: string; delta: string; days: number }) {
@@ -53,7 +54,7 @@ export function PortfolioHealth(props: {
               </Typography>
             ))}
             {h.worst && (
-              <Typography variant="caption" component="span" style={{ marginLeft: 'auto', fontWeight: 600, color: '#c0392b' }}>
+              <Typography variant="caption" component="span" style={{ marginLeft: 'auto', fontWeight: 600, color: WORST_TIER_COLOR }}>
                 Worst: {h.worst.label} · {h.worst.count}
               </Typography>
             )}
