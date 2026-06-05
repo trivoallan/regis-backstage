@@ -6,13 +6,13 @@ import {
   Content,
   Header,
   InfoCard,
-  Link,
   Page,
   Progress,
   ResponseErrorPanel,
 } from '@backstage/core-components';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import MuiLink from '@material-ui/core/Link';
 import type { ExploreGroupBy } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef } from '../api/RegisApi';
 import { unionLadder } from './format';
@@ -103,12 +103,12 @@ export function RegisExplorerPage() {
           title="No images match this scope."
           action={
             hasFilters ? (
-              <Link
+              <MuiLink
                 component="button"
                 onClick={() => setState({ groupBy: state.groupBy, filters: {} })}
               >
                 Clear filters
-              </Link>
+              </MuiLink>
             ) : undefined
           }
         />
