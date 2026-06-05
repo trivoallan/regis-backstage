@@ -1,4 +1,5 @@
 import { type Entity, parseEntityRef } from '@backstage/catalog-model';
+import { REGIS_ANNOTATION_PLAYBOOK_ID } from '@regis/backstage-plugin-regis-common';
 
 /** EntityRefs of `resource:` targets reached from `entity` via `relationType`. */
 export function imageRefsFromRelations(
@@ -34,4 +35,10 @@ export function isRegisPlaybook(entity: Entity): boolean {
 /** A Resource minted as a Regis container image. */
 export function isContainerImage(entity: Entity): boolean {
   return entity.kind === 'Resource' && entity.spec?.type === 'container-image';
+}
+
+/** Explorer route scoped to a playbook entity's id, or undefined when unknown. */
+export function playbookExploreLink(entity: Entity): string | undefined {
+  const id = entity.metadata.annotations?.[REGIS_ANNOTATION_PLAYBOOK_ID];
+  return id ? `/?groupBy=playbook&playbook=${encodeURIComponent(id)}` : undefined;
 }
