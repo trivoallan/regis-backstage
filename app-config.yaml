@@ -11,6 +11,11 @@ app:
     - page:catalog:
         config:
           path: /catalog
+    # Curate the app to image-management surfaces: TechDocs and the catalog
+    # relations graph aren't part of the Regis posture workflow, so disable both
+    # plugins (their pages, entity tabs, and addons) wholesale.
+    - plugin:techdocs: false
+    - plugin:catalog-graph: false
 
 organization:
   name: My Company
