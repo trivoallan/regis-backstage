@@ -12,6 +12,7 @@ import { unionLadder } from './format';
 import { TrajectoryChart } from './TrajectoryChart';
 import { points, summary } from './trajectory';
 import { formatDelta } from './trendSummary';
+import { RegisEmptyState } from './RegisEmptyState';
 
 /** Score/tier trajectory of a container-image entity over time. */
 export function RegisTrajectoryCard() {
@@ -41,7 +42,11 @@ export function RegisTrajectoryCard() {
   const [history, playbooksResp] = value ?? [undefined, undefined];
   const snapshots = history?.snapshots ?? [];
   if (!history || snapshots.length === 0) {
-    return <InfoCard title="Trajectory">No history recorded yet.</InfoCard>;
+    return (
+      <InfoCard title="Trajectory">
+        <RegisEmptyState title="No history recorded." />
+      </InfoCard>
+    );
   }
   const ladder = unionLadder(playbooksResp?.playbooks);
   const s = summary(points(history));

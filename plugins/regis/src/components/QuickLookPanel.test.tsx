@@ -73,7 +73,7 @@ describe('QuickLookPanel', () => {
     await waitFor(() =>
       expect(getHistory).toHaveBeenCalledWith('resource:default/shop-catalog-api-4.1.0'),
     );
-    const link = await screen.findByText(/open full page/i);
+    const link = await screen.findByText(/open image page/i);
     expect(link.closest('a')?.getAttribute('href')).toContain('shop-catalog-api-4.1.0');
   });
 
@@ -81,7 +81,7 @@ describe('QuickLookPanel', () => {
     const getHistory = jest.fn();
     renderPanel({ entities: [], getHistory });
     expect(await screen.findByText(/not in the catalog/i)).toBeInTheDocument();
-    expect(screen.queryByText(/open full page/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/open image page/i)).not.toBeInTheDocument();
     expect(getHistory).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import type { ReportHistory, TrendBand } from '@regis/backstage-plugin-regis-common';
 import { tierColor } from './format';
 import { points, tierSpans } from './trajectory';
+import { RegisEmptyState } from './RegisEmptyState';
 
 
 /** Dependency-free SVG: score-over-time line with axes + a tier lane. */
@@ -12,7 +13,7 @@ export function TrajectoryChart(props: {
   const { history, ladder, compact = false } = props;
   const pts = points(history);
   if (pts.length < 2) {
-    return <span>Not enough history to plot a trend yet.</span>;
+    return <RegisEmptyState title="Not enough history to plot a trend." />;
   }
   const spans = tierSpans(pts);
 

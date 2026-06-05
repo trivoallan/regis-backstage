@@ -28,6 +28,6 @@ describe('PortfolioStackedArea', () => {
 
   it('renders nothing meaningful for an empty series', () => {
     render(<PortfolioStackedArea bands={bands} buckets={[]} />);
-    expect(screen.getByText(/no data/i)).toBeInTheDocument();
+    expect(screen.getByText(/no portfolio data/i)).toBeInTheDocument();
   });
 });

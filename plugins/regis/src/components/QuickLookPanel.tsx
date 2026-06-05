@@ -17,6 +17,7 @@ import {
 import { regisApiRef } from '../api/RegisApi';
 import { tierColor } from './format';
 import { TrajectoryChart } from './TrajectoryChart';
+import { RegisEmptyState } from './RegisEmptyState';
 
 /** Right-hand quick-look for one image: tier/score + trajectory + link to the entity page. */
 export function QuickLookPanel({
@@ -61,7 +62,7 @@ export function QuickLookPanel({
   let trajectory: JSX.Element;
   if (loading) trajectory = <Progress />;
   else if (history) trajectory = <TrajectoryChart history={history} ladder={ladder} compact />;
-  else trajectory = <Typography variant="body2">No history.</Typography>;
+  else trajectory = <RegisEmptyState title="No history recorded." />;
 
   return (
     <Drawer anchor="right" open onClose={onClose} variant="temporary">
@@ -76,7 +77,7 @@ export function QuickLookPanel({
         <Typography variant="overline" color="textSecondary">Trajectory</Typography>
         {trajectory}
         {entityRef ? (
-          <EntityRefLink entityRef={entityRef}>Open full page ↗</EntityRefLink>
+          <EntityRefLink entityRef={entityRef}>Open image page →</EntityRefLink>
         ) : (
           !loading && (
             <Typography variant="body2" color="textSecondary">

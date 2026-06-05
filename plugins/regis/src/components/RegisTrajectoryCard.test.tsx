@@ -93,7 +93,7 @@ describe('RegisTrajectoryCard', () => {
 
   it('shows an empty state when there is no history', async () => {
     await renderCard(async () => ({ imageRef: 'r/n:1', snapshots: [] }));
-    expect(await screen.findByText('No history recorded yet.')).toBeInTheDocument();
+    expect(await screen.findByText('No history recorded.')).toBeInTheDocument();
   });
 
   it('shows an error panel when the history request fails', async () => {
