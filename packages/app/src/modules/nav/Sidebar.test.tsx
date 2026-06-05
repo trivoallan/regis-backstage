@@ -1,4 +1,18 @@
+import { isValidElement, type ReactNode } from 'react';
 import { SidebarBody } from './Sidebar';
+
+/** Walk a returned element tree (unrendered) for the first element matching pred. */
+function findElement(
+  node: ReactNode,
+  pred: (props: Record<string, unknown>) => boolean,
+): boolean {
+  if (Array.isArray(node)) return node.some(n => findElement(n, pred));
+  if (isValidElement(node)) {
+    const props = node.props as Record<string, unknown>;
+    return pred(props) || findElement(props.children as ReactNode, pred);
+  }
+  return false;
+}
 
 /** Minimal stub of the NavItemsCollection passed by NavContentBlueprint. */
 function stubNav() {
@@ -28,11 +42,19 @@ describe('SidebarBody (curated nav)', () => {
     renderSidebarBody({ navItems: s.navItems as any });
     expect(s.taken).toEqual([
       'page:search',
-      'page:regis',
       'page:catalog',
       'page:scaffolder',
       'page:user-settings',
     ]);
     expect(s.restCalled).toBe(false);
+  });
+
+  it('renders an explicit Portfolio item pointing to the home', () => {
+    const s = stubNav();
+    const renderSidebarBody = SidebarBody;
+    const tree = renderSidebarBody({ navItems: s.navItems as any });
+    expect(
+      findElement(tree, p => p.text === 'Portfolio' && p.to === '/'),
+    ).toBe(true);
   });
 });

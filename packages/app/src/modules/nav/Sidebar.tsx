@@ -12,6 +12,7 @@ import {
 import { SidebarLogo } from './SidebarLogo';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
+import TimelineIcon from '@material-ui/icons/Timeline';
 import { SidebarSearchModal } from '@backstage/plugin-search';
 import { UserSettingsSignInAvatar } from '@backstage/plugin-user-settings';
 
@@ -35,7 +36,7 @@ export function SidebarBody({ navItems }: { navItems: NavContentNavItems }) {
       </SidebarGroup>
       <SidebarDivider />
       <SidebarGroup label="Menu" icon={<MenuIcon />}>
-        {nav.take('page:regis')}
+        <SidebarItem icon={TimelineIcon} to="/" text="Portfolio" />
         {nav.take('page:catalog')}
         {nav.take('page:scaffolder')}
       </SidebarGroup>
