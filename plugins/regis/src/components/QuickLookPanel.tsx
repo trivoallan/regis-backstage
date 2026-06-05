@@ -16,7 +16,7 @@ import {
 } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef } from '../api/RegisApi';
 import { tierColor } from './format';
-import { Sparkline } from './Sparkline';
+import { TrajectoryChart } from './TrajectoryChart';
 
 /** Right-hand quick-look for one image: tier/score + trajectory + link to the entity page. */
 export function QuickLookPanel({
@@ -60,7 +60,7 @@ export function QuickLookPanel({
 
   let trajectory: JSX.Element;
   if (loading) trajectory = <Progress />;
-  else if (history) trajectory = <Sparkline history={history} ladder={ladder} />;
+  else if (history) trajectory = <TrajectoryChart history={history} ladder={ladder} compact />;
   else trajectory = <Typography variant="body2">No history.</Typography>;
 
   return (
