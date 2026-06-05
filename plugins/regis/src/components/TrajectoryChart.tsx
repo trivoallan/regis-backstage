@@ -2,7 +2,6 @@ import type { ReportHistory, TrendBand } from '@regis/backstage-plugin-regis-com
 import { tierColor } from './format';
 import { points, tierSpans } from './trajectory';
 
-const NEUTRAL = '#9ca3af';
 
 /** Dependency-free SVG: score-over-time line with axes + a tier lane. */
 export function TrajectoryChart(props: {
@@ -57,13 +56,23 @@ export function TrajectoryChart(props: {
         <text key={i} x={x(i)} y={xLabelY} textAnchor="middle" fontSize={10} fill="#999">{pts[i].date}</text>
       ))}
       {spans.map((sp, idx) => {
-        const startX = idx === 0 ? left : x(sp.fromIndex);
-        const endX = idx === spans.length - 1 ? W - right : x(spans[idx + 1].fromIndex);
+        const startX = idx === 0 ? left : (x(sp.fromIndex) + x(sp.fromIndex - 1)) / 2;
+        const endX =
+          idx === spans.length - 1
+            ? W - right
+            : (x(sp.toIndex) + x(sp.toIndex + 1)) / 2;
         const segW = Math.max(0, endX - startX);
         return (
           <g key={sp.fromIndex}>
-            <rect data-testid="tier-lane-seg" x={startX} y={laneTop} width={segW} height={laneH} rx={3}
-              fill={sp.tier ? tierColor(sp.tier, ladder) : NEUTRAL} />
+            <rect
+              data-testid="tier-lane-seg"
+              x={startX}
+              y={laneTop}
+              width={segW}
+              height={laneH}
+              rx={3}
+              fill={tierColor(sp.tier, ladder)}
+            />
             {!compact && segW > 34 && (
               <text x={startX + segW / 2} y={laneTop + laneH - 4} textAnchor="middle" fontSize={11} fontWeight={600} fill="#fff">
                 {sp.tier ?? '—'}

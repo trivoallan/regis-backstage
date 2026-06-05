@@ -25,6 +25,10 @@ describe('TrajectoryChart', () => {
     expect(svg).toBeInTheDocument();
     expect(svg.querySelector('polyline')).toBeInTheDocument();
     expect(screen.getAllByTestId('tier-lane-seg')).toHaveLength(3);
+    // Every lane segment must be visible — including the last (single-point) span.
+    screen.getAllByTestId('tier-lane-seg').forEach(seg => {
+      expect(Number(seg.getAttribute('width'))).toBeGreaterThan(0);
+    });
   });
 
   it('renders the insufficient-history message for fewer than 2 points', () => {

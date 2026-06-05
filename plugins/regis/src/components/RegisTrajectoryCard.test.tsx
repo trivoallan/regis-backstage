@@ -44,7 +44,7 @@ const renderCard = (
   );
 
 describe('RegisTrajectoryCard', () => {
-  it('renders a sparkline and the latest posture when history exists', async () => {
+  it('renders the trajectory chart and the latest posture when history exists', async () => {
     await renderCard(async () => ({
       imageRef: 'registry-1.docker.io/library/nginx:1.27',
       snapshots: [
@@ -58,7 +58,7 @@ describe('RegisTrajectoryCard', () => {
     expect(screen.getByText(/▲ 30/)).toBeInTheDocument();
   });
 
-  it('colors sparkline dots by the resolved playbook ladder', async () => {
+  it('colors trajectory dots by the resolved playbook ladder', async () => {
     const getPlaybooks = async () => ({
       playbooks: [
         {
