@@ -80,7 +80,7 @@
     {
       "slug": "no-critical-cve",
       "description": "No critical vulnerabilities",
-      "level": "Gold",
+      "level": "critical",
       "tags": [
         "security"
       ],
@@ -94,7 +94,7 @@
     {
       "slug": "no-high-cve",
       "description": "No high vulnerabilities",
-      "level": "Silver",
+      "level": "high",
       "tags": [
         "security"
       ],
@@ -108,7 +108,7 @@
     {
       "slug": "fixable-cves-patched",
       "description": "All fixable CVEs are patched",
-      "level": "Bronze",
+      "level": "medium",
       "tags": [
         "security"
       ],
@@ -122,7 +122,7 @@
     {
       "slug": "runs-as-nonroot",
       "description": "Runs as a non-root user",
-      "level": "Silver",
+      "level": "medium",
       "tags": [
         "hygiene"
       ],
@@ -136,7 +136,7 @@
     {
       "slug": "has-healthcheck",
       "description": "Declares a HEALTHCHECK",
-      "level": "Bronze",
+      "level": "low",
       "tags": [
         "hygiene"
       ],
@@ -150,7 +150,7 @@
     {
       "slug": "pinned-base-image",
       "description": "Base image pinned by digest",
-      "level": "Silver",
+      "level": "medium",
       "tags": [
         "supply-chain"
       ],
@@ -164,7 +164,7 @@
     {
       "slug": "image-signed",
       "description": "Image is signed (cosign)",
-      "level": "Gold",
+      "level": "high",
       "tags": [
         "supply-chain"
       ],
@@ -178,7 +178,7 @@
     {
       "slug": "oci-source-labels",
       "description": "OCI source/revision labels present",
-      "level": "Bronze",
+      "level": "low",
       "tags": [
         "observability"
       ],

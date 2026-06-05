@@ -5,9 +5,9 @@ import { RuleTable } from './RuleTable';
 import type { Rule } from './posture';
 
 const rules: Rule[] = [
-  { slug: 'fail-sec', description: 'Run as non-root', tags: ['security'], level: 'Gold', passed: false, status: 'failed', message: 'no USER' },
-  { slug: 'inc-sup', description: 'Provenance', tags: ['supply-chain'], level: 'Silver', passed: false, status: 'incomplete', message: 'offline' },
-  { slug: 'pass-hyg', description: 'Pinned base', tags: ['hygiene'], level: 'Bronze', passed: true, status: 'passed', message: 'ok' },
+  { slug: 'fail-sec', description: 'Run as non-root', tags: ['security'], level: 'high', passed: false, status: 'failed', message: 'no USER' },
+  { slug: 'inc-sup', description: 'Provenance', tags: ['supply-chain'], level: 'medium', passed: false, status: 'incomplete', message: 'offline' },
+  { slug: 'pass-hyg', description: 'Pinned base', tags: ['hygiene'], level: 'low', passed: true, status: 'passed', message: 'ok' },
 ];
 
 describe('RuleTable', () => {

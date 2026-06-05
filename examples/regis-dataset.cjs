@@ -43,16 +43,19 @@ function scorePath(img) {
   return [60, 62, img.score];
 }
 
-// --- shared rule catalogue (slug, description, gating level, tags) ----------
+// --- shared rule catalogue (slug, description, severity, tags) --------------
+// `level` is the rule's SEVERITY (critical/high/medium/low), per the Regis
+// rules model — not a tier. Tier gating is decided by the playbook conditions,
+// and each image's earned tier + failing rules are set explicitly below.
 const RULES = [
-  { slug: 'no-critical-cve', description: 'No critical vulnerabilities', level: 'Gold', tags: ['security'], analyzers: ['cve'] },
-  { slug: 'no-high-cve', description: 'No high vulnerabilities', level: 'Silver', tags: ['security'], analyzers: ['cve'] },
-  { slug: 'fixable-cves-patched', description: 'All fixable CVEs are patched', level: 'Bronze', tags: ['security'], analyzers: ['cve'] },
-  { slug: 'runs-as-nonroot', description: 'Runs as a non-root user', level: 'Silver', tags: ['hygiene'], analyzers: ['oci'] },
-  { slug: 'has-healthcheck', description: 'Declares a HEALTHCHECK', level: 'Bronze', tags: ['hygiene'], analyzers: ['oci'] },
-  { slug: 'pinned-base-image', description: 'Base image pinned by digest', level: 'Silver', tags: ['supply-chain'], analyzers: ['oci'] },
-  { slug: 'image-signed', description: 'Image is signed (cosign)', level: 'Gold', tags: ['supply-chain'], analyzers: ['oci'] },
-  { slug: 'oci-source-labels', description: 'OCI source/revision labels present', level: 'Bronze', tags: ['observability'], analyzers: ['oci'] },
+  { slug: 'no-critical-cve', description: 'No critical vulnerabilities', level: 'critical', tags: ['security'], analyzers: ['cve'] },
+  { slug: 'no-high-cve', description: 'No high vulnerabilities', level: 'high', tags: ['security'], analyzers: ['cve'] },
+  { slug: 'fixable-cves-patched', description: 'All fixable CVEs are patched', level: 'medium', tags: ['security'], analyzers: ['cve'] },
+  { slug: 'runs-as-nonroot', description: 'Runs as a non-root user', level: 'medium', tags: ['hygiene'], analyzers: ['oci'] },
+  { slug: 'has-healthcheck', description: 'Declares a HEALTHCHECK', level: 'low', tags: ['hygiene'], analyzers: ['oci'] },
+  { slug: 'pinned-base-image', description: 'Base image pinned by digest', level: 'medium', tags: ['supply-chain'], analyzers: ['oci'] },
+  { slug: 'image-signed', description: 'Image is signed (cosign)', level: 'high', tags: ['supply-chain'], analyzers: ['oci'] },
+  { slug: 'oci-source-labels', description: 'OCI source/revision labels present', level: 'low', tags: ['observability'], analyzers: ['oci'] },
 ];
 
 const PLAYBOOKS = [

@@ -37,7 +37,7 @@ describe('RegisTabContent', () => {
           playbooks: [{ playbook_name: 'base-image-policy', playbook_version: '2.3' }],
           request: { repository: 'library/nginx', tag: '1.25', timestamp: '2026-06-04T00:00:00Z' },
           rules: [
-            { slug: 'a', description: 'Run as non-root', tags: ['security'], level: 'Gold', passed: false, status: 'failed', message: 'no USER' },
+            { slug: 'a', description: 'Run as non-root', tags: ['security'], level: 'high', passed: false, status: 'failed', message: 'no USER' },
           ],
           rules_summary: { score: 73, by_tag: { security: { rules: ['a'], passed_rules: [], score: 0 } } },
         } as any,
