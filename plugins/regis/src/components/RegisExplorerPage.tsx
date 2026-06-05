@@ -6,13 +6,13 @@ import {
   Content,
   Header,
   InfoCard,
+  Link,
   Page,
   Progress,
   ResponseErrorPanel,
 } from '@backstage/core-components';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import type { ExploreGroupBy } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef } from '../api/RegisApi';
 import { unionLadder } from './format';
@@ -22,6 +22,7 @@ import { FacetRail, type ExploreState, type FacetKey } from './FacetRail';
 import { Breakdown } from './Breakdown';
 import { ImageList } from './ImageList';
 import { QuickLookPanel } from './QuickLookPanel';
+import { RegisEmptyState } from './RegisEmptyState';
 
 function scopeSummary(
   filters: ExploreState['filters'],
@@ -96,7 +97,22 @@ export function RegisExplorerPage() {
     if (error) return <ResponseErrorPanel error={error} />;
     if (!data) return null;
     if (data.images.length === 0) {
-      return <Typography>No images match this scope yet.</Typography>;
+      const hasFilters = Object.keys(state.filters).length > 0;
+      return (
+        <RegisEmptyState
+          title="No images match this scope."
+          action={
+            hasFilters ? (
+              <Link
+                component="button"
+                onClick={() => setState({ groupBy: state.groupBy, filters: {} })}
+              >
+                Clear filters
+              </Link>
+            ) : undefined
+          }
+        />
+      );
     }
     return (
       <Grid container spacing={2}>
