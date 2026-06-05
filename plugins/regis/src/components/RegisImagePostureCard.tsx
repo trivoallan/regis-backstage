@@ -8,29 +8,18 @@ import {
   type TableColumn,
 } from '@backstage/core-components';
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
+import { Box, Chip } from '@material-ui/core';
 import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef, type ReportSummary } from '../api/RegisApi';
-import { tierColor, unionLadder } from './format';
-
-function distribution(rows: ReportSummary[], order: string[]): string {
-  const counts = new Map<string, number>();
-  for (const r of rows) {
-    const key = r.status === 'ok' ? r.tier ?? 'untiered' : r.status;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  const rank = (k: string) =>
-    order.indexOf(k) === -1 ? order.length : order.indexOf(k);
-  return [...counts.entries()]
-    .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
-    .map(([k, n]) => `${n} ${k}`)
-    .join(' · ');
-}
+import { scoreBarColor, tierColor, unionLadder } from './format';
+import { sortSummariesWorstFirst } from './rollup';
+import { PostureRollup } from './PostureRollup';
 
 function makeColumns(ladder: TrendBand[]): TableColumn<ReportSummary>[] {
   return [
     {
       title: 'Image',
-      field: 'entityRef',
+      field: 'imageRef',
       render: row => (
         <EntityRefLink entityRef={row.entityRef}>
           {row.imageRef ?? row.entityRef}
@@ -40,23 +29,32 @@ function makeColumns(ladder: TrendBand[]): TableColumn<ReportSummary>[] {
     {
       title: 'Tier',
       field: 'tier',
-      render: row => (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span
-            data-testid="tier-swatch"
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              display: 'inline-block',
-              backgroundColor: tierColor(row.tier, ladder),
-            }}
+      render: row =>
+        row.tier ? (
+          <Chip
+            size="small"
+            label={row.tier}
+            style={{ backgroundColor: tierColor(row.tier, ladder), color: '#fff' }}
           />
-          {row.tier ?? '—'}
-        </span>
+        ) : (
+          <>—</>
+        ),
+    },
+    {
+      title: 'Score',
+      field: 'score',
+      type: 'numeric',
+      render: row => (
+        <Box display="flex" alignItems="center" gridGap={8} justifyContent="flex-end">
+          <span>{row.score ?? '—'}</span>
+          {row.score !== undefined && (
+            <div style={{ width: 64, height: 6, borderRadius: 3, background: '#eee', overflow: 'hidden' }}>
+              <div style={{ width: `${row.score}%`, height: '100%', background: scoreBarColor(row.score) }} />
+            </div>
+          )}
+        </Box>
       ),
     },
-    { title: 'Score', field: 'score', type: 'numeric' },
   ];
 }
 
@@ -64,8 +62,9 @@ function makeColumns(ladder: TrendBand[]): TableColumn<ReportSummary>[] {
 export function RegisImagePostureCard(props: {
   title: string;
   imageRefs: string[];
+  exploreLink?: string;
 }) {
-  const { title, imageRefs } = props;
+  const { title, imageRefs, exploreLink } = props;
   const api = useApi(regisApiRef);
   const { value, loading, error } = useAsync(
     () => Promise.all([api.listReports(), api.getPlaybooks()]),
@@ -89,8 +88,6 @@ export function RegisImagePostureCard(props: {
 
   const [reports, playbooksResp] = value ?? [undefined, undefined];
   const ladder = unionLadder(playbooksResp?.playbooks);
-  const order = ladder.map(b => b.key);
-
   const wanted = new Set(imageRefs);
   const rows = (reports ?? []).filter(r => wanted.has(r.entityRef));
 
@@ -98,14 +95,16 @@ export function RegisImagePostureCard(props: {
     return <InfoCard title={title}>No Regis-tracked images yet.</InfoCard>;
   }
 
+  const deepLink = exploreLink
+    ? { title: 'View in explorer', link: exploreLink }
+    : undefined;
+
   return (
-    <InfoCard
-      title={title}
-      subheader={`${rows.length} images · ${distribution(rows, order)}`}
-    >
+    <InfoCard title={title} deepLink={deepLink}>
+      <PostureRollup rows={rows} ladder={ladder} />
       <Table
         columns={makeColumns(ladder)}
-        data={rows}
+        data={sortSummariesWorstFirst(rows, ladder)}
         options={{
           search: false,
           toolbar: false,
