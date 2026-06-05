@@ -52,6 +52,7 @@ describe('RegisScorecardCard', () => {
           schemaVersion: 1,
           tier: 'Silver',
           playbooks: [{ playbook_name: 'base-image-policy', playbook_version: '2.3' }],
+          request: { repository: 'library/nginx', tag: '1.25', timestamp: '2026-06-04T00:00:00Z' },
           badges: [
             { scope: 'security', value: 'B', class: 'warning' },
             { scope: 'hygiene', value: 'A', class: 'success' },
@@ -86,9 +87,53 @@ describe('RegisScorecardCard', () => {
       'href',
       '/catalog/default/resource/regis-playbook-default',
     );
+    expect(screen.getByText(/v2\.3/)).toBeInTheDocument();
+    expect(screen.getByText(/scanned 2026-06-04/i)).toBeInTheDocument();
     // No next-tier claims are made any more.
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();
+  });
+
+  it('renders the playbook name as plain text when no playbook annotation is present', async () => {
+    const noAnnotationEntity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: {
+        name: 'img',
+        annotations: { 'regis.io/report-url': 'https://h/r.json' },
+      },
+      spec: {},
+    };
+    await renderInTestApp(
+      <TestApiProvider
+        apis={[
+          [
+            regisApiRef,
+            {
+              getReport: async () => ({
+                report: {
+                  schemaVersion: 1,
+                  tier: 'Silver',
+                  playbooks: [{ playbook_name: 'base-image-policy' }],
+                  rules: [],
+                  rules_summary: { score: 73, by_tag: {} },
+                } as any,
+                meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
+              }),
+              getPlaybooks: async () => ({ playbooks: [] }),
+            } as Partial<typeof regisApiRef.T>,
+          ],
+        ]}
+      >
+        <EntityProvider entity={noAnnotationEntity}>
+          <RegisScorecardCard />
+        </EntityProvider>
+      </TestApiProvider>,
+    );
+
+    const name = await screen.findByText('base-image-policy');
+    expect(name.closest('a')).toBeNull();
+    expect(name.tagName).toBe('STRONG');
   });
 
   it('renders an error panel when the API fails', async () => {
