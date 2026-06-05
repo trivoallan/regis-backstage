@@ -55,6 +55,7 @@ describe('RegisTrajectoryCard', () => {
     expect(await screen.findByText('Trajectory')).toBeInTheDocument();
     expect(await screen.findByLabelText('score trajectory')).toBeInTheDocument();
     expect(screen.getByText(/latest Gold/)).toBeInTheDocument();
+    expect(screen.getByText(/▲ 30/)).toBeInTheDocument();
   });
 
   it('colors sparkline dots by the resolved playbook ladder', async () => {
