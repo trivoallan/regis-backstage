@@ -60,3 +60,4 @@ Router (`router.ts`) exposes: `GET /report` (single, by entity ref), `GET /repor
 - **Demo data is generated.** Everything in `examples/` (catalog YAML, reports, index fragments, history) comes from `examples/regis-dataset.cjs`. Edit the generator and run `node examples/regis-dataset.cjs` — do not hand-edit the generated files. `examples/README.md` documents the demo dataset and how to run it end-to-end.
 - **Design & planning docs** live in `docs/superpowers/specs/` (designs) and `docs/superpowers/plans/` (implementation plans), dated and per-phase. Consult the relevant one before large changes; the project has been built in numbered phases/slices.
 - Changesets (`.changeset/`) are used for versioning published plugins.
+- **PR merges use squash merge.** Always merge pull requests with `gh pr merge --squash` (never `--merge` or `--rebase`) to keep `main` history linear.
