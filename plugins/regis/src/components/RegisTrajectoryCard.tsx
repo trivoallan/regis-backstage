@@ -9,7 +9,9 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { regisApiRef } from '../api/RegisApi';
 import { unionLadder } from './format';
-import { Sparkline } from './Sparkline';
+import { TrajectoryChart } from './TrajectoryChart';
+import { points, summary } from './trajectory';
+import { formatDelta } from './trendSummary';
 
 /** Score/tier trajectory of a container-image entity over time. */
 export function RegisTrajectoryCard() {
@@ -42,16 +44,15 @@ export function RegisTrajectoryCard() {
     return <InfoCard title="Trajectory">No history recorded yet.</InfoCard>;
   }
   const ladder = unionLadder(playbooksResp?.playbooks);
-
-  const latest = snapshots[snapshots.length - 1];
+  const s = summary(points(history));
   return (
     <InfoCard
       title="Trajectory"
       subheader={`${snapshots.length} snapshots · latest ${
-        latest.tier ?? 'none'
-      } (${latest.score ?? '—'})`}
+        s.latestTier ?? 'none'
+      } (${s.latestScore ?? '—'}) · ${formatDelta(s.delta)}`}
     >
-      <Sparkline history={history} ladder={ladder} />
+      <TrajectoryChart history={history} ladder={ladder} />
     </InfoCard>
   );
 }
