@@ -1,6 +1,6 @@
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { RegisImagePostureCard } from './RegisImagePostureCard';
-import { imageRefsFromRelations } from './imageRelations';
+import { imageRefsFromRelations, playbookExploreLink } from './imageRelations';
 
 /** Images the current Component depends on. */
 export function RegisServiceImagesCard() {
@@ -20,6 +20,7 @@ export function RegisPlaybookImagesCard() {
     <RegisImagePostureCard
       title="Assessed images"
       imageRefs={imageRefsFromRelations(entity, 'dependencyOf')}
+      exploreLink={playbookExploreLink(entity)}
     />
   );
 }

@@ -3,6 +3,7 @@ import {
   imageRefsFromRelations,
   isComponentWithImageDeps,
   isRegisPlaybook,
+  playbookExploreLink,
 } from './imageRelations';
 
 const component: Entity = {
@@ -65,6 +66,27 @@ describe('isRegisPlaybook', () => {
 });
 
 import { isContainerImage } from './imageRelations';
+
+describe('playbookExploreLink', () => {
+  it('builds an explorer link scoped to the playbook id', () => {
+    const entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: { name: 'regis-playbook-default', annotations: { 'regis.io/playbook-id': 'default' } },
+      spec: { type: 'regis-playbook' },
+    } as any;
+    expect(playbookExploreLink(entity)).toBe('/?groupBy=playbook&playbook=default');
+  });
+  it('returns undefined when the playbook id annotation is absent', () => {
+    const entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: { name: 'p' },
+      spec: { type: 'regis-playbook' },
+    } as any;
+    expect(playbookExploreLink(entity)).toBeUndefined();
+  });
+});
 
 describe('isContainerImage', () => {
   it('is true for a container-image Resource', () => {

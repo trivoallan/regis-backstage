@@ -66,4 +66,30 @@ describe('RegisPlaybookImagesCard', () => {
     expect(await screen.findByText('Assessed images')).toBeInTheDocument();
     expect(await screen.findByText('r/a:1')).toBeInTheDocument();
   });
+
+  it('playbook card links to the explorer scoped by playbook id', async () => {
+    const playbook = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: { name: 'regis-playbook-default', annotations: { 'regis.io/playbook-id': 'default' } },
+      spec: { type: 'regis-playbook' },
+      relations: [{ type: 'dependencyOf', targetRef: 'resource:default/img-a' }],
+    } as any;
+    renderWith(playbook, <RegisPlaybookImagesCard />);
+    const link = await screen.findByText('View in explorer');
+    expect(link.closest('a')).toHaveAttribute('href', '/?groupBy=playbook&playbook=default');
+  });
+
+  it('service card shows no explorer link', async () => {
+    const service = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Component',
+      metadata: { name: 'svc' },
+      spec: { type: 'service' },
+      relations: [{ type: 'dependsOn', targetRef: 'resource:default/img-a' }],
+    } as any;
+    renderWith(service, <RegisServiceImagesCard />);
+    await screen.findByText('r/a:1');
+    expect(screen.queryByText('View in explorer')).not.toBeInTheDocument();
+  });
 });
