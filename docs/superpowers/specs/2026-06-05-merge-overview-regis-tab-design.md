@@ -69,7 +69,10 @@ Keeps the score gauge, tier chip, badges, and status counts. Adds:
 
 Stays `type: 'info'`. This card becomes the complete synthesis, so the redundant
 `repo:tag` identity line from `PostureSummary` is dropped — the *About* card and
-entity title already carry the identity.
+entity title already carry the identity. The tier-ladder caption
+(`· ladder: Gold → Silver → Bronze`) is also dropped: the gauge already encodes
+the ladder through its color and the tier chip shows the current tier, so the
+flattened ladder names add little on a single-image card.
 
 ### `RegisRulesCard` (new, `type: 'content'`)
 
