@@ -41,4 +41,10 @@ describe('PostureRollup', () => {
     const { container } = render(<PostureRollup rows={[]} ladder={ladder} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('labels the mix bar for assistive tech', () => {
+    const rows = [row({ tier: 'Gold' }), row({ tier: 'Bronze' })];
+    render(<PostureRollup rows={rows} ladder={ladder} />);
+    expect(screen.getByLabelText(/Tier distribution: 1 Gold, 1 Bronze/)).toBeInTheDocument();
+  });
 });

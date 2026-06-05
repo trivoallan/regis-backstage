@@ -16,9 +16,11 @@ export function PostureRollup(props: {
   const missing = missingCount(rows);
   const total = rows.length;
 
+  const barLabel = `Tier distribution: ${entries.map(e => `${e.count} ${e.label}`).join(', ')}`;
+
   return (
     <Box mb={1.5}>
-      <Box display="flex" height={14} borderRadius={4} overflow="hidden" mb={1}>
+      <Box display="flex" height={14} borderRadius={4} overflow="hidden" mb={1} role="img" aria-label={barLabel}>
         {entries.map(e => (
           <Box
             key={e.key}

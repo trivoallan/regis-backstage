@@ -49,7 +49,12 @@ export function worstTier(
   return { label: band.label, count };
 }
 
-/** Rows with no usable report. */
+/**
+ * Rows with no usable report (`status !== 'ok'`). Note: a row that still carries
+ * a tier from stale data is counted both in its tier bucket (see `mix`) and here,
+ * so the mix counts plus this count may exceed `rows.length`. This is intentional —
+ * show the last-known tier and flag staleness separately.
+ */
 export function missingCount(rows: ReportSummary[]): number {
   return rows.filter(r => r.status !== 'ok').length;
 }
