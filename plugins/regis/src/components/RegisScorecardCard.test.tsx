@@ -4,16 +4,19 @@ import {
   renderInTestApp,
   TestApiProvider,
 } from '@backstage/frontend-test-utils';
-import { EntityProvider } from '@backstage/plugin-catalog-react';
+import { EntityProvider, entityRouteRef } from '@backstage/plugin-catalog-react';
 import { regisApiRef } from '../api/RegisApi';
 import { RegisScorecardCard } from './RegisScorecardCard';
 
 const entity = {
   apiVersion: 'backstage.io/v1alpha1',
-  kind: 'Component',
+  kind: 'Resource',
   metadata: {
-    name: 'svc',
-    annotations: { 'regis.io/report-url': 'https://h/r.json' },
+    name: 'img',
+    annotations: {
+      'regis.io/report-url': 'https://h/r.json',
+      'regis.io/playbook': 'resource:default/regis-playbook-default',
+    },
   },
   spec: {},
 };
@@ -38,6 +41,7 @@ const renderCard = (api: Partial<typeof regisApiRef.T>) =>
         <RegisScorecardCard />
       </EntityProvider>
     </TestApiProvider>,
+    { mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef } },
   );
 
 describe('RegisScorecardCard', () => {
@@ -56,7 +60,13 @@ describe('RegisScorecardCard', () => {
             { slug: 'g1', description: 'd', level: 'high', passed: true, status: 'passed', message: '' },
             { slug: 'g2', description: 'd', level: 'critical', passed: false, status: 'failed', message: '' },
           ],
-          rules_summary: { score: 73, by_tag: {} },
+          rules_summary: {
+            score: 73,
+            by_tag: {
+              security: { rules: ['a', 'b'], passed_rules: ['a'], score: 65 },
+              hygiene: { rules: ['c'], passed_rules: ['c'], score: 92 },
+            },
+          },
         } as any,
         meta: { fetchedAt: '', source: 'http', schemaVersion: 1 },
       }),
@@ -66,10 +76,16 @@ describe('RegisScorecardCard', () => {
     expect(await screen.findByText('73')).toBeInTheDocument();
     const chip = (await screen.findByText('Silver')).closest('.MuiChip-root') as HTMLElement;
     expect(chip).toHaveStyle({ backgroundColor: '#9ca3af' });
-    expect(screen.getByText(/security/)).toBeInTheDocument();
-    expect(screen.getByText(/hygiene/)).toBeInTheDocument();
+    expect(screen.getByText(/security · B/)).toBeInTheDocument();
+    expect(screen.getByText(/hygiene · A/)).toBeInTheDocument();
     expect(screen.getByText(/1 passed/)).toBeInTheDocument();
-    expect(screen.getByText(/via base-image-policy/i)).toBeInTheDocument();
+    expect(screen.getByText('security')).toBeInTheDocument();
+    expect(screen.getByText('65%')).toBeInTheDocument();
+    const playbookLink = await screen.findByText('base-image-policy');
+    expect(playbookLink.closest('a')).toHaveAttribute(
+      'href',
+      '/catalog/default/resource/regis-playbook-default',
+    );
     // No next-tier claims are made any more.
     expect(screen.queryByText(/rules left for/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Top tier/i)).not.toBeInTheDocument();

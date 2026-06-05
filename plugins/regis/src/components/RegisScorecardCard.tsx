@@ -3,7 +3,10 @@ import {
   Progress,
   ResponseErrorPanel,
 } from '@backstage/core-components';
+import { EntityRefLink, useEntity } from '@backstage/plugin-catalog-react';
 import { Box, Chip, Typography } from '@material-ui/core';
+import { REGIS_ANNOTATION_PLAYBOOK } from '@regis/backstage-plugin-regis-common';
+import { CategoryBreakdown } from './CategoryBreakdown';
 import { badgeClassColor, tierColor } from './format';
 import { countByStatus } from './posture';
 import { useReportAndLadder } from './useReportAndLadder';
@@ -55,8 +58,9 @@ function Gauge(props: { score: number; color: string }) {
   );
 }
 
-/** Overview posture card: score gauge + tier + domain badges + counts. */
+/** Overview posture card: score gauge + tier + breakdown + badges + counts. */
 export function RegisScorecardCard() {
+  const { entity } = useEntity();
   const { value, loading, error } = useReportAndLadder();
 
   if (loading) return <Progress />;
@@ -66,7 +70,11 @@ export function RegisScorecardCard() {
   const rules = report.rules ?? [];
   const score = report.rules_summary?.score ?? 0;
   const counts = countByStatus(rules);
-  const playbookName = report.playbooks?.[0]?.playbook_name;
+  const pb = report.playbooks?.[0];
+  const playbookName = pb?.playbook_name;
+  const playbookRef =
+    entity.metadata.annotations?.[REGIS_ANNOTATION_PLAYBOOK];
+  const scanned = report.request?.timestamp?.slice(0, 10);
 
   return (
     <InfoCard title="Regis posture">
@@ -97,9 +105,19 @@ export function RegisScorecardCard() {
           ))}
         </Box>
       )}
+      <Box mb={1}>
+        <CategoryBreakdown rulesSummary={report.rules_summary} />
+      </Box>
       {playbookName && (
-        <Typography variant="caption" color="textSecondary">
-          via {playbookName}
+        <Typography variant="caption" color="textSecondary" component="div">
+          via{' '}
+          {playbookRef ? (
+            <EntityRefLink entityRef={playbookRef}>{playbookName}</EntityRefLink>
+          ) : (
+            <strong>{playbookName}</strong>
+          )}
+          {pb?.playbook_version ? ` v${pb.playbook_version}` : ''}
+          {scanned ? ` · scanned ${scanned}` : ''}
         </Typography>
       )}
     </InfoCard>
