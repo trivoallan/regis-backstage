@@ -94,4 +94,13 @@ describe('sortSummariesWorstFirst', () => {
     ];
     expect(sortSummariesWorstFirst(rows, ladder).map(r => r.entityRef)).toEqual(['lo', 'hi']);
   });
+  it('is stable when scores are undefined and tiers unladdered (no NaN comparisons)', () => {
+    const rows = [
+      row({ entityRef: 'a', status: 'pending', tier: null }),
+      row({ entityRef: 'b', status: 'pending', tier: null }),
+      row({ entityRef: 'c', tier: 'Gold', score: undefined }),
+      row({ entityRef: 'd', tier: 'Gold', score: undefined }),
+    ];
+    expect(sortSummariesWorstFirst(rows, ladder).map(r => r.entityRef)).toEqual(['a', 'b', 'c', 'd']);
+  });
 });

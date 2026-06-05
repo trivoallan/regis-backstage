@@ -61,9 +61,12 @@ export function sortSummariesWorstFirst(
 ): ReportSummary[] {
   const rank = tierRank(ladder);
   const missing = (r: ReportSummary) => (r.status !== 'ok' ? 0 : 1);
+  // Unknown/unladdered tiers sort as worst; use a finite sentinel past the last
+  // rank so the comparator never produces NaN (Infinity - Infinity).
   const rnk = (r: ReportSummary) =>
-    (r.tier ? rank.get(r.tier) : undefined) ?? Number.POSITIVE_INFINITY;
-  const score = (r: ReportSummary) => r.score ?? Number.NEGATIVE_INFINITY;
+    (r.tier ? rank.get(r.tier) : undefined) ?? ladder.length;
+  // Missing score sorts first within a tier (scores are 0-100, so -1 is below all).
+  const score = (r: ReportSummary) => r.score ?? -1;
   return [...rows].sort(
     (a, b) =>
       missing(a) - missing(b) || rnk(b) - rnk(a) || score(a) - score(b),
