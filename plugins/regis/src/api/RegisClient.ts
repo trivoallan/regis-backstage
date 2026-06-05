@@ -13,6 +13,7 @@ import type {
 export class RegisClient implements RegisApi {
   private readonly discoveryApi: DiscoveryApi;
   private readonly fetchApi: FetchApi;
+  private readonly inflight = new Map<string, Promise<unknown>>();
 
   constructor(options: { discoveryApi: DiscoveryApi; fetchApi: FetchApi }) {
     this.discoveryApi = options.discoveryApi;
@@ -23,7 +24,17 @@ export class RegisClient implements RegisApi {
     return this.discoveryApi.getBaseUrl('regis');
   }
 
-  private async getJson<T>(path: string): Promise<T> {
+  private getJson<T>(path: string): Promise<T> {
+    const cached = this.inflight.get(path);
+    if (cached) return cached as Promise<T>;
+    const promise = this.fetchJson<T>(path);
+    this.inflight.set(path, promise);
+    const clear = () => this.inflight.delete(path);
+    promise.then(clear, clear);
+    return promise;
+  }
+
+  private async fetchJson<T>(path: string): Promise<T> {
     const res = await this.fetchApi.fetch(`${await this.baseUrl()}${path}`);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

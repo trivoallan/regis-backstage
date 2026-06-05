@@ -6,10 +6,7 @@ import {
   discoveryApiRef,
   fetchApiRef,
 } from '@backstage/frontend-plugin-api';
-import {
-  EntityCardBlueprint,
-  EntityContentBlueprint,
-} from '@backstage/plugin-catalog-react/alpha';
+import { EntityCardBlueprint } from '@backstage/plugin-catalog-react/alpha';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import { isRegisAvailable } from '@regis/backstage-plugin-regis-common';
 import {
@@ -44,14 +41,13 @@ const scorecardCard = EntityCardBlueprint.make({
   },
 });
 
-const reportTab = EntityContentBlueprint.make({
-  name: 'report',
+const rulesCard = EntityCardBlueprint.make({
+  name: 'rules',
   params: {
-    path: 'regis',
-    title: 'Regis',
+    type: 'content',
     filter: isRegisAvailable,
     loader: () =>
-      import('./components/RegisTabContent').then(m => <m.RegisTabContent />),
+      import('./components/RegisRulesCard').then(m => <m.RegisRulesCard />),
   },
 });
 
@@ -114,7 +110,7 @@ export const regisPlugin = createFrontendPlugin({
   extensions: [
     regisApi,
     scorecardCard,
-    reportTab,
+    rulesCard,
     explorerPage,
     serviceImagesCard,
     playbookImagesCard,

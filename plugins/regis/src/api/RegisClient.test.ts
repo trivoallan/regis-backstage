@@ -124,4 +124,39 @@ describe('RegisClient', () => {
     expect(url).toContain('system=shop');
     expect(url).toContain('tier=Gold');
   });
+
+  it('dedupes concurrent identical GETs into a single fetch', async () => {
+    let resolveFetch!: (v: unknown) => void;
+    const fetchImpl = jest
+      .fn()
+      .mockReturnValue(new Promise(res => (resolveFetch = res)));
+    const client = clientWith(fetchImpl);
+
+    const p1 = client.getReport('component:default/svc');
+    const p2 = client.getReport('component:default/svc');
+    // Let baseUrl()/fetch fire before resolving the pending response.
+    await new Promise(r => setTimeout(r, 0));
+    resolveFetch({
+      ok: true,
+      json: async () => ({ report: { schemaVersion: 1 }, meta: {} }),
+    });
+    const [a, b] = await Promise.all([p1, p2]);
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(a.report.schemaVersion).toBe(1);
+    expect(b.report.schemaVersion).toBe(1);
+  });
+
+  it('refetches once a prior request has settled', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ report: { schemaVersion: 1 }, meta: {} }),
+    });
+    const client = clientWith(fetchImpl);
+
+    await client.getReport('component:default/svc');
+    await client.getReport('component:default/svc');
+
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
 });
