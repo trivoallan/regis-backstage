@@ -71,3 +71,6 @@ export function badgeClassColor(
       return '#1565c0';
   }
 }
+
+/** Emphasis color for the worst-tier indicator (matches the low-score band). */
+export const WORST_TIER_COLOR = '#c0392b';

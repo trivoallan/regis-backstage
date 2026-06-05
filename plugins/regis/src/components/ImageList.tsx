@@ -1,23 +1,18 @@
 import { Table, type TableColumn } from '@backstage/core-components';
 import Box from '@material-ui/core/Box';
+import Chip from '@material-ui/core/Chip';
 import Link from '@material-ui/core/Link';
 import type { ExploreImage, TrendBand } from '@regis/backstage-plugin-regis-common';
-import { tierColor } from './format';
+import { scoreBarColor, tierColor } from './format';
+import { tierRank } from './rollup';
 
-function TierCell({ tier, ladder }: { tier?: string | null; ladder: TrendBand[] }) {
-  return (
-    <Box component="span" display="inline-flex" alignItems="center" gridGap={6}>
-      <Box
-        component="span"
-        data-testid="tier-swatch"
-        width={10}
-        height={10}
-        borderRadius={2}
-        style={{ backgroundColor: tierColor(tier, ladder) }}
-      />
-      {tier ?? '—'}
-    </Box>
-  );
+/** Worst tier first (highest rank index first), then ascending score. Non-mutating. */
+function sortImagesWorstFirst(images: ExploreImage[], ladder: TrendBand[]): ExploreImage[] {
+  const rank = tierRank(ladder);
+  const rnk = (img: ExploreImage) =>
+    (img.tier ? rank.get(img.tier) : undefined) ?? ladder.length;
+  const score = (img: ExploreImage) => img.score ?? -1;
+  return [...images].sort((a, b) => rnk(b) - rnk(a) || score(a) - score(b));
 }
 
 /** Scoped image list; clicking a row opens the quick-look. */
@@ -40,14 +35,41 @@ export function ImageList({
         </Link>
       ),
     },
-    { title: 'Tier', field: 'tier', render: row => <TierCell tier={row.tier} ladder={ladder} /> },
-    { title: 'Score', field: 'score', type: 'numeric' },
+    {
+      title: 'Tier',
+      field: 'tier',
+      render: row =>
+        row.tier ? (
+          <Chip
+            size="small"
+            label={row.tier}
+            style={{ backgroundColor: tierColor(row.tier, ladder), color: '#fff' }}
+          />
+        ) : (
+          <>—</>
+        ),
+    },
+    {
+      title: 'Score',
+      field: 'score',
+      type: 'numeric',
+      render: row => (
+        <Box display="flex" alignItems="center" gridGap={8} justifyContent="flex-end">
+          <span>{row.score ?? '—'}</span>
+          {row.score !== undefined && (
+            <div style={{ width: 60, height: 6, borderRadius: 3, background: '#eee', overflow: 'hidden' }}>
+              <div style={{ width: `${row.score}%`, height: '100%', background: scoreBarColor(row.score) }} />
+            </div>
+          )}
+        </Box>
+      ),
+    },
   ];
   return (
     <Table
-      title={`${images.length} images`}
+      title={`${images.length} images · worst first`}
       columns={columns}
-      data={images}
+      data={sortImagesWorstFirst(images, ladder)}
       options={{ search: true, paging: images.length > 20, pageSize: 20, padding: 'dense' }}
     />
   );
