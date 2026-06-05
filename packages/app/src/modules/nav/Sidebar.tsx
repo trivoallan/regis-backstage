@@ -3,69 +3,55 @@ import {
   SidebarDivider,
   SidebarGroup,
   SidebarItem,
-  SidebarScrollWrapper,
   SidebarSpace,
 } from '@backstage/core-components';
-import { NavContentBlueprint } from '@backstage/plugin-app-react';
+import {
+  NavContentBlueprint,
+  NavContentNavItems,
+} from '@backstage/plugin-app-react';
 import { SidebarLogo } from './SidebarLogo';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { SidebarSearchModal } from '@backstage/plugin-search';
 import { UserSettingsSignInAvatar } from '@backstage/plugin-user-settings';
-import { NotificationsSidebarItem } from '@backstage/plugin-notifications';
+
+/**
+ * Curated sidebar body: only the image-management surfaces (Portfolio, Catalog,
+ * Create, Search, Settings). Plugins stay loaded — entity tabs and direct URLs
+ * are unaffected; this just trims the nav. Exported for unit testing.
+ */
+export function SidebarBody({ navItems }: { navItems: NavContentNavItems }) {
+  const nav = navItems.withComponent(item => (
+    <SidebarItem icon={() => item.icon} to={item.href} text={item.title} />
+  ));
+
+  nav.take('page:search'); // search is the modal below, not a nav page
+
+  return (
+    <Sidebar>
+      <SidebarLogo />
+      <SidebarGroup label="Search" icon={<SearchIcon />} to="/search">
+        <SidebarSearchModal />
+      </SidebarGroup>
+      <SidebarDivider />
+      <SidebarGroup label="Menu" icon={<MenuIcon />}>
+        {nav.take('page:regis')}
+        {nav.take('page:catalog')}
+        {nav.take('page:scaffolder')}
+      </SidebarGroup>
+      <SidebarSpace />
+      <SidebarDivider />
+      <SidebarGroup
+        label="Settings"
+        icon={<UserSettingsSignInAvatar />}
+        to="/settings"
+      >
+        {nav.take('page:user-settings')}
+      </SidebarGroup>
+    </Sidebar>
+  );
+}
 
 export const SidebarContent = NavContentBlueprint.make({
-  params: {
-    component: ({ navItems }) => {
-      // The standalone catalog-graph page renders an empty canvas until a root
-      // entity is selected. Default the sidebar entry to the `shop` System so
-      // the link lands on a populated graph instead of a blank page.
-      const CATALOG_GRAPH_DEFAULT_ROOT =
-        '/catalog-graph?rootEntityRefs[]=system:default/shop';
-      const nav = navItems.withComponent(item => (
-        <SidebarItem
-          icon={() => item.icon}
-          to={
-            item.href === '/catalog-graph'
-              ? CATALOG_GRAPH_DEFAULT_ROOT
-              : item.href
-          }
-          text={item.title}
-        />
-      ));
-
-      // Skipped items
-      nav.take('page:search'); // Using search modal instead
-
-      return (
-        <Sidebar>
-          <SidebarLogo />
-          <SidebarGroup label="Search" icon={<SearchIcon />} to="/search">
-            <SidebarSearchModal />
-          </SidebarGroup>
-          <SidebarDivider />
-          <SidebarGroup label="Menu" icon={<MenuIcon />}>
-            {nav.take('page:catalog')}
-            {nav.take('page:scaffolder')}
-            <SidebarDivider />
-            <SidebarScrollWrapper>
-              {nav.rest({ sortBy: 'title' })}
-            </SidebarScrollWrapper>
-          </SidebarGroup>
-          <SidebarSpace />
-          <SidebarDivider />
-          <NotificationsSidebarItem />
-          <SidebarDivider />
-          <SidebarGroup
-            label="Settings"
-            icon={<UserSettingsSignInAvatar />}
-            to="/settings"
-          >
-            {nav.take('page:app-visualizer')}
-            {nav.take('page:user-settings')}
-          </SidebarGroup>
-        </Sidebar>
-      );
-    },
-  },
+  params: { component: SidebarBody },
 });
