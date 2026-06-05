@@ -8,6 +8,7 @@ const bands: TrendBand[] = [
 ];
 
 const bucket = (counts: Record<string, number>, total: number, avgScore: number): TrendBucket => ({
+  date: '2026-06-01',
   counts,
   total,
   avgScore,
