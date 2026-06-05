@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import { renderInTestApp } from '@backstage/frontend-test-utils';
+import { entityRouteRef } from '@backstage/plugin-catalog-react';
 import type { TrendBand } from '@regis/backstage-plugin-regis-common';
 import { PostureSummary } from './PostureSummary';
 
@@ -35,6 +37,15 @@ describe('PostureSummary', () => {
     expect(screen.getByText('65%')).toBeInTheDocument();
     expect(screen.getByText('hygiene')).toBeInTheDocument();
     expect(screen.getByText(/scanned 2026-06-04/i)).toBeInTheDocument();
+  });
+
+  it('links the playbook name to its entity when playbookRef is given', async () => {
+    await renderInTestApp(
+      <PostureSummary report={report} ladder={ladder} playbookRef="resource:default/regis-playbook-default" />,
+      { mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef } },
+    );
+    const link = await screen.findByText('base-image-policy');
+    expect(link.closest('a')).toHaveAttribute('href', '/catalog/default/resource/regis-playbook-default');
   });
 
   it('omits category bars when by_tag is absent', () => {

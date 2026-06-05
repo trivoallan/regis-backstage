@@ -14,6 +14,7 @@ import { regisApiRef, type ReportSummary } from '../api/RegisApi';
 import { scoreBarColor, tierColor, unionLadder } from './format';
 import { sortSummariesWorstFirst } from './rollup';
 import { PostureRollup } from './PostureRollup';
+import { RegisEmptyState } from './RegisEmptyState';
 
 function makeColumns(ladder: TrendBand[]): TableColumn<ReportSummary>[] {
   return [
@@ -92,7 +93,11 @@ export function RegisImagePostureCard(props: {
   const rows = (reports ?? []).filter(r => wanted.has(r.entityRef));
 
   if (rows.length === 0) {
-    return <InfoCard title={title}>No Regis-tracked images yet.</InfoCard>;
+    return (
+      <InfoCard title={title}>
+        <RegisEmptyState title="No Regis-tracked images." />
+      </InfoCard>
+    );
   }
 
   const deepLink = exploreLink

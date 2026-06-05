@@ -1,4 +1,5 @@
 import type { TrendBand, TrendBucket } from '@regis/backstage-plugin-regis-common';
+import { RegisEmptyState } from './RegisEmptyState';
 
 /** Dependency-free stacked-area chart of per-band counts + an average-score line. */
 export function PortfolioStackedArea({
@@ -8,7 +9,7 @@ export function PortfolioStackedArea({
   bands: TrendBand[];
   buckets: TrendBucket[];
 }) {
-  if (buckets.length === 0) return <span>No data yet.</span>;
+  if (buckets.length === 0) return <RegisEmptyState title="No portfolio data yet." />;
 
   const W = 760;
   const H = 280;

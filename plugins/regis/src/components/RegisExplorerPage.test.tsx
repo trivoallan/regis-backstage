@@ -59,6 +59,49 @@ describe('RegisExplorerPage', () => {
     expect(await screen.findByText(/no images match this scope/i)).toBeInTheDocument();
   });
 
+  it('offers Clear filters in the empty state when a filter is active', async () => {
+    const emptyExplore = jest.fn().mockResolvedValue({
+      filters: { system: 'shop' },
+      groupBy: 'system',
+      trend: { bands: [], buckets: [] },
+      groups: [],
+      images: [],
+      facets: { systems: ['shop'], owners: [], playbooks: [], tiers: ['Gold'] },
+    });
+    await renderInTestApp(
+      <TestApiProvider apis={[[regisApiRef, { ...api, explore: emptyExplore }]]}>
+        <RegisExplorerPage />
+      </TestApiProvider>,
+      {
+        initialRouteEntries: ['/?groupBy=system&system=shop'],
+        mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef },
+      },
+    );
+    expect(await screen.findByText('No images match this scope.')).toBeInTheDocument();
+    const clear = await screen.findByText('Clear filters');
+    fireEvent.click(clear);
+    await waitFor(() => expect(screen.queryByText('Clear filters')).not.toBeInTheDocument());
+  });
+
+  it('does not show Clear filters in the empty state when no filter is active', async () => {
+    const emptyExplore = jest.fn().mockResolvedValue({
+      filters: {},
+      groupBy: 'system',
+      trend: { bands: [], buckets: [] },
+      groups: [],
+      images: [],
+      facets: { systems: [], owners: [], playbooks: [], tiers: [] },
+    });
+    await renderInTestApp(
+      <TestApiProvider apis={[[regisApiRef, { ...api, explore: emptyExplore }]]}>
+        <RegisExplorerPage />
+      </TestApiProvider>,
+      { mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef } },
+    );
+    expect(await screen.findByText('No images match this scope.')).toBeInTheDocument();
+    expect(screen.queryByText('Clear filters')).not.toBeInTheDocument();
+  });
+
   it('shows the portfolio health header instead of the KpiStrip', async () => {
     await renderInTestApp(
       <TestApiProvider apis={[[regisApiRef, api]]}>
