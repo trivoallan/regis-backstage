@@ -17,11 +17,23 @@ import type { ExploreGroupBy } from '@regis/backstage-plugin-regis-common';
 import { regisApiRef } from '../api/RegisApi';
 import { unionLadder } from './format';
 import { PortfolioStackedArea } from './portfolioChart';
-import { KpiStrip } from './KpiStrip';
+import { PortfolioHealth } from './PortfolioHealth';
 import { FacetRail, type ExploreState, type FacetKey } from './FacetRail';
 import { Breakdown } from './Breakdown';
 import { ImageList } from './ImageList';
 import { QuickLookPanel } from './QuickLookPanel';
+
+function scopeSummary(
+  filters: ExploreState['filters'],
+  imageCount: number,
+  days: number,
+): string {
+  const active = Object.entries(filters)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${k}: ${v}`);
+  const head = active.length > 0 ? active.join(' · ') : 'All images';
+  return `${head} · ${imageCount} images · ${days}d`;
+}
 
 const WINDOW_DAYS = 90;
 const FACET_KEYS: FacetKey[] = ['system', 'owner', 'playbook', 'tier'];
@@ -95,7 +107,7 @@ export function RegisExplorerPage() {
         </Grid>
         <Grid item xs={12} md={9}>
           <Box display="flex" flexDirection="column" gridGap={16}>
-            <KpiStrip bands={data.trend.bands} buckets={data.trend.buckets} days={WINDOW_DAYS} />
+            <PortfolioHealth bands={data.trend.bands} buckets={data.trend.buckets} days={WINDOW_DAYS} />
             <InfoCard title="Posture over time">
               <PortfolioStackedArea bands={data.trend.bands} buckets={data.trend.buckets} />
             </InfoCard>
@@ -127,7 +139,14 @@ export function RegisExplorerPage() {
 
   return (
     <Page themeId="tool">
-      <Header title="Portfolio" subtitle="Explore image posture across the portfolio" />
+      <Header
+        title="Portfolio"
+        subtitle={
+          data
+            ? scopeSummary(state.filters, data.images.length, WINDOW_DAYS)
+            : 'Explore image posture across the portfolio'
+        }
+      />
       <Content>{body()}</Content>
     </Page>
   );

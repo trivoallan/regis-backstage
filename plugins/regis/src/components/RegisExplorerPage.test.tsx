@@ -59,6 +59,20 @@ describe('RegisExplorerPage', () => {
     expect(await screen.findByText(/no images match this scope/i)).toBeInTheDocument();
   });
 
+  it('shows the portfolio health header instead of the KpiStrip', async () => {
+    await renderInTestApp(
+      <TestApiProvider apis={[[regisApiRef, api]]}>
+        <RegisExplorerPage />
+      </TestApiProvider>,
+      { mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef } },
+    );
+    expect(await screen.findByText('Portfolio health')).toBeInTheDocument();
+    expect(screen.getByText('Avg score')).toBeInTheDocument();
+    // the per-band KpiStrip card heading ("Rank 1") is gone;
+    // the band label still appears in the chart legend but not as an InfoCard heading
+    expect(screen.queryByRole('heading', { name: 'Rank 1' })).not.toBeInTheDocument();
+  });
+
   it('drills into a group, writing the filter to the URL and refetching', async () => {
     const drillExplore = jest.fn().mockResolvedValue({
       filters: {},
