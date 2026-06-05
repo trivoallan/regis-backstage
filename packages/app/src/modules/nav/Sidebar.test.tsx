@@ -24,7 +24,8 @@ describe('SidebarBody (curated nav)', () => {
     const s = stubNav();
     // Invoke the component function directly; the nav.take(...) calls run while
     // building the element tree. We do not render the result.
-    SidebarBody({ navItems: s.navItems as any });
+    const renderSidebarBody = SidebarBody;
+    renderSidebarBody({ navItems: s.navItems as any });
     expect(s.taken).toEqual([
       'page:search',
       'page:regis',
