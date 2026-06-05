@@ -1,5 +1,5 @@
 import type { TrendBand, TrendBucket } from '@regis/backstage-plugin-regis-common';
-import { summarizeTrend, formatDelta } from './portfolioHealth';
+import { summarizeTrend, formatDelta } from './trendSummary';
 
 const bands: TrendBand[] = [
   { key: 'Gold', label: 'Gold', color: '#g' },

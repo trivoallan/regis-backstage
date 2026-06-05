@@ -1,63 +1,18 @@
 import { InfoCard } from '@backstage/core-components';
 import { Box, Typography } from '@material-ui/core';
 import type { TrendBand, TrendBucket } from '@regis/backstage-plugin-regis-common';
-// NOTE: we do not import from './portfolioHealth' here because on macOS
-// case-insensitive filesystems Jest resolves './PortfolioHealth' (this file)
-// and './portfolioHealth' to the same path (portfolioHealth.ts, since .ts <
-// .tsx in moduleFileExtensions), causing this module to evaluate to the util
-// module and export `undefined` for PortfolioHealth.  We inline the two small
-// helpers instead.
+import { formatDelta, summarizeTrend } from './trendSummary';
 
-interface MixEntry {
-  key: string;
-  label: string;
-  color: string;
-  count: number;
-}
-
-interface HealthSummary {
-  mix: MixEntry[];
-  worst: { label: string; count: number } | null;
-  avgScore: number;
-  images: number;
-  scoreDelta: number;
-  imagesDelta: number;
-}
-
-function fmt(d: number): string {
-  if (d === 0) return '±0';
-  return d > 0 ? `▲ ${d}` : `▼ ${Math.abs(d)}`;
-}
-
-function summarize(bands: TrendBand[], buckets: TrendBucket[]): HealthSummary {
-  if (buckets.length === 0) {
-    return { mix: [], worst: null, avgScore: 0, images: 0, scoreDelta: 0, imagesDelta: 0 };
-  }
-  const first = buckets[0];
-  const last = buckets[buckets.length - 1];
-  const at = (b: TrendBucket, key: string) => b.counts[key] ?? 0;
-
-  const mix: MixEntry[] = bands
-    .map(b => ({ key: b.key, label: b.label, color: b.color, count: at(last, b.key) }))
-    .filter(e => e.count > 0);
-
-  let worst: { label: string; count: number } | null = null;
-  for (let i = bands.length - 1; i >= 0; i--) {
-    const count = at(last, bands[i].key);
-    if (count > 0) {
-      worst = i === 0 ? null : { label: bands[i].label, count };
-      break;
-    }
-  }
-
-  return {
-    mix,
-    worst,
-    avgScore: last.avgScore,
-    images: last.total,
-    scoreDelta: last.avgScore - first.avgScore,
-    imagesDelta: last.total - first.total,
-  };
+function Kpi(props: { label: string; value: string; delta: string; days: number }) {
+  return (
+    <Box>
+      <Typography variant="caption" color="textSecondary" component="div" style={{ textTransform: 'uppercase', letterSpacing: 0.3 }}>
+        {props.label}
+      </Typography>
+      <Typography variant="h4" component="div">{props.value}</Typography>
+      <Typography variant="caption" component="div">{`${props.delta} / ${props.days}d`}</Typography>
+    </Box>
+  );
 }
 
 /** Portfolio health header: tier-mix bar + worst tier + headline KPIs with deltas. */
@@ -69,7 +24,7 @@ export function PortfolioHealth(props: {
   const { bands, buckets, days } = props;
   if (buckets.length === 0) return null;
 
-  const h = summarize(bands, buckets);
+  const h = summarizeTrend(bands, buckets);
   const total = h.mix.reduce((n, e) => n + e.count, 0) || 1;
   const barLabel = `Tier distribution: ${h.mix.map(e => `${e.count} ${e.label}`).join(', ')}`;
 
@@ -105,20 +60,8 @@ export function PortfolioHealth(props: {
           </Box>
         </Box>
         <Box display="flex" gridGap={24}>
-          <Box>
-            <Typography variant="caption" color="textSecondary" component="div" style={{ textTransform: 'uppercase', letterSpacing: 0.3 }}>
-              Avg score
-            </Typography>
-            <Typography variant="h4" component="div">{String(h.avgScore)}</Typography>
-            <Typography variant="caption" component="div">{`${fmt(h.scoreDelta)} / ${days}d`}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="textSecondary" component="div" style={{ textTransform: 'uppercase', letterSpacing: 0.3 }}>
-              Images
-            </Typography>
-            <Typography variant="h4" component="div">{String(h.images)}</Typography>
-            <Typography variant="caption" component="div">{`${fmt(h.imagesDelta)} / ${days}d`}</Typography>
-          </Box>
+          <Kpi label="Avg score" value={String(h.avgScore)} delta={formatDelta(h.scoreDelta)} days={days} />
+          <Kpi label="Images" value={String(h.images)} delta={formatDelta(h.imagesDelta)} days={days} />
         </Box>
       </Box>
     </InfoCard>

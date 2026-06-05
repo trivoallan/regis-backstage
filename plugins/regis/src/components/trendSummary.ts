@@ -56,10 +56,3 @@ export function summarizeTrend(
     imagesDelta: last.total - first.total,
   };
 }
-
-// Re-export the PortfolioHealth component so that on macOS case-insensitive
-// filesystems (where Jest resolves './PortfolioHealth' to this .ts file instead
-// of PortfolioHealth.tsx, because .ts is listed before .tsx in
-// moduleFileExtensions), tests importing './PortfolioHealth' still receive the
-// component.  The explicit .tsx extension forces the correct module.
-export { PortfolioHealth } from './PortfolioHealth.tsx';
