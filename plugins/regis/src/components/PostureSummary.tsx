@@ -1,12 +1,13 @@
 import type { Report, TrendBand } from '@regis/backstage-plugin-regis-common';
 import { InfoCard } from '@backstage/core-components';
+import { EntityRefLink } from '@backstage/plugin-catalog-react';
 import { Box, Chip, Typography } from '@material-ui/core';
 import { scoreBarColor, tierColor } from './format';
 import { categoryScores } from './posture';
 
 /** Header card for the Regis tab: identity, tier, score, attribution, by-tag bars. */
-export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
-  const { report, ladder } = props;
+export function PostureSummary(props: { report: Report; ladder: TrendBand[]; playbookRef?: string }) {
+  const { report, ladder, playbookRef } = props;
   const cats = categoryScores(report.rules_summary);
   const score = report.rules_summary?.score;
   const pb = report.playbooks?.[0];
@@ -36,7 +37,12 @@ export function PostureSummary(props: { report: Report; ladder: TrendBand[] }) {
       <Typography variant="caption" color="textSecondary" component="div" style={{ margin: '6px 0 14px' }}>
         {pb ? (
           <>
-            Evaluated by playbook <strong>{pb.playbook_name}</strong>
+            Evaluated by playbook{' '}
+            {playbookRef ? (
+              <EntityRefLink entityRef={playbookRef}>{pb.playbook_name}</EntityRefLink>
+            ) : (
+              <strong>{pb.playbook_name}</strong>
+            )}
             {pb.playbook_version ? ` v${pb.playbook_version}` : ''}
           </>
         ) : (

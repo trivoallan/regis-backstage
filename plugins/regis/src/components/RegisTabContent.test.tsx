@@ -4,7 +4,7 @@ import {
   renderInTestApp,
   TestApiProvider,
 } from '@backstage/frontend-test-utils';
-import { EntityProvider } from '@backstage/plugin-catalog-react';
+import { EntityProvider, entityRouteRef } from '@backstage/plugin-catalog-react';
 import { regisApiRef } from '../api/RegisApi';
 import { RegisTabContent } from './RegisTabContent';
 
@@ -13,7 +13,10 @@ const entity = {
   kind: 'Resource',
   metadata: {
     name: 'img',
-    annotations: { 'regis.io/report-url': 'https://h/r.json' },
+    annotations: {
+      'regis.io/report-url': 'https://h/r.json',
+      'regis.io/playbook': 'resource:default/regis-playbook-default',
+    },
   },
   spec: {},
 };
@@ -25,6 +28,7 @@ const renderTab = (api: Partial<typeof regisApiRef.T>) =>
         <RegisTabContent />
       </EntityProvider>
     </TestApiProvider>,
+    { mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef } },
   );
 
 describe('RegisTabContent', () => {
@@ -55,6 +59,9 @@ describe('RegisTabContent', () => {
 
     expect(await screen.findByText('library/nginx:1.25')).toBeInTheDocument();
     expect((await screen.findAllByText('Run as non-root')).length).toBeGreaterThan(0);
+
+    const explore = await screen.findByText('View in explorer');
+    expect(explore.closest('a')).toHaveAttribute('href', '/?groupBy=playbook&playbook=base-image-policy');
   });
 
   it('renders an error panel when the report fails to load', async () => {
