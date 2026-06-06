@@ -74,9 +74,21 @@ const serviceImagesCard = EntityCardBlueprint.make({
   },
 });
 
+const playbookScorecard = EntityCardBlueprint.make({
+  name: 'playbook-scorecard',
+  params: {
+    filter: isRegisPlaybook,
+    loader: () =>
+      import('./components/RegisPlaybookScorecard').then(m => (
+        <m.RegisPlaybookScorecard />
+      )),
+  },
+});
+
 const playbookImagesCard = EntityCardBlueprint.make({
   name: 'playbook-images',
   params: {
+    type: 'content',
     filter: isRegisPlaybook,
     loader: () =>
       import('./components/RegisRelatedImagesCards').then(m => (
@@ -113,6 +125,7 @@ export const regisPlugin = createFrontendPlugin({
     rulesCard,
     explorerPage,
     serviceImagesCard,
+    playbookScorecard,
     playbookImagesCard,
     aliasesCard,
     trajectoryCard,
