@@ -27,4 +27,16 @@ describe('ImagePostureTable', () => {
     expect(ordered[0]).toHaveTextContent('r/b:1');
     expect(ordered[1]).toHaveTextContent('r/a:1');
   });
+
+  it('renders an em dash for rows missing tier or score', async () => {
+    const sparse: ReportSummary[] = [
+      { entityRef: 'resource:default/c', status: 'ok', imageRef: 'r/c:1' },
+    ];
+    await renderInTestApp(<ImagePostureTable rows={sparse} ladder={ladder} />, {
+      mountedRoutes: { '/catalog/:namespace/:kind/:name': entityRouteRef },
+    });
+    expect(await screen.findByText('r/c:1')).toBeInTheDocument();
+    // Both the missing tier and the missing score render as em dashes.
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(2);
+  });
 });
