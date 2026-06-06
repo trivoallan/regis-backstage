@@ -61,3 +61,4 @@ Router (`router.ts`) exposes: `GET /report` (single, by entity ref), `GET /repor
 - **Design & planning docs** live in `docs/superpowers/specs/` (designs) and `docs/superpowers/plans/` (implementation plans), dated and per-phase. Consult the relevant one before large changes; the project has been built in numbered phases/slices.
 - Changesets (`.changeset/`) are used for versioning published plugins.
 - **PR merges use squash merge.** Always merge pull requests with `gh pr merge --squash` (never `--merge` or `--rebase`) to keep `main` history linear.
+- **PR titles follow Conventional Commits.** Write pull request titles in [Conventional Commits](https://www.conventionalcommits.org/) format (`type(scope): summary`, e.g. `feat(app): …`, `docs(claude): …`) — the squash merge uses the PR title as the commit subject, so it lands on `main` history.
