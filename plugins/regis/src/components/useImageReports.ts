@@ -17,6 +17,8 @@ export function useImageReports(imageRefs: string[]): {
   error: Error | undefined;
 } {
   const api = useApi(regisApiRef);
+  // listReports()/getPlaybooks() are catalog-wide, so the fetch is intentionally
+  // fire-once per mount; narrowing to imageRefs happens below on every render.
   const { value, loading, error } = useAsync(
     () => Promise.all([api.listReports(), api.getPlaybooks()]),
     [],
