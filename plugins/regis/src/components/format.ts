@@ -49,6 +49,15 @@ export function unionLadder(playbooks?: PlaybookLadder[]): TrendBand[] {
   return out;
 }
 
+/** The tiers of the playbook with `id`, or `[]` when the id is unknown/missing. */
+export function playbookLadder(
+  playbooks: PlaybookLadder[] | undefined,
+  id: string | undefined,
+): TrendBand[] {
+  if (!id) return [];
+  return playbooks?.find(p => p.id === id)?.tiers ?? [];
+}
+
 /** Color for a 0-100 score bar, matching the badge semantic palette. */
 export function scoreBarColor(score: number): string {
   if (score >= 90) return '#1e7d34';

@@ -1,4 +1,4 @@
-import { tierColor, unionLadder, badgeClassColor, scoreBarColor } from './format';
+import { tierColor, unionLadder, badgeClassColor, scoreBarColor, playbookLadder } from './format';
 import type {
   PlaybookLadder,
   TrendBand,
@@ -93,5 +93,24 @@ describe('badgeClassColor', () => {
     expect(badgeClassColor('warning')).toBe('#a86700');
     expect(badgeClassColor('error')).toBe('#c0392b');
     expect(badgeClassColor('information')).toBe('#1565c0');
+  });
+});
+
+describe('playbookLadder', () => {
+  const playbooks: PlaybookLadder[] = [
+    { id: 'default', tiers: [{ key: 'Gold', label: 'Gold', color: '#d4af37' }] },
+    { id: 'pci-dss', tiers: [{ key: 'Pass', label: 'Pass', color: '#2e7d32' }] },
+  ];
+
+  it('returns the matching playbook tiers', () => {
+    expect(playbookLadder(playbooks, 'pci-dss')).toEqual([
+      { key: 'Pass', label: 'Pass', color: '#2e7d32' },
+    ]);
+  });
+
+  it('returns [] for an unknown id, a missing id, or missing playbooks', () => {
+    expect(playbookLadder(playbooks, 'nope')).toEqual([]);
+    expect(playbookLadder(playbooks, undefined)).toEqual([]);
+    expect(playbookLadder(undefined, 'default')).toEqual([]);
   });
 });

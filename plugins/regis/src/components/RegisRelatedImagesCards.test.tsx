@@ -92,4 +92,17 @@ describe('RegisPlaybookImagesCard', () => {
     await screen.findByText('r/a:1');
     expect(screen.queryByText('View in explorer')).not.toBeInTheDocument();
   });
+
+  it('shows an empty state when the playbook has no assessed images', async () => {
+    const entity: Entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Resource',
+      metadata: { name: 'pb' },
+      spec: { type: 'regis-playbook' },
+      relations: [{ type: 'dependencyOf', targetRef: 'resource:default/none' }],
+    };
+    renderWith(entity, <RegisPlaybookImagesCard />);
+    expect(await screen.findByText('Assessed images')).toBeInTheDocument();
+    expect(await screen.findByText(/No Regis-tracked images/)).toBeInTheDocument();
+  });
 });
