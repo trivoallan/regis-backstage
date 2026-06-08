@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Mémoire transverse (constellation Regis)
+
+Conventions de travail (auto-chargées) :
+https://github.com/trivoallan/regis/tree/main/.agent/rules/
+Contrat inter-repos, glossaire :
+https://github.com/trivoallan/regis/tree/main/docs/memory-bank/constellation/
+Lis `contract.md` AVANT toute modification touchant la sérialisation/consommation d'un report.
+Ce CLAUDE.md ne contient que le spécifique à CE repo.
+
 ## What this is
 
 A Backstage app (monorepo, Backstage 1.51.0) whose reason for existing is the four **Regis** plugins under `plugins/`. Regis ("regis") is an external tool that scans container images for security/supply-chain/hygiene/observability posture and emits a `report.json` per image plus a published **report index**. These plugins surface that posture inside Backstage's software catalog: per-image scorecards, a portfolio-wide catalog page, posture-over-time trends, and an intake flow for onboarding new images.
@@ -52,7 +61,6 @@ Router (`router.ts`) exposes: `GET /report` (single, by entity ref), `GET /repor
 
 ## Conventions
 
-- **Documentation style:** prose docs (READMEs, `docs/`, design/plan docs, this file) follow the [Google developer documentation style guide](https://developers.google.com/style) — second person, present tense, active voice, sentence case headings.
 - **TypeScript style:** code follows the [Google TypeScript style guide](https://google.github.io/styleguide/tsguide.html), within what the Backstage ESLint/Prettier config enforces.
 - **UI/component design:** frontend plugin UI follows the [Backstage component design guidelines](https://backstage.io/docs/dls/component-design-guidelines/) — reuse Backstage core components, match catalog UX patterns, keep cards/tabs consistent with the rest of the app.
 - **Tests are colocated** (`X.ts` + `X.test.ts`) and dense — there is near-1:1 test coverage. Match this: add/adjust the sibling `.test.ts` for any change. The codebase follows TDD; prefer writing the failing test first.
